@@ -303,9 +303,11 @@
       const resp = await fetch('/.netlify/functions/gemini-proxy', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
       });
+      // مرّر جسم الخطأ للواجهة للتشخيص
       if (!resp.ok) {
-        let err = 'Network error'; try { err = (await resp.json()).error || resp.statusText; } catch {}
-        throw new Error(err);
+        let err;
+        try { err = await resp.json(); } catch { err = { error: resp.statusText, status: resp.status }; }
+        throw err;
       }
       return resp.json(); // { text, model, lang, ... }
     }
@@ -368,7 +370,7 @@ STRICT:
 
       show('plan-review-screen'); dom.loading.style.display='flex'; dom.planContent.classList.add('hidden');
 
-      let attempt=0, maxAttempts=2, lastErr='';
+      let attempt=0, maxAttempts=2, lastErr=null;
       while(attempt<maxAttempts){
         try{
           const { text } = await callAIProxy({ systemInstruction: planPrompt(desc), history: [], mode:'plan', forceLang:'ar' });
@@ -378,16 +380,21 @@ STRICT:
           renderPlan(plan);
           dom.loading.style.display='none'; dom.planContent.classList.remove('hidden'); save();
           return;
-        }catch(e){ lastErr = e.message||String(e); attempt++; }
+        }catch(e){ lastErr = e; attempt++; }
       }
-      // فشل → زر إعادة محاولة
+
+      // فشل → شاشة تشخيص تفصيلية (تعرض upstream.message/الحالة/السيفتي…)
       dom.loading.style.display='none';
       $('plan-review-screen').innerHTML = `
         <div class="flex flex-col items-center justify-center text-center gap-3 py-12">
           <i data-lucide="wifi-off" class="w-16 h-16 text-amber-500"></i>
           <h3 class="text-xl font-bold">تعذّر إنشاء الخطة الآن</h3>
-          <p class="text-slate-600 text-sm max-w-md">السبب: ${lastErr}</p>
-          <div class="flex gap-3">
+          <p class="text-slate-600 text-sm max-w-md">السبب (من المزود): <span id="err-reason">—</span></p>
+          <details class="text-left bg-slate-50 border rounded-lg p-3 w-full max-w-lg">
+            <summary class="cursor-pointer font-bold">تفاصيل التشخيص</summary>
+            <pre id="err-details" class="text-[11px] whitespace-pre-wrap break-words mt-2"></pre>
+          </details>
+          <div class="flex gap-3 mt-3">
             <button id="retry-plan" class="bg-sky-600 text-white font-bold py-3 px-6 rounded-full hover:bg-sky-700">إعادة المحاولة</button>
             <button id="back-to-parent" class="bg-slate-200 text-slate-800 font-bold py-3 px-6 rounded-full hover:bg-slate-300">رجوع</button>
           </div>
@@ -395,6 +402,12 @@ STRICT:
       lucide.createIcons();
       $('retry-plan').addEventListener('click', ()=>generatePlan(isModification));
       $('back-to-parent').addEventListener('click', ()=>show('parent-input-screen'));
+
+      try {
+        const upstream = (lastErr && (lastErr.upstream || lastErr)) || {};
+        $('err-reason').textContent = upstream.message || upstream.error || 'غير معروف';
+        $('err-details').textContent = JSON.stringify(upstream, null, 2);
+      } catch {}
     }
 
     function renderPlan(plan){
