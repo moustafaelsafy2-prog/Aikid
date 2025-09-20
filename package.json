@@ -2,13 +2,11 @@
   "name": "sadiki-ai",
   "version": "1.0.0",
   "private": true,
-  "description": "Sadiki AI - child guidance tool (UAE compliance)",
+  "description": "Sadiki AI — UAE-compliant child guidance (school project)",
   "scripts": {
     "build": "echo \"static app\"",
     "dev": "netlify dev",
     "start": "netlify dev"
   },
-  "engines": {
-    "node": ">=18"
-  }
+  "engines": { "node": ">=18" }
 }
