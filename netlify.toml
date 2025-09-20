@@ -1,43 +1,46 @@
 # =============================================================================
-# Netlify Configuration File
+# Netlify Configuration File (Professional Version)
 # This file provides comprehensive instructions for Netlify on how to build
 # and deploy your site, including serverless functions and security settings.
 #
-# ملف إعدادات Netlify
+# ملف إعدادات Netlify (النسخة الاحترافية)
 # هذا الملف يقدم تعليمات شاملة لـ Netlify حول كيفية بناء ونشر موقعك،
 # بما في ذلك الوظائف السحابية وإعدادات الأمان.
 # =============================================================================
 
 [build]
-  # Command to build your site. Since this is a static HTML/JS project,
-  # no complex build command is necessary.
-  # أمر بناء الموقع. بما أن هذا المشروع ثابت (HTML/JS)، لا حاجة لأمر بناء معقد.
-  command = "echo 'Build command is not required for this static project.'"
+  # The directory where the serverless functions are located.
+  # This is the most important setting for your backend.
+  # المجلد الذي توجد فيه الوظائف السحابية. هذا هو الإعداد الأهم للواجهة الخلفية.
+  functions = "functions/"
 
   # The directory that contains the deploy-ready HTML files and assets.
   # For this project, it's the root directory.
   # المجلد الذي يحتوي على الملفات الجاهزة للنشر (في هذا المشروع، هو المجلد الرئيسي).
   publish = "."
 
-  # The directory where the serverless functions are located.
-  # المجلد الذي توجد فيه الوظائف السحابية.
-  functions = "functions/"
+  # --- Environment Variables ---
+  # --- متغيرات البيئة ---
+  # This is the correct way to specify the Node.js version for the functions runtime.
+  # Using a specific LTS (Long Term Support) version ensures consistent builds.
+  # هذه هي الطريقة الصحيحة لتحديد إصدار Node.js المستخدم للوظائف.
+  # استخدام إصدار LTS محدد يضمن بناء متسق ومستقر.
+  [build.environment]
+    NODE_VERSION = "18"
 
 # =============================================================================
 # Functions Configuration
-# Specify runtime settings for the serverless functions to ensure stability.
+# Specify the bundler for serverless functions.
 #
 # إعدادات الوظائف السحابية
-# تحديد إعدادات وقت التشغيل للوظائف السحابية لضمان الاستقرار.
+# تحديد أداة الحزم للوظائف السحابية.
 # =============================================================================
 
 [functions]
-  # Specify the Node.js version to use for the functions.
-  # Using a specific LTS (Long Term Support) version ensures consistent builds.
-  # تحديد إصدار Node.js المستخدم للوظائف.
-  # استخدام إصدار LTS محدد يضمن بناء متسق ومستقر.
+  # Use esbuild for faster bundling of serverless functions.
+  # استخدام esbuild لحزم أسرع للوظائف السحابية.
   node_bundler = "esbuild"
-  node_version = "18"
+
 
 # =============================================================================
 # Redirects and Security Rules
