@@ -1,16 +1,14 @@
 {
-  "name": "sadiki-ai-yousef-salmeen",
+  "name": "sadiki-ai",
   "version": "1.0.0",
-  "description": "تطبيق ويب تجريبي لمشروع مدرسي يستخدم الذكاء الاصطناعي (Gemini) لتقديم الدعم للأطفال الذين يواجهون تحديات اجتماعية.",
-  "main": "index.html",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "Yousef Salmeen (يوسف سالمين)",
-  "license": "UNLICENSED",
+  "description": "صديقي الذكي — واجهة تفاعلية + دالة Gemini على Netlify",
   "private": true,
-  "dependencies": {
-    "@google/generative-ai": "^0.14.1"
+  "scripts": {
+    "dev": "netlify dev",
+    "build": "echo \"Static build\"",
+    "start": "netlify dev"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }
-
