@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>صديقي الذكي (النسخة النهائية)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        html, body {
+            overscroll-behavior-y: contain;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Tajawal', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        #app-wrapper {
+            background-image: linear-gradient(rgba(241, 245, 249, 0.9), rgba(241, 245, 249, 0.9)), url('https://images.pexels.com/photos/15392930/pexels-photo-15392930.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2');
+            background-size: cover;
+            background-position: center;
+        }
+        #app-container {
+            height: 100%;
+            height: 100dvh;
+        }
+        .screen, .modal { display: none; }
+        .screen.active, .modal.active { display: flex; }
+        .bg-screen { background-color: rgba(248, 250, 252, 0.95); backdrop-filter: blur(2px); }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .scale-up { animation: scaleUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes scaleUp { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        .chat-bubble { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popIn { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
+        .typing-indicator span { animation: bounce 1.4s infinite ease-in-out both; }
+        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+        #chat-messages::-webkit-scrollbar { width: 6px; }
+        #chat-messages::-webkit-scrollbar-track { background: #f1f5f9; }
+        #chat-messages::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .gender-btn.selected, .age-btn.selected {
+            border-color: #0ea5e9;
+            background-color: #f0f9ff;
+            color: #0284c7;
+        }
+        #continue-profile-btn:disabled, #analyze-btn:disabled {
+            background-color: #94a3b8;
+            cursor: not-allowed;
+        }
+        @keyframes shake {
+          10%, 90% { transform: translate3d(-1px, 0, 0); }
+          20%, 80% { transform: translate3d(2px, 0, 0); }
+          30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+          40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+        .shake { animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both; }
+    </style>
+</head>
+<body class="bg-slate-200 text-slate-800 antialiased">
+
+    <div id="app-wrapper">
+        <div id="app-container" class="w-full max-w-md mx-auto bg-transparent shadow-lg flex flex-col overflow-hidden relative">
+            <div id="main-content-area" class="flex-grow relative flex flex-col">
+                <!-- Screens are dynamically injected here -->
+            </div>
+
+            <!-- Disclaimer Footer -->
+            <div id="disclaimer" class="w-full max-w-md mx-auto bg-amber-100 text-amber-900 p-2 text-center text-xs sm:text-sm font-bold shrink-0">
+                نسخة تجريبية لمشروع مدرسي | حقوق الطالب: يوسف سالمين | لغرض العرض فقط
+            </div>
+        </div>
+        <!-- Modals are dynamically injected here -->
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        
+        const mainContentArea = document.getElementById('main-content-area');
+        const appWrapper = document.getElementById('app-wrapper');
+
+        const createScreens = () => {
+            const screenHTML = `
+                <!-- Screen: Age Selection -->
+                <div id="age-selection-screen" class="screen flex-col justify-center items-center p-8 text-center h-full bg-screen">
+                    <i data-lucide="users-2" class="w-16 h-16 text-sky-500 mx-auto mb-6"></i>
+                    <h2 class="text-2xl font-bold mb-2">مرحباً بولي الأمر</h2>
+                    <p class="text-slate-600 mb-8">لتخصيص التجربة، يرجى تحديد الفئة العمرية للطفل.</p>
+                    <div class="w-full space-y-3">
+                        <button data-age="3-7" class="age-btn w-full text-lg bg-white/80 border-2 border-slate-200 hover:border-sky-500 hover:bg-sky-50 transition-all p-4 rounded-xl font-bold">3 - 7 سنوات <span class="block text-sm font-normal text-slate-500">الطفولة المبكرة</span></button>
+                        <button data-age="8-12" class="age-btn w-full text-lg bg-white/80 border-2 border-slate-200 hover:border-sky-500 hover:bg-sky-50 transition-all p-4 rounded-xl font-bold">8 - 12 سنة <span class="block text-sm font-normal text-slate-500">مرحلة الطفولة</span></button>
+                        <button data-age="13-18" class="age-btn w-full text-lg bg-white/80 border-2 border-slate-200 hover:border-sky-500 hover:bg-sky-50 transition-all p-4 rounded-xl font-bold">13 - 18 سنة <span class="block text-sm font-normal text-slate-500">مرحلة المراهقة</span></button>
+                    </div>
+                </div>
+                
+                <!-- Screen: Profile Setup -->
+                <div id="profile-setup-screen" class="screen flex-col justify-center p-8 h-full bg-screen">
+                    <i data-lucide="user-round-check" class="w-16 h-16 text-sky-500 mx-auto mb-6"></i>
+                    <h2 class="text-2xl font-bold text-center mb-2">ملف البطل الشخصي</h2>
+                    <p class="text-slate-600 text-center mb-8">هذه المعلومات تجعل التجربة شخصية ومميزة.</p>
+                    <div class="w-full space-y-6">
+                        <div>
+                            <label for="child-name-input" class="font-bold mb-2 block">اسم الطفل/الطفلة</label>
+                            <input id="child-name-input" type="text" placeholder="مثال: خالد أو علياء" class="w-full bg-white/80 border-2 border-slate-200 rounded-xl p-3 text-lg focus:outline-none focus:border-sky-400 transition">
+                        </div>
+                        <div>
+                            <p class="font-bold mb-2">الجنس</p>
+                            <div class="grid grid-cols-2 gap-4">
+                                <button id="gender-male" data-gender="ذكر" class="gender-btn w-full flex flex-col items-center gap-2 text-lg bg-white/80 border-2 border-slate-200 p-4 rounded-xl font-bold"><i data-lucide="user-round" class="w-8 h-8"></i> ذكر</button>
+                                <button id="gender-female" data-gender="أنثى" class="gender-btn w-full flex flex-col items-center gap-2 text-lg bg-white/80 border-2 border-slate-200 p-4 rounded-xl font-bold"><i data-lucide="user-round" class="w-8 h-8"></i> أنثى</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-auto pt-8">
+                         <button id="continue-profile-btn" class="w-full bg-sky-500 text-white font-bold py-4 px-6 rounded-full text-lg shadow-lg" disabled>متابعة</button>
+                    </div>
+                </div>
+
+                <!-- Screen: Parent Input -->
+                <div id="parent-input-screen" class="screen flex-col p-8 h-full bg-screen overflow-y-auto">
+                    <i data-lucide="file-text" class="w-16 h-16 text-sky-500 mx-auto mb-6 shrink-0"></i>
+                    <h2 class="text-2xl font-bold text-center mb-2">رؤية ولي الأمر</h2>
+                    <p class="text-slate-600 text-center mb-8 shrink-0">كلما كانت التفاصيل أدق، كانت الخطة أفضل. هذه المعلومات تبقى سرية.</p>
+                    <div class="w-full space-y-6 flex-grow">
+                        <div>
+                            <label for="child-personality" class="font-bold mb-2 block">1. كيف تصف شخصية طفلك؟</label>
+                            <textarea id="child-personality" rows="3" placeholder="مثال: مبدع، هادئ، حساس، حركي..." class="w-full bg-white/80 border-2 border-slate-200 rounded-xl p-3 text-lg focus:outline-none focus:border-sky-400 transition"></textarea>
+                        </div>
+                        <div>
+                            <label for="child-challenges" class="font-bold mb-2 block">2. ما هي أهم التحديات الاجتماعية التي تواجهه؟</label>
+                            <textarea id="child-challenges" rows="4" placeholder="مثال: يجد صعوبة في تكوين صداقات، يخجل من المشاركة في الصف..." class="w-full bg-white/80 border-2 border-slate-200 rounded-xl p-3 text-lg focus:outline-none focus:border-sky-400 transition"></textarea>
+                        </div>
+                    </div>
+                    <div class="mt-auto pt-8 shrink-0">
+                         <button id="analyze-btn" class="w-full bg-sky-500 text-white font-bold py-4 px-6 rounded-full text-lg shadow-lg shadow-sky-200 hover:bg-sky-600 transition-colors" disabled>تحليل وإنشاء الخطة</button>
+                    </div>
+                </div>
+                
+                <!-- Screen: Plan Change Request -->
+                <div id="plan-change-screen" class="screen flex-col p-8 h-full bg-screen overflow-y-auto">
+                    <i data-lucide="edit" class="w-16 h-16 text-sky-500 mx-auto mb-6 shrink-0"></i>
+                    <h2 class="text-2xl font-bold text-center mb-2">تعديل الخطة التدريبية</h2>
+                    <p class="text-slate-600 text-center mb-8 shrink-0">صف التغييرات التي لاحظتها أو الأهداف الجديدة التي ترغب بالتركيز عليها.</p>
+                    <div class="w-full space-y-6 flex-grow">
+                        <div>
+                            <label for="plan-change-reason" class="font-bold mb-2 block">لماذا تريد تغيير الخطة؟</label>
+                            <textarea id="plan-change-reason" rows="5" placeholder="مثال: لقد أصبح أكثر ثقة في التحية، لكنه لا يزال يجد صعوبة في الانضمام للألعاب الجماعية..." class="w-full bg-white/80 border-2 border-slate-200 rounded-xl p-3 text-lg focus:outline-none focus:border-sky-400 transition"></textarea>
+                        </div>
+                    </div>
+                    <div class="mt-auto pt-8 shrink-0">
+                         <button id="re-analyze-btn" class="w-full bg-sky-500 text-white font-bold py-4 px-6 rounded-full text-lg shadow-lg shadow-sky-200 hover:bg-sky-600 transition-colors">إعادة التحليل وتحديث الخطة</button>
+                    </div>
+                </div>
+
+                <!-- Screen: Plan Review -->
+                <div id="plan-review-screen" class="screen flex-col p-8 h-full bg-screen overflow-y-auto">
+                    <div id="loading-spinner" class="m-auto text-center flex flex-col items-center justify-center">
+                        <i data-lucide="loader-circle" class="w-16 h-16 text-sky-500 mx-auto mb-4 animate-spin"></i>
+                        <h3 class="text-xl font-bold">يقوم الخبير التربوي بتحليل البيانات...</h3>
+                        <p class="text-slate-500">لحظات ويتم إنشاء خطة مخصصة.</p>
+                    </div>
+                    <div id="plan-content" class="hidden w-full h-full flex flex-col">
+                        <i data-lucide="clipboard-check" class="w-16 h-16 text-green-500 mx-auto mb-6 shrink-0"></i>
+                        <h2 class="text-2xl font-bold text-center mb-2">الخطة التدريبية المقترحة</h2>
+                        <p class="text-slate-600 text-center mb-8 shrink-0">هذه هي رؤيتنا لمساعدة طفلك بناءً على وصفك.</p>
+                        <div class="bg-white border border-slate-200 rounded-xl p-4 space-y-4 flex-grow">
+                            <div>
+                                <h4 class="font-bold flex items-center gap-2"><i data-lucide="user-round-cog" class="w-5 h-5 text-sky-600"></i>ملف الطفل (تحليل الذكاء الاصطناعي)</h4>
+                                <p id="ai-analysis-summary" class="text-slate-700 mt-1"></p>
+                            </div>
+                            <hr>
+                            <div>
+                                <h4 class="font-bold flex items-center gap-2"><i data-lucide="list-checks" class="w-5 h-5 text-sky-600"></i>الخطة المقترحة (خطوات بسيطة)</h4>
+                                <ul id="ai-plan-steps" class="list-decimal list-inside mt-2 space-y-1 text-slate-700"></ul>
+                            </div>
+                        </div>
+                         <div class="mt-auto pt-8 shrink-0">
+                            <button id="approve-plan-btn" class="w-full bg-green-600 text-white font-bold py-4 px-6 rounded-full text-lg shadow-lg shadow-green-200 hover:bg-green-700 transition-colors">اعتماد الخطة وبدء رحلة الطفل</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Screen: Home (for the child) -->
+                <div id="home-screen" class="screen flex-col p-6 h-full bg-transparent">
+                    <header class="flex justify-between items-center mb-6">
+                        <div>
+                            <p id="home-greeting" class="text-slate-500"></p>
+                            <h2 id="home-mission-status" class="text-2xl font-bold">جاهز لمغامرة اليوم؟</h2>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button id="edit-plan-request-btn" title="تعديل الخطة" class="p-2 rounded-full bg-white/50 hover:bg-sky-100 text-sky-600 transition-colors">
+                                <i data-lucide="edit" class="w-5 h-5"></i>
+                            </button>
+                            <button id="reset-app-btn" title="إعادة ضبط التطبيق" class="p-2 rounded-full bg-white/50 hover:bg-red-100 text-red-500 transition-colors">
+                                <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                    </header>
+                    <main class="flex-grow flex flex-col justify-center items-center text-center">
+                        <div class="w-48 h-48 bg-white/50 backdrop-blur-sm rounded-full flex items-center justify-center mb-8"><i data-lucide="bot" class="w-28 h-28 text-sky-600"></i></div>
+                        <h3 id="home-ai-name-intro" class="text-2xl font-bold mb-2"></h3>
+                        <p id="home-intro-text" class="text-slate-500 max-w-xs mb-8"></p>
+                        <button id="initiate-chat-btn" class="w-full bg-sky-500 text-white font-bold py-4 px-6 rounded-full text-lg shadow-lg flex items-center justify-center gap-2">
+                            <i data-lucide="message-circle"></i>
+                            <span id="start-chat-btn-text"></span>
+                        </button>
+                    </main>
+                </div>
+
+                <!-- Screen: Chat -->
+                <div id="chat-screen" class="screen flex-col h-full bg-screen">
+                    <header class="bg-white p-4 flex items-center gap-4 border-b border-slate-200">
+                        <button id="end-chat-btn" class="p-2 rounded-full hover:bg-slate-100 transition-colors"><i data-lucide="arrow-right"></i></button>
+                        <div class="w-10 h-10 bg-gradient-to-br from-cyan-100 to-sky-200 rounded-full flex items-center justify-center shrink-0"><i data-lucide="bot" class="w-6 h-6 text-sky-600"></i></div>
+                        <div class="flex-grow">
+                            <h3 id="chat-header-name" class="font-bold"></h3>
+                            <p class="text-xs text-green-500 font-medium flex items-center gap-1"><span class="w-2 h-2 bg-green-400 rounded-full"></span>متصل</p>
+                        </div>
+                        <button id="language-toggle-btn" title="تبديل اللغة" class="p-2 rounded-full hover:bg-slate-100 text-slate-600 transition-colors">
+                            <i data-lucide="languages" class="w-5 h-5"></i>
+                        </button>
+                    </header>
+                    <main id="chat-messages" class="flex-grow p-4 space-y-4 overflow-y-auto"></main>
+                    <footer class="p-4 border-t border-slate-200 bg-white/80 backdrop-blur-sm">
+                        <div id="chat-options-container" class="mb-3 grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+                        <form id="chat-form" class="flex items-center gap-2">
+                            <input id="chat-input" type="text" placeholder="اكتب ردك هنا..." class="w-full bg-white border-2 border-slate-200 rounded-full py-2 px-4 focus:outline-none focus:border-sky-400 transition">
+                            <button type="submit" class="bg-sky-500 text-white rounded-full p-3 hover:bg-sky-600 transition-transform transform hover:scale-110 active:scale-95 shrink-0">
+                                <i data-lucide="send-horizontal" class="w-5 h-5"></i>
+                            </button>
+                        </form>
+                    </footer>
+                </div>
+            `;
+            mainContentArea.innerHTML = screenHTML;
+        };
+
+        const createModals = () => {
+            const modalHTML = `
+                <!-- Modal: Consent -->
+                <div id="consent-modal" class="modal active absolute inset-0 bg-black/50 z-50 justify-center items-center p-4 backdrop-blur-sm fade-in">
+                     <div class="bg-white w-full max-w-md rounded-2xl shadow-xl p-6 scale-up">
+                        <div class="text-center"><i data-lucide="shield-check" class="w-16 h-16 text-sky-500 mx-auto mb-4"></i><h3 class="text-xl font-bold mb-2">التزامنا بأمان طفلك</h3><p class="text-slate-600 mb-6 text-sm">بموافقتك، أنت تقر بفهمك لإجراءات الحماية التالية:</p></div>
+                        <ul class="space-y-4 text-sm text-slate-700">
+                            <li class="flex items-start gap-3"><i data-lucide="lock" class="w-5 h-5 text-sky-500 shrink-0 mt-0.5"></i><span><strong>خصوصية تامة:</strong> لا يتم مشاركة أي معلومات شخصية أو نصوص محادثات.</span></li>
+                            <li class="flex items-start gap-3"><i data-lucide="database" class="w-5 h-5 text-sky-500 shrink-0 mt-0.5"></i><span><strong>حفظ محلي:</strong> يتم حفظ بيانات طفلك بشكل آمن على هذا الجهاز فقط.</span></li>
+                            <li class="flex items-start gap-3"><i data-lucide="bot" class="w-5 h-5 text-sky-500 shrink-0 mt-0.5"></i><span><strong>ذكاء اصطناعي موجّه:</strong> تم تدريب النموذج ليكون صديقًا داعمًا ويرفض الخوض في مواضيع غير لائقة.</span></li>
+                        </ul>
+                        <button id="accept-consent-btn" class="mt-8 w-full bg-sky-500 text-white font-bold py-3 px-6 rounded-full text-base hover:bg-sky-600">أوافق وأفهم (ولي الأمر)</button>
+                    </div>
+                </div>
+                
+                <!-- Modal: Parental PIN -->
+                <div id="pin-modal" class="modal absolute inset-0 bg-black/50 z-50 justify-center items-center p-4 backdrop-blur-sm fade-in">
+                     <div id="pin-modal-content" class="bg-white w-full max-w-md rounded-2xl shadow-xl p-6 scale-up text-center">
+                        <i data-lucide="shield-alert" class="w-16 h-16 text-amber-500 mx-auto mb-4"></i>
+                        <h3 id="pin-modal-title" class="text-xl font-bold mb-2">الرقابة الأبوية</h3>
+                        <p class="text-slate-600 mb-6 text-sm">هذا الإجراء يتطلب إدخال رمز الحماية (PIN) الخاص بولي الأمر.</p>
+                        <input id="pin-input" type="tel" maxlength="4" placeholder="••••" class="w-full text-center tracking-[1em] bg-slate-100 border-2 border-slate-200 rounded-xl p-3 text-2xl focus:outline-none focus:border-sky-400 transition">
+                        <p id="pin-error-msg" class="text-red-500 text-sm mt-2 hidden">رمز الحماية غير صحيح.</p>
+                        <div class="grid grid-cols-2 gap-4 mt-6">
+                            <button id="cancel-pin-btn" class="w-full bg-slate-200 text-slate-800 font-bold py-3 px-4 rounded-full hover:bg-slate-300 transition-colors">إلغاء</button>
+                            <button id="confirm-pin-btn" class="w-full bg-red-500 text-white font-bold py-3 px-4 rounded-full hover:bg-red-600 transition-colors">موافق</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            appWrapper.insertAdjacentHTML('beforeend', modalHTML);
+        };
+
+        createScreens();
+        createModals();
+
+        const dom = {
+            screens: document.querySelectorAll('.screen'),
+            modals: document.querySelectorAll('.modal'),
+            ageButtons: document.querySelectorAll('.age-btn'),
+            childNameInput: document.getElementById('child-name-input'),
+            genderButtons: document.querySelectorAll('.gender-btn'),
+            continueProfileBtn: document.getElementById('continue-profile-btn'),
+            homeGreeting: document.getElementById('home-greeting'),
+            homeAiNameIntro: document.getElementById('home-ai-name-intro'),
+            startChatBtnText: document.getElementById('start-chat-btn-text'),
+            chatHeaderName: document.getElementById('chat-header-name'),
+            chatMessages: document.getElementById('chat-messages'),
+            chatOptionsContainer: document.getElementById('chat-options-container'),
+            chatForm: document.getElementById('chat-form'),
+            chatInput: document.getElementById('chat-input'),
+            homeIntroText: document.getElementById('home-intro-text'),
+            homeMissionStatus: document.getElementById('home-mission-status'),
+            pinInput: document.getElementById('pin-input'),
+            pinErrorMsg: document.getElementById('pin-error-msg'),
+            pinModalContent: document.getElementById('pin-modal-content'),
+            pinModalTitle: document.getElementById('pin-modal-title'),
+            acceptConsentBtn: document.getElementById('accept-consent-btn'),
+            resetAppBtn: document.getElementById('reset-app-btn'),
+            editPlanRequestBtn: document.getElementById('edit-plan-request-btn'),
+            initiateChatBtn: document.getElementById('initiate-chat-btn'),
+            endChatBtn: document.getElementById('end-chat-btn'),
+            cancelPinBtn: document.getElementById('cancel-pin-btn'),
+            confirmPinBtn: document.getElementById('confirm-pin-btn'),
+            personalityInput: document.getElementById('child-personality'),
+            challengesInput: document.getElementById('child-challenges'),
+            analyzeBtn: document.getElementById('analyze-btn'),
+            loadingSpinner: document.getElementById('loading-spinner'),
+            planContent: document.getElementById('plan-content'),
+            aiAnalysisSummary: document.getElementById('ai-analysis-summary'),
+            aiPlanSteps: document.getElementById('ai-plan-steps'),
+            approvePlanBtn: document.getElementById('approve-plan-btn'),
+            languageToggleBtn: document.getElementById('language-toggle-btn'),
+            planChangeReason: document.getElementById('plan-change-reason'),
+            reAnalyzeBtn: document.getElementById('re-analyze-btn'),
+        };
+
+        let state = {};
+        let pinAction = null;
+        
+        const STORAGE_KEY = 'sadikiAiProfileData_v18_final';
+        const API_PROXY_URL = `/.netlify/functions/gemini`; 
+        
+        const saveState = () => { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { console.error("Failed to save state:", e); } };
+        const loadState = () => { try { const d = localStorage.getItem(STORAGE_KEY); if(d){ state = JSON.parse(d); return true; } return false; } catch (e) { return false; } };
+        const resetState = () => { state = { language: 'ar', ageGroup: null, name: null, gender: null, aiName: null, parentDescription: null, trainingPlan: null, chatHistory: [], currentPlanStep: 0 }; };
+
+        const getAiName = (age, gender) => {
+            if (age === '3-7') return gender === 'ذكر' ? 'سيف' : 'نورة';
+            if (age === '8-12') return gender === 'ذكر' ? 'راشد' : 'مريم';
+            if (age === '13-18') return gender === 'ذكر' ? 'سلطان' : 'آمنة';
+            return 'صديقك الذكي';
+        };
+        
+        const showScreen = (id) => dom.screens.forEach(s => s.classList.toggle('active', s.id === id));
+        const showModal = (id) => document.getElementById(id)?.classList.add('active');
+        const hideModal = (id) => document.getElementById(id)?.classList.remove('active');
+        
+        const updateUiForChild = () => {
+            if (!state || !state.name) return;
+            const lang = state.language;
+            const translations = {
+                ar: { greeting: `مرحباً بك يا ${state.name}`, mission: `هدفنا:`, ready: "جاهز لمغامرة اليوم؟", aiIntro: `أهلاً بك! أنا ${state.aiName}`, aiDesc: { 'ذكر': `رفيجك الرقمي اللي بيساعدك في كل خطوة.`, 'أنثى': `رفيجتج الرقمية اللي بتساعدج في كل خطوة.`}, chatBtn: `ابدأ الدردشة مع ${state.aiName}`, placeholder: "اكتب ردك هنا..." },
+                en: { greeting: `Welcome, ${state.name}`, mission: `Our goal:`, ready: "Ready for today's adventure?", aiIntro: `Hey! I'm ${state.aiName}`, aiDesc: { 'ذكر': `Your digital buddy to help you every step.`, 'أنثى': `Your digital buddy to help you every step.`}, chatBtn: `Start chat with ${state.aiName}`, placeholder: "Type your reply here..." }
+            };
+
+            document.documentElement.lang = lang;
+            document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+            dom.homeGreeting.innerText = translations[lang].greeting;
+            dom.homeAiNameIntro.innerText = translations[lang].aiIntro;
+            dom.startChatBtnText.innerText = translations[lang].chatBtn;
+            dom.homeIntroText.innerText = translations[lang].aiDesc[state.gender];
+            dom.chatInput.placeholder = translations[lang].placeholder;
+            
+            if (state.trainingPlan && state.trainingPlan.planSteps && state.trainingPlan.planSteps[state.currentPlanStep]) {
+                dom.homeMissionStatus.innerText = `${translations[lang].mission} ${state.trainingPlan.planSteps[state.currentPlanStep]}`;
+            } else {
+                dom.homeMissionStatus.innerText = translations[lang].ready;
+            }
+        };
+
+        const validateProfileInput = () => {
+            const isNameValid = dom.childNameInput.value.trim().length > 1;
+            const isGenderValid = state.gender !== null;
+            const isAgeValid = state.ageGroup !== null;
+            dom.continueProfileBtn.disabled = !(isNameValid && isGenderValid && isAgeValid);
+        };
+
+        const validateParentInput = () => {
+            const isPersonalityValid = dom.personalityInput.value.trim().length > 5;
+            const isChallengesValid = dom.challengesInput.value.trim().length > 10;
+            dom.analyzeBtn.disabled = !(isPersonalityValid && isChallengesValid);
+        };
+        
+        const setupEventListeners = () => {
+            dom.acceptConsentBtn.addEventListener('click', () => { hideModal('consent-modal'); showScreen('age-selection-screen'); });
+            dom.ageButtons.forEach(btn => btn.addEventListener('click', (event) => { state.ageGroup = event.currentTarget.dataset.age; showScreen('profile-setup-screen'); }));
+            dom.genderButtons.forEach(btn => btn.addEventListener('click', (event) => { state.gender = event.currentTarget.dataset.gender; dom.genderButtons.forEach(b => b.classList.remove('selected')); event.currentTarget.classList.add('selected'); validateProfileInput(); }));
+            dom.childNameInput.addEventListener('input', validateProfileInput);
+            dom.continueProfileBtn.addEventListener('click', () => { if (dom.continueProfileBtn.disabled) return; state.name = dom.childNameInput.value.trim(); state.aiName = getAiName(state.ageGroup, state.gender); showScreen('parent-input-screen'); });
+            dom.personalityInput.addEventListener('input', validateParentInput);
+            dom.challengesInput.addEventListener('input', validateParentInput);
+            dom.analyzeBtn.addEventListener('click', () => generatePlan(false));
+            dom.reAnalyzeBtn.addEventListener('click', () => generatePlan(true));
+            dom.approvePlanBtn.addEventListener('click', approvePlan);
+            dom.resetAppBtn.addEventListener('click', () => { pinAction = 'reset'; dom.pinModalTitle.innerText = "تأكيد إعادة الضبط"; showModal('pin-modal'); });
+            dom.editPlanRequestBtn.addEventListener('click', () => { pinAction = 'edit'; dom.pinModalTitle.innerText = "تعديل الخطة"; showModal('pin-modal'); });
+            dom.cancelPinBtn.addEventListener('click', () => { hideModal('pin-modal'); dom.pinInput.value = ''; dom.pinErrorMsg.classList.add('hidden'); });
+            dom.confirmPinBtn.addEventListener('click', handlePinConfirm);
+            dom.initiateChatBtn.addEventListener('click', initiateChat);
+            dom.endChatBtn.addEventListener('click', endChat);
+            dom.chatForm.addEventListener('submit', handleChatFormSubmit);
+            dom.languageToggleBtn.addEventListener('click', toggleLanguage);
+        };
+        
+        function handlePinConfirm() {
+            if (dom.pinInput.value === '2222') {
+                hideModal('pin-modal');
+                if (pinAction === 'reset') {
+                    localStorage.removeItem(STORAGE_KEY);
+                    location.reload();
+                } else if (pinAction === 'edit') {
+                    showScreen('plan-change-screen');
+                }
+                dom.pinInput.value = '';
+            } else {
+                dom.pinErrorMsg.classList.remove('hidden');
+                dom.pinInput.value = '';
+                dom.pinModalContent.classList.add('shake');
+                setTimeout(() => dom.pinModalContent.classList.remove('shake'), 500);
+            }
+        }
+
+        async function generatePlan(isModification = false) {
+            let fullDescription = "";
+            if (isModification) {
+                const reason = dom.planChangeReason.value.trim();
+                if (reason.length < 10) return;
+                fullDescription = state.parentDescription + ` ملاحظات جديدة من ولي الأمر: ${reason}`;
+            } else {
+                fullDescription = `الشخصية: ${dom.personalityInput.value.trim()}. التحديات: ${dom.challengesInput.value.trim()}`;
+                state.parentDescription = fullDescription;
+            }
+            
+            showScreen('plan-review-screen');
+            dom.loadingSpinner.style.display = 'flex';
+            dom.planContent.classList.add('hidden');
+
+            const analysisPrompt = `You are an expert in child psychology. Analyze the following parent's description of their child. Description: "${fullDescription}". Your task is to return a response in a valid JSON format ONLY, with no additional text or markdown. The JSON must be in Arabic. It must contain two keys: 1. "analysisSummary": A single sentence summarizing the child's personality and main challenge based on the LATEST information. 2. "planSteps": An array of exactly 3 training steps, starting with the basics and gradually increasing in difficulty.`;
+            
+            try {
+                const response = await fetch(API_PROXY_URL, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ systemInstruction: analysisPrompt, history: [] })
+                });
+                if (!response.ok) throw new Error('API response not OK');
+                const result = await response.json();
+                let planJsonText = result.text;
+                if (!planJsonText) throw new Error('No text in API response');
+                const cleanedJson = planJsonText.replace(/```json|```/g, '').trim();
+                state.trainingPlan = JSON.parse(cleanedJson);
+            } catch (error) {
+                 console.warn("Using fallback for plan generation as API call failed:", error);
+                 state.trainingPlan = { "analysisSummary": "طفل مبدع وحساس، يجد صعوبة في المبادرة ببدء الحوارات.", "planSteps": [ "التدريب على قول 'مرحباً' بثقة.", "التدريب على طرح سؤال بسيط.", "التدريب على دعوة صديق لنشاط." ]};
+            } finally {
+                displayTrainingPlan();
+                dom.loadingSpinner.style.display = 'none';
+                dom.planContent.classList.remove('hidden');
+            }
+        }
+
+        function displayTrainingPlan() {
+            dom.aiAnalysisSummary.innerText = state.trainingPlan.analysisSummary;
+            dom.aiPlanSteps.innerHTML = '';
+            state.trainingPlan.planSteps.forEach(step => {
+                const li = document.createElement('li');
+                li.innerText = step;
+                dom.aiPlanSteps.appendChild(li);
+            });
+        }
+
+        function approvePlan() {
+            state.currentPlanStep = 0;
+            state.chatHistory = [];
+            saveState();
+            updateUiForChild();
+            showScreen('home-screen');
+        }
+        
+        const initiateChat = () => {
+            showScreen('chat-screen');
+            dom.chatMessages.innerHTML = '';
+            if (state.chatHistory && state.chatHistory.length > 0) {
+                state.chatHistory.forEach(msg => addMessage(msg.parts[0].text, msg.role));
+                 const lastModelMessage = state.chatHistory[state.chatHistory.length - 1];
+                 if (lastModelMessage.role === 'model') processChatResponse(lastModelMessage.parts[0].text, true);
+            } else {
+                state.chatHistory = [];
+                const startingMessage = state.language === 'ar' ? `مرحباً يا ${state.aiName}، أنا ${state.name} وجاهز للبدء.` : `Hi ${state.aiName}, I'm ${state.name} and I'm ready to start.`;
+                getChatResponse(startingMessage);
+            }
+        };
+
+        const addMessage = (text, role = 'model') => {
+            const el = document.createElement('div');
+            el.className = `chat-bubble max-w-[80%] rounded-2xl p-3 ${role === 'user' ? 'bg-sky-500 text-white self-end' : 'bg-slate-200 text-slate-800 self-start'}`;
+            el.innerText = text;
+            dom.chatMessages.appendChild(el);
+            setTimeout(() => dom.chatMessages.scrollTop = dom.chatMessages.scrollHeight, 50);
+        };
+
+        const showTypingIndicator = () => {
+            const indicator = `<div id="typing-indicator" class="chat-bubble self-start flex items-center gap-1 bg-slate-200 rounded-2xl p-3"><div class="typing-indicator"><span class="w-2 h-2 bg-slate-400 rounded-full inline-block"></span><span class="w-2 h-2 bg-slate-400 rounded-full inline-block"></span><span class="w-2 h-2 bg-slate-400 rounded-full inline-block"></span></div></div>`;
+            dom.chatMessages.insertAdjacentHTML('beforeend', indicator);
+            dom.chatMessages.scrollTop = dom.chatMessages.scrollHeight;
+        };
+        const hideTypingIndicator = () => document.getElementById('typing-indicator')?.remove();
+        
+        const showUserOptions = (optionsText) => {
+            dom.chatOptionsContainer.innerHTML = '';
+            if (!optionsText) return;
+            const options = optionsText.split('\n').map(o => o.trim().replace(/^- /g, '')).filter(o => o);
+            options.forEach(optionText => {
+                const button = document.createElement('button');
+                button.className = 'w-full text-sky-700 bg-sky-100 font-medium py-2 px-3 rounded-lg text-center hover:bg-sky-200 transition-colors text-sm';
+                button.innerText = optionText;
+                button.addEventListener('click', () => handleUserChoice(optionText));
+                dom.chatOptionsContainer.appendChild(button);
+            });
+        };
+
+        const handleUserChoice = (choiceText) => {
+            addMessage(choiceText, 'user');
+            if (!state.chatHistory) state.chatHistory = [];
+            state.chatHistory.push({ role: "user", parts: [{ text: choiceText }] });
+            saveState();
+            getChatResponse(choiceText);
+        };
+        
+        const handleChatFormSubmit = (e) => {
+            e.preventDefault();
+            const userInput = dom.chatInput.value.trim();
+            if (userInput) {
+                handleUserChoice(userInput);
+                dom.chatInput.value = '';
+            }
+        };
+
+        async function getChatResponse(userMessage) {
+            showTypingIndicator();
+            dom.chatOptionsContainer.innerHTML = '';
+            
+            try {
+                const getSystemPromptForChat = () => {
+                    let persona, trainingStyle;
+                    const lang = state.language === 'ar' ? 'Emirati Arabic' : 'English';
+                    if (state.gender === 'ذكر') {
+                        switch(state.ageGroup) {
+                            case '3-7': persona = `You are "Saif", a cute and friendly cartoon character.`; trainingStyle = `Your training style is a "game".`; break;
+                            case '8-12': persona = `You are "Rashid", a smart and fun friend who speaks in an Emirati dialect.`; trainingStyle = `Your training style is "role-playing".`; break;
+                            case '13-18': persona = `You are "Sultan", a supportive mentor who speaks in a mature, motivating Emirati dialect.`; trainingStyle = `Your training style is "simulation and discussion".`; break;
+                        }
+                    } else {
+                        switch(state.ageGroup) {
+                            case '3-7': persona = `You are "Noora", a cute and friendly cartoon character.`; trainingStyle = `Your training style is a "game".`; break;
+                            case '8-12': persona = `You are "Mariam", a smart and fun friend who speaks in an Emirati dialect.`; trainingStyle = `Your training style is "role-playing".`; break;
+                            case '13-18': persona = `You are "Amna", a supportive mentor who speaks in a mature, motivating Emirati dialect.`; trainingStyle = `Your training style is "simulation and discussion".`; break;
+                        }
+                    }
+                    return `**Your Persona:** ${persona} **Child's Info:** Name is "${state.name}", gender is "${state.gender}", age group is ${state.ageGroup}. **The Training Plan:** ${JSON.stringify(state.trainingPlan)}. **Current Progress:** You are on step ${state.currentPlanStep + 1}, which is: "${state.trainingPlan.planSteps[state.currentPlanStep]}". **VERY STRICT RULES:** 1. **Language:** You MUST reply ONLY in ${lang}. Your entire response, including user options, must be in this language. 2. **Training Methodology:** Always follow the (Intro, Practice, Mission, Follow-up) methodology. ${trainingStyle}. 3. **Evaluate Answers:** If the child gives a positive answer, praise them. If they give a negative/hesitant answer, DO NOT move on. Instead, gently guide them: empathize, explain the benefit of the positive behavior, and encourage them to practice with you. 4. **Suggested Options:** Your suggested options MUST always be expressions of the child's potential feelings or reactions (e.g., "I feel shy," "That sounds fun!"). NEVER put instructive thoughts into the options. 5. **Personalization:** Always address the child by their name and use the correct gendered form of the language.`;
+                };
+
+                const payload = { 
+                    systemInstruction: getSystemPromptForChat(),
+                    history: state.chatHistory 
+                };
+                
+                const response = await fetch(API_PROXY_URL, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify(payload) 
+                });
+                
+                if (!response.ok) {
+                    const errorBody = await response.json();
+                    throw new Error(`API Error: ${response.statusText} - ${errorBody.error}`);
+                }
+                const result = await response.json();
+                const modelResponse = result.text || (state.language === 'ar' ? "عفواً، ما فهمت عليك." : "Sorry, I didn't understand.");
+                
+                hideTypingIndicator();
+                processChatResponse(modelResponse);
+            } catch (error) {
+                console.error("Chat API call failed:", error);
+                hideTypingIndicator();
+                const errorMsg = state.language === 'ar' ? "عفواً، حدث خطأ بسيط في الاتصال. لنجرب مرة أخرى." : "Sorry, there was a small connection error. Let's try again.";
+                addMessage(errorMsg, 'model');
+            }
+        }
+
+        function processChatResponse(text, isReloading = false) {
+            const parts = text.split(/\n\n/);
+            const mainResponse = parts[0];
+            const optionsPart = parts.length > 1 ? parts[1] : (text.includes('\n- ') ? text.split('\n- ').slice(1).join('\n- ') : null);
+            
+            if (!isReloading) {
+                if(mainResponse) addMessage(mainResponse, 'model');
+                if (!state.chatHistory) state.chatHistory = [];
+                state.chatHistory.push({ role: "model", parts: [{ text: text }] });
+                saveState();
+            }
+            showUserOptions(optionsPart);
+        }
+        
+        function toggleLanguage() {
+            state.language = state.language === 'ar' ? 'en' : 'ar';
+            state.chatHistory.push({role: "user", parts: [{text: `(System instruction: Please switch your language to ${state.language} now.)`}]});
+            saveState();
+            updateUiForChild();
+            getChatResponse(`(System instruction: Please switch your language to ${state.language} now and confirm in that language.)`);
+        }
+
+        const endChat = () => {
+            showScreen('home-screen');
+            updateUiForChild();
+        };
+
+        function init() {
+            setupEventListeners();
+            const isReturningUser = loadState();
+            if (isReturningUser && state.name) {
+                updateUiForChild();
+                showScreen('home-screen');
+            } else {
+                resetState();
+                showModal('consent-modal');
+            }
+            lucide.createIcons();
+        }
+
+        init();
+    });
+    </script>
+</body>
+</html>
+
