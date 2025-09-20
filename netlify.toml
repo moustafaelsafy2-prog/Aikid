@@ -1,0 +1,57 @@
+# =============================================================================
+# Netlify Configuration File
+# This file provides comprehensive instructions for Netlify on how to build
+# and deploy your site, including serverless functions and security settings.
+#
+# ملف إعدادات Netlify
+# هذا الملف يقدم تعليمات شاملة لـ Netlify حول كيفية بناء ونشر موقعك،
+# بما في ذلك الوظائف السحابية وإعدادات الأمان.
+# =============================================================================
+
+[build]
+  # Command to build your site. Since this is a static HTML/JS project,
+  # no complex build command is necessary.
+  # أمر بناء الموقع. بما أن هذا المشروع ثابت (HTML/JS)، لا حاجة لأمر بناء معقد.
+  command = "echo 'Build command is not required for this static project.'"
+
+  # The directory that contains the deploy-ready HTML files and assets.
+  # For this project, it's the root directory.
+  # المجلد الذي يحتوي على الملفات الجاهزة للنشر (في هذا المشروع، هو المجلد الرئيسي).
+  publish = "."
+
+  # The directory where the serverless functions are located.
+  # المجلد الذي توجد فيه الوظائف السحابية.
+  functions = "functions/"
+
+# =============================================================================
+# Functions Configuration
+# Specify runtime settings for the serverless functions to ensure stability.
+#
+# إعدادات الوظائف السحابية
+# تحديد إعدادات وقت التشغيل للوظائف السحابية لضمان الاستقرار.
+# =============================================================================
+
+[functions]
+  # Specify the Node.js version to use for the functions.
+  # Using a specific LTS (Long Term Support) version ensures consistent builds.
+  # تحديد إصدار Node.js المستخدم للوظائف.
+  # استخدام إصدار LTS محدد يضمن بناء متسق ومستقر.
+  node_bundler = "esbuild"
+  node_version = "18"
+
+# =============================================================================
+# Redirects and Security Rules
+# Control how traffic is routed and enhance security.
+#
+# قواعد إعادة التوجيه والأمان
+# التحكم في كيفية توجيه الزوار وتعزيز الأمان.
+# =============================================================================
+
+[[redirects]]
+  # This rule ensures that all traffic is forced to use HTTPS for security.
+  # هذه القاعدة تضمن أن جميع الاتصالات تتم بشكل إجباري عبر HTTPS للأمان.
+  from = "http://*"
+  to = "https://:splat"
+  status = 301
+  force = true
+
