@@ -3,21 +3,28 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>صديقي الذكي — النسخة النهائية</title>
+  <title>صديقي الذكي — مشروع مدرسي (مدرسة الإمارات الوطنية)</title>
+
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Tajawal font -->
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet"/>
+
+  <!-- Lucide icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
+
   <style>
     html,body{overscroll-behavior-y:contain;height:100%;margin:0;padding:0}
     body{font-family:'Tajawal',sans-serif;-webkit-tap-highlight-color:transparent}
-    /* خلفية تعبّر عن الطفولة الإماراتية (ثوب/رمال/طائرات ورقية كرمزية لعب طفولي خليجي) */
+    /* خلفية تعبّر عن الطفولة الإماراتية */
     #app-wrapper{
       background-image:
         linear-gradient(rgba(241,245,249,.92),rgba(241,245,249,.92)),
         url('https://images.unsplash.com/photo-1542810634-71277d95dcbb?q=80&w=1600&auto=format&fit=crop'); 
-      background-size: cover; background-position: center;
+      background-size:cover;background-position:center
     }
     #app-container{height:100%;height:100dvh}
     .screen,.modal{display:none}.screen.active,.modal.active{display:flex}
@@ -44,16 +51,21 @@
 <body class="bg-slate-200 text-slate-800 antialiased">
   <div id="app-wrapper">
     <div id="app-container" class="w-full max-w-md md:max-w-lg mx-auto bg-transparent shadow-lg flex flex-col overflow-hidden relative">
+
+      <!-- سيتم حقن الشاشات هنا -->
       <div id="main-content-area" class="flex-grow relative flex flex-col"></div>
 
-      <!-- حقوق الأداة (تصميم جمالي) -->
+      <!-- حقوق الأداة (جمالي ومثبت) -->
       <footer class="w-full mx-auto shrink-0 bg-white/70 backdrop-blur border-t border-slate-200">
-        <div class="px-3 py-2 text-[11px] sm:text-xs flex items-center justify-between">
+        <div class="px-3 py-2 text-[11px] sm:text-xs flex flex-col sm:flex-row items-center justify-between gap-2">
           <div class="flex items-center gap-2">
             <span class="badge bg-cyan-100 text-cyan-700 font-semibold"><i data-lucide="shield-check" class="w-3.5 h-3.5"></i> أمان الطفل أولاً</span>
             <span class="badge bg-emerald-100 text-emerald-700 font-semibold"><i data-lucide="sprout" class="w-3.5 h-3.5"></i> توجيه تربوي إيجابي</span>
           </div>
-          <div class="font-bold brand-gradient">© صديقي الذكي — بإشراف أولياء الأمور</div>
+          <div class="text-center leading-tight">
+            <div class="font-bold brand-gradient">© صديقي الذكي — مشروع مدرسي</div>
+            <div class="text-slate-500">مدرسة الإمارات الوطنية — حقوق الطالب: <span class="font-bold">يوسف سالمين</span></div>
+          </div>
         </div>
       </footer>
     </div>
@@ -61,11 +73,10 @@
 
   <script>
   document.addEventListener('DOMContentLoaded', () => {
-    const mainContentArea = document.getElementById('main-content-area');
-    const appWrapper = document.getElementById('app-wrapper');
-
     /* ============================ بناء الشاشات ============================ */
-    const screenHTML = `
+    const mainContentArea = document.getElementById('main-content-area');
+
+    const screens = `
       <!-- اختيار العمر -->
       <div id="age-selection-screen" class="screen flex-col justify-center items-center p-8 text-center h-full bg-screen">
         <i data-lucide="users-2" class="w-16 h-16 text-sky-500 mx-auto mb-6"></i>
@@ -105,7 +116,7 @@
       <div id="parent-input-screen" class="screen flex-col p-8 h-full bg-screen overflow-y-auto">
         <i data-lucide="file-text" class="w-16 h-16 text-sky-500 mx-auto mb-6 shrink-0"></i>
         <h2 class="text-2xl font-bold text-center mb-2">رؤية وليّ الأمر</h2>
-        <p class="text-slate-600 text-center mb-8 shrink-0">كلما كانت التفاصيل أدق، كانت الخطة أفضل. لا نطلب بيانات تعريفية.</p>
+        <p class="text-slate-600 text-center mb-8">كلما كانت التفاصيل أدق، كانت الخطة أفضل. لا نطلب بيانات تعريفية.</p>
         <div class="w-full space-y-6 flex-grow">
           <div>
             <label class="font-bold mb-2 block">1) كيف تصف شخصية طفلك؟</label>
@@ -116,7 +127,7 @@
             <textarea id="child-challenges" rows="4" placeholder="مثال: صعوبة تكوين صداقات، خجل من المشاركة..." class="w-full bg-white/80 border-2 border-slate-200 rounded-xl p-3 text-lg focus:outline-none focus:border-sky-400 transition"></textarea>
           </div>
         </div>
-        <div class="mt-auto pt-8 shrink-0">
+        <div class="mt-auto pt-8">
           <button id="analyze-btn" class="w-full bg-sky-500 text-white font-bold py-4 px-6 rounded-full text-lg shadow-lg hover:bg-sky-600" disabled>تحليل وإنشاء الخطة الأولية</button>
         </div>
       </div>
@@ -130,8 +141,8 @@
         </div>
         <div id="plan-content" class="hidden w-full h-full flex flex-col">
           <i data-lucide="clipboard-check" class="w-16 h-16 text-green-500 mx-auto mb-6 shrink-0"></i>
-          <h2 class="text-2xl font-bold text-center mb-2">الخطة المقترحة (للـمراجعة)</h2>
-          <p class="text-slate-600 text-center mb-6">يرجى <b>الموافقة</b> أو <b>طلب تعديل</b>. عند طلب تعديل سنسأل عن الأسباب لإنتاج خطة أدق.</p>
+          <h2 class="text-2xl font-bold text-center mb-2">الخطة المقترحة (للمراجعة)</h2>
+          <p class="text-slate-600 text-center mb-6">يرجى <b>الموافقة</b> أو <b>طلب تعديل</b>. عند طلب التعديل سنسأل عن الأسباب لإنتاج خطة أدق.</p>
           <div class="bg-white border border-slate-200 rounded-xl p-4 space-y-4 flex-grow">
             <div>
               <h4 class="font-bold flex items-center gap-2"><i data-lucide="user-round-cog" class="w-5 h-5 text-sky-600"></i>ملف الطفل (ملخص)</h4>
@@ -206,44 +217,56 @@
         </footer>
       </div>
     `;
-    mainContentArea.innerHTML = screenHTML;
+    mainContentArea.innerHTML = screens;
 
-    /* ============================ المودالات ============================ */
-    const consentHTML = `
+    /* ============================ نافذة الموافقة والالتزامات ============================ */
+    const consent = `
       <div id="consent-modal" class="modal active absolute inset-0 bg-black/50 z-50 justify-center items-center p-4 backdrop-blur-sm fade-in">
         <div class="bg-white w-full max-w-md rounded-2xl shadow-xl p-6 scale-up">
           <div class="text-center">
             <i data-lucide="shield-check" class="w-16 h-16 text-sky-500 mx-auto mb-4"></i>
             <h3 class="text-xl font-bold mb-2">كيف تعمل الأداة؟ وما التزاماتنا؟</h3>
             <p class="text-slate-600 mb-4 text-sm">
-              نجمع وصف وليّ الأمر، نحلّله بالذكاء الاصطناعي، ننتج <b>خطة أولية</b> تُعرض للموافقة أو التعديل.
-              عند طلب التعديل نطلب <b>الأسباب</b> ثم نولّد <b>خطة جديدة</b>. بعد الموافقة يبدأ <b>اختبار أولي قصير</b> مع الطفل
-              لاكتشاف الاحتياجات الحقيقية ثم ننطلق في تدريب سلوكي متدرّج.
+              نجمع وصف وليّ الأمر، نحلّله بالذكاء الاصطناعي، نولّد <b>خطة أولية</b> تُعرض للموافقة أو التعديل.
+              عند طلب التعديل نطلب <b>الأسباب</b> ونولّد <b>خطة جديدة</b>. بعد الموافقة يبدأ <b>اختبار أولي قصير</b> مع الطفل
+              لاكتشاف الاحتياجات الحقيقية، ثم تدريب سلوكي متدرّج.
             </p>
           </div>
           <ul class="space-y-3 text-sm text-slate-700">
-            <li class="flex items-start gap-3"><i data-lucide="scale" class="w-5 h-5 text-sky-500 mt-0.5"></i><span><b>امتثال:</b> نلتزم بقوانين دولة الإمارات والمعايير الدولية لأمان الطفل (منع المحتوى غير اللائق/التحرش/الاستغلال، مسار تصعيد عند مؤشرات الخطر).</span></li>
-            <li class="flex items-start gap-3"><i data-lucide="database" class="w-5 h-5 text-sky-500 mt-0.5"></i><span><b>خصوصية:</b> لا نطلب بيانات تعريفية؛ التخزين محلي في جهازك؛ تُرسل نصوص ضرورية فقط للنموذج.</span></li>
-            <li class="flex items-start gap-3"><i data-lucide="stethoscope" class="w-5 h-5 text-sky-500 mt-0.5"></i><span><b>حدود:</b> توجيه تربوي سلوكي—not تشخيص طبي/نفسي. للحالات الخطرة يُنصح بالرجوع لمختص مرخّص.</span></li>
-            <li class="flex items-start gap-3"><i data-lucide="child" class="w-5 h-5 text-sky-500 mt-0.5"></i><span><b>وضوح الهدف:</b> تمكين الطفل تدريجياً للخروج من المشكلة محورياً عبر تمارين قصيرة وقابلة للقياس.</span></li>
+            <li class="flex items-start gap-3"><i data-lucide="scale" class="w-5 h-5 text-sky-500 mt-0.5"></i><span><b>امتثال:</b> الالتزام بقوانين دولة الإمارات والمعايير الدولية لسلامة الطفل.</span></li>
+            <li class="flex items-start gap-3"><i data-lucide="database" class="w-5 h-5 text-sky-500 mt-0.5"></i><span><b>خصوصية:</b> لا نطلب بيانات تعريفية؛ التخزين محلي؛ تُرسل للنموذج نصوص ضرورية فقط.</span></li>
+            <li class="flex items-start gap-3"><i data-lucide="stethoscope" class="w-5 h-5 text-sky-500 mt-0.5"></i><span><b>حدود:</b> توجيه تربوي—not تشخيص طبي/نفسي. عند مؤشرات الخطر نوصي بالتصعيد لوليّ الأمر/المدرسة ومختص مرخّص.</span></li>
+            <li class="flex items-start gap-3"><i data-lucide="child" class="w-5 h-5 text-sky-500 mt-0.5"></i><span><b>الهدف:</b> تمكين الطفل تدريجياً للخروج من المشكلة عبر خطوات قصيرة قابلة للقياس.</span></li>
           </ul>
           <button id="accept-consent-btn" class="mt-6 w-full bg-sky-500 text-white font-bold py-3 px-6 rounded-full hover:bg-sky-600">أوافق وأفهم (وليّ الأمر)</button>
         </div>
       </div>
     `;
-    appWrapper.insertAdjacentHTML('beforeend', consentHTML);
+    document.getElementById('app-wrapper').insertAdjacentHTML('beforeend', consent);
 
-    /* ============================ الحالة والثوابت ============================ */
+    /* ============================ الثوابت والحالة ============================ */
+    const STORAGE_KEY = 'sadikiAi_v21_uae';
+    const API_PROXY_URL = '/.netlify/functions/gemini';
+    const UAE_COMPLIANCE = `
+- الالتزام بقوانين دولة الإمارات والمعايير الدولية لسلامة الطفل.
+- لا تقدم تشخيصاً طبياً/نفسياً؛ عند الخطر وجّه لمختص مرخّص وأخبر وليّ الأمر.
+- لا تطلب بيانات تعريفية (عنوان/مدرسة/أرقام).
+- أي مؤشرات إساءة أو إيذاء: أوقف التقدّم واعطِ رسالة تصعيد لوليّ الأمر/المدرسة.
+`;
+
     const dom = {
+      // screens
       screens: document.querySelectorAll('.screen'),
+      // profile
       ageButtons: document.querySelectorAll('.age-btn'),
       genderButtons: document.querySelectorAll('.gender-btn'),
-      continueProfileBtn: document.getElementById('continue-profile-btn'),
       childNameInput: document.getElementById('child-name-input'),
+      continueProfileBtn: document.getElementById('continue-profile-btn'),
+      // parent inputs
       personalityInput: document.getElementById('child-personality'),
       challengesInput: document.getElementById('child-challenges'),
       analyzeBtn: document.getElementById('analyze-btn'),
-
+      // plan review
       loadingSpinner: document.getElementById('loading-spinner'),
       planContent: document.getElementById('plan-content'),
       aiAnalysisSummary: document.getElementById('ai-analysis-summary'),
@@ -251,39 +274,29 @@
       aiPlanSteps: document.getElementById('ai-plan-steps'),
       approvePlanBtn: document.getElementById('approve-plan-btn'),
       requestEditBtn: document.getElementById('request-edit-btn'),
-
+      // change reason
+      planChangeReason: document.getElementById('plan-change-reason'),
+      reAnalyzeBtn: document.getElementById('re-analyze-btn'),
+      // home
       homeGreeting: document.getElementById('home-greeting'),
       homeAiNameIntro: document.getElementById('home-ai-name-intro'),
       startChatBtnText: document.getElementById('start-chat-btn-text'),
       homeIntroText: document.getElementById('home-intro-text'),
       homeMissionStatus: document.getElementById('home-mission-status'),
       initiateChatBtn: document.getElementById('initiate-chat-btn'),
-      endChatBtn: document.getElementById('end-chat-btn'),
-      languageToggleBtn: document.getElementById('language-toggle-btn'),
-
+      resetAppBtn: document.getElementById('reset-app-btn'),
+      // chat
       chatMessages: document.getElementById('chat-messages'),
       chatOptionsContainer: document.getElementById('chat-options-container'),
       chatForm: document.getElementById('chat-form'),
       chatInput: document.getElementById('chat-input'),
-
-      planChangeReason: document.getElementById('plan-change-reason'),
-      reAnalyzeBtn: document.getElementById('re-analyze-btn'),
-      resetAppBtn: document.getElementById('reset-app-btn'),
-
+      endChatBtn: document.getElementById('end-chat-btn'),
+      languageToggleBtn: document.getElementById('language-toggle-btn'),
+      // consent
       acceptConsentBtn: document.getElementById('accept-consent-btn')
     };
 
     let state = {};
-    const STORAGE_KEY = 'sadikiAi_v20_uae';
-    const API_PROXY_URL = '/.netlify/functions/gemini';
-
-    const UAE_COMPLIANCE = `
-- التزم بقوانين دولة الإمارات والمعايير الدولية لسلامة الطفل.
-- لا تُقدم تشخيصاً طبياً/نفسيّاً. وجّه لمختص مرخّص عند مؤشرات الخطر.
-- تجنّب جمع بيانات تعريفية؛ لا تطلب عنوان/مدرسة/أرقام.
-- عند الإساءة/التنمّر/إيذاء: أوقف التقدّم وقدّم تعليمات لإبلاغ وليّ الأمر/المدرسة.
-`;
-
     const saveState = () => { try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch{} };
     const loadState = () => { try{ const d=localStorage.getItem(STORAGE_KEY); if(d){ state=JSON.parse(d); return true; } }catch{} return false; };
     const resetState = () => { state = { language:'ar', ageGroup:null, name:null, gender:null, aiName:null, parentDescription:null, trainingPlan:null, chatHistory:[], currentPlanStep:0, assessment:null }; };
@@ -292,21 +305,21 @@
       if(age==='3-7')  return gender==='ذكر'?'سيف':'نورة';
       if(age==='8-12') return gender==='ذكر'?'راشد':'مريم';
       if(age==='13-18')return gender==='ذكر'?'سلطان':'آمنة';
-      return 'صديقك الذكي';
+      return 'صديقي الذكي';
     };
 
     const showScreen = id => document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active', s.id===id));
-    const hideModal = id => document.getElementById(id)?.classList.remove('active');
 
     /* ============================ أحداث الواجهة ============================ */
-    dom.acceptConsentBtn.addEventListener('click',()=>{ hideModal('consent-modal'); showScreen('age-selection-screen'); });
+    document.getElementById('accept-consent-btn').addEventListener('click',()=>{ document.getElementById('consent-modal').classList.remove('active'); showScreen('age-selection-screen'); });
+
     dom.ageButtons.forEach(b=>b.addEventListener('click',e=>{ state.ageGroup=e.currentTarget.dataset.age; showScreen('profile-setup-screen'); }));
     dom.genderButtons.forEach(btn=>btn.addEventListener('click',e=>{
       state.gender=e.currentTarget.dataset.gender;
       document.querySelectorAll('.gender-btn').forEach(x=>x.classList.remove('selected'));
-      e.currentTarget.classList.add('selected'); validateProfileInput();
+      e.currentTarget.classList.add('selected'); validateProfile();
     }));
-    dom.childNameInput.addEventListener('input',validateProfileInput);
+    dom.childNameInput.addEventListener('input',validateProfile);
     dom.continueProfileBtn.addEventListener('click',()=>{
       if(dom.continueProfileBtn.disabled) return;
       state.name = dom.childNameInput.value.trim();
@@ -314,38 +327,45 @@
       showScreen('parent-input-screen');
     });
 
-    dom.personalityInput.addEventListener('input',validateParentInput);
-    dom.challengesInput.addEventListener('input',validateParentInput);
+    dom.personalityInput.addEventListener('input',validateParent);
+    dom.challengesInput.addEventListener('input',validateParent);
     dom.analyzeBtn.addEventListener('click',()=>generatePlan(false));
 
-    dom.approvePlanBtn.addEventListener('click',approvePlan);
-    dom.requestEditBtn.addEventListener('click',()=>{ showScreen('plan-change-screen'); });
-
+    dom.requestEditBtn.addEventListener('click',()=>showScreen('plan-change-screen'));
     dom.reAnalyzeBtn.addEventListener('click',()=>generatePlan(true));
+    dom.approvePlanBtn.addEventListener('click',approvePlan);
+
     dom.resetAppBtn.addEventListener('click',()=>{ localStorage.removeItem(STORAGE_KEY); location.reload(); });
 
     dom.initiateChatBtn.addEventListener('click',()=>initiateChat(false));
-    dom.endChatBtn.addEventListener('click',()=>{ showScreen('home-screen'); updateUi(); });
+    dom.endChatBtn.addEventListener('click',()=>{ showScreen('home-screen'); updateUI(); });
     dom.chatForm.addEventListener('submit',e=>{ e.preventDefault(); const v=dom.chatInput.value.trim(); if(v){ handleUserChoice(v); dom.chatInput.value=''; } });
-    dom.languageToggleBtn.addEventListener('click',()=>{ state.language = state.language==='ar'?'en':'ar'; state.chatHistory.push({role:'user',parts:[{text:`(System instruction: switch to ${state.language})`} ]}); saveState(); updateUi(); getChatResponse(`(System instruction: switch to ${state.language} and confirm.)`); });
+    dom.languageToggleBtn?.addEventListener('click',()=>{ state.language = state.language==='ar'?'en':'ar'; state.chatHistory.push({role:'user',parts:[{text:`(System instruction: switch to ${state.language})`} ]}); saveState(); updateUI(); getChatResponse(`(System instruction: switch to ${state.language} and confirm.)`); });
 
-    function validateProfileInput(){
+    function validateProfile(){
       const ok = dom.childNameInput.value.trim().length>1 && !!state.gender && !!state.ageGroup;
       dom.continueProfileBtn.disabled = !ok;
     }
-    function validateParentInput(){
+    function validateParent(){
       const ok = dom.personalityInput.value.trim().length>5 && dom.challengesInput.value.trim().length>10;
       dom.analyzeBtn.disabled = !ok;
     }
 
-    /* ============================ نصوص الذكاء الاصطناعي ============================ */
+    /* ============================ اتصال الدالة ============================ */
+    async function callAI(payload){
+      const r = await fetch('/.netlify/functions/gemini',{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+      if(!r.ok){ let e=''; try{const j=await r.json(); e=j.error||r.statusText;}catch{e=r.statusText;} throw new Error(e); }
+      return r.json();
+    }
+
+    /* ============================ توليد الخطة + دورة الموافقة ============================ */
     const planPrompt = (desc)=>`
 ${UAE_COMPLIANCE}
 أنت خبير تربية طفل وسلامة رقمية. حلّل وصف وليّ الأمر التالي:
 "${desc}"
 أرجع JSON بالعربية فقط (بدون أي نص خارج JSON) بالشكل:
 {
- "analysisSummary": "جملة واحدة مختصرة",
+ "analysisSummary": "جملة مختصرة تلخّص شخصية الطفل ومشكلته",
  "needsHypothesis": ["3 نقاط فرضية دقيقة للاحتياجات"],
  "planSteps": ["3 خطوات تدريبية متدرجة وقابلة للقياس"],
  "initialAssessment": {
@@ -356,12 +376,80 @@ ${UAE_COMPLIANCE}
      {"type":"selfCheck","q":"كم درجة ثقتك الآن؟ (0-10)","scaleMin":0,"scaleMax":10}
    ],
    "scoring":"كيف نحسب مستوى الاحتياج (عالي/متوسط/منخفض)",
-   "safeguards":"متى نوقف الحوار ونعطي تعليمات تصعيد"
+   "safeguards":"متى نوقف الحوار ونعطي رسالة تصعيد"
  }
 }
-التزم بالدقة، ولا تفترض معلومات غير موجودة.
+التزم بالدقة ولاتفترض معلومات غير موجودة.
 `;
 
+    async function generatePlan(isModification){
+      let fullDescription="";
+      if(isModification){
+        const reason = dom.planChangeReason.value.trim();
+        if(reason.length<10){ dom.planChangeReason.focus(); return; }
+        fullDescription = (state.parentDescription||'') + ` | أسباب التعديل: ${reason}`;
+      }else{
+        fullDescription = `الشخصية: ${dom.personalityInput.value.trim()} | التحديات: ${dom.challengesInput.value.trim()}`;
+        state.parentDescription = fullDescription;
+      }
+
+      showScreen('plan-review-screen');
+      dom.loadingSpinner.style.display='flex'; dom.planContent.classList.add('hidden');
+
+      try{
+        const result = await callAI({ systemInstruction: planPrompt(fullDescription), history: [] });
+        let text = (result.text||'').replace(/```json|```/g,'').trim();
+        const json = JSON.parse(text);
+        state.trainingPlan = json;
+        state.assessment = { spec: json.initialAssessment, result:null, answers:[] };
+        renderPlan(json);
+      }catch(e){
+        // Fallback آمن
+        const fallback = {
+          analysisSummary:'طفل حساس ويحتاج تمهيداً اجتماعياً تدريجياً.',
+          needsHypothesis:['تمارين تحية قصيرة','تعزيز ثقة البدء','نشاط لعب مشترك'],
+          planSteps:['قل "مرحباً" بثقة','اسأل سؤالاً بسيطاً','ادعُ صديقاً لنشاط'],
+          initialAssessment:{ intro:'نجرب أسئلة بسيطة.', items:[{type:'choice',q:'كيف تحس لما تبدأ كلام؟',options:['تمام','شوية','صعب'],map:{'تمام':0,'شوية':1,'صعب':2}},{type:'roleplay',q:'سلّم على زميلك بصوت واضح.',success_hint:'ابتسامة + مرحباً'},{type:'selfCheck',q:'ثقتك من 0 إلى 10؟',scaleMin:0,scaleMax:10}], scoring:'≥2 نقاط = احتياج أعلى', safeguards:'لو ظهر إساءة/تنمّر نوقف ونوجّه للتصعيد' }
+        };
+        state.trainingPlan=fallback;
+        state.assessment = { spec: fallback.initialAssessment, result:null, answers:[] };
+        renderPlan(fallback);
+      } finally {
+        dom.loadingSpinner.style.display='none'; dom.planContent.classList.remove('hidden'); saveState();
+      }
+    }
+
+    function renderPlan(plan){
+      dom.aiAnalysisSummary.textContent = plan.analysisSummary || '';
+      dom.aiNeedsHypo.innerHTML=''; (plan.needsHypothesis||[]).forEach(n=>{ const li=document.createElement('li'); li.textContent=n; dom.aiNeedsHypo.appendChild(li); });
+      dom.aiPlanSteps.innerHTML=''; (plan.planSteps||[]).forEach(s=>{ const li=document.createElement('li'); li.textContent=s; dom.aiPlanSteps.appendChild(li); });
+    }
+
+    function approvePlan(){
+      state.currentPlanStep=0; state.chatHistory=[];
+      saveState(); updateUI(); showScreen('home-screen');
+      initiateChat(true); startInitialAssessment();
+    }
+
+    /* ============================ الاختبار الأولي ============================ */
+    function startInitialAssessment(){
+      const spec = state.assessment?.spec; if(!spec) return;
+      const intro = spec.intro || (state.language==='ar'?'خلّينا نعمل اختباراً قصيراً يساعدنا نعرف اللي ينفعك أكثر.':'Let’s do a short check-in.');
+      pushModel(intro + '\n\n- موافق\n- متردد'); showUserOptions('- موافق\n- متردد');
+    }
+    function scoreAssessment(){
+      const items = state.assessment?.spec?.items||[]; let score=0;
+      items.forEach((it,idx)=>{
+        const a=state.assessment.answers[idx];
+        if(it.type==='choice' && it.map && a in it.map) score += it.map[a];
+        if(it.type==='selfCheck' && typeof a==='number') score += a>=7?2:(a>=4?1:0);
+      });
+      const level = score>=3 ? 'احتياج مرتفع' : (score>=1 ? 'احتياج متوسط' : 'احتياج منخفض');
+      state.assessment.result = { score, level, at: Date.now() };
+      saveState();
+    }
+
+    /* ============================ محادثة ============================ */
     const chatSystem = ()=>{
       const lang = state.language==='ar' ? 'Emirati Arabic' : 'English';
       const persona = (()=>{
@@ -386,85 +474,10 @@ STRICT:
 2) المنهجية: Intro → Practice → Mission → Follow-up. أسلوب: ${persona.style}.
 3) اربط كل رد بمدخلات الوالدين/الخطة/الاختبار. لا تستخدم قوالب ثابتة.
 4) قائمة خيارات الطفل تكون مشاعر/ردود فعل فقط، سطر فارغ ثم عناصر تبدأ بـ "- ".
-5) عند مؤشرات خطر: أوقف التقدم وقدّم رسالة جاهزة لوليّ الأمر للتصعيد.
+5) عند مؤشرات خطر: أوقف التقدم وقدّم رسالة جاهزة للتصعيد لوليّ الأمر/المدرسة.
 `;
     };
 
-    /* ============================ اتصال الدالة ============================ */
-    async function callAI(payload){
-      const r = await fetch(API_PROXY_URL,{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
-      if(!r.ok){ let e=''; try{const j=await r.json(); e=j.error||r.statusText;}catch{e=r.statusText;} throw new Error(e); }
-      return r.json();
-    }
-
-    /* ============================ توليد الخطة + دورة الموافقة ============================ */
-    async function generatePlan(isModification){
-      let fullDescription="";
-      if(isModification){
-        const reason = dom.plan-change-reason.value.trim();
-        if(reason.length<10){ dom.plan-change-reason.focus(); return; }
-        fullDescription = (state.parentDescription||'') + ` | أسباب التعديل: ${reason}`;
-      }else{
-        fullDescription = `الشخصية: ${dom.personalityInput.value.trim()} | التحديات: ${dom.challengesInput.value.trim()}`;
-        state.parentDescription = fullDescription;
-      }
-
-      showScreen('plan-review-screen');
-      dom.loadingSpinner.style.display='flex'; dom.planContent.classList.add('hidden');
-
-      try{
-        const result = await callAI({ systemInstruction: planPrompt(fullDescription), history: [] });
-        let text = (result.text||'').replace(/```json|```/g,'').trim();
-        const json = JSON.parse(text);
-        state.trainingPlan = json;
-        state.assessment = { spec: json.initialAssessment, result:null, answers:[] };
-        renderPlan(json);
-      }catch(e){
-        state.trainingPlan = { analysisSummary:'طفل حساس يحتاج تمهيداً اجتماعياً تدريجياً.', needsHypothesis:['تمارين تحية قصيرة','تعزيز ثقة البدء','تجربة لعب مشتركة'], planSteps:['قل "مرحباً" بثقة','اسأل سؤالاً بسيطاً','ادعُ صديقاً لنشاط'], initialAssessment:{ intro:'نجرب أسئلة بسيطة.', items:[{type:'choice',q:'كيف تحس لما تبدأ كلام؟',options:['تمام','شوية','صعب'],map:{'تمام':0,'شوية':1,'صعب':2}},{type:'roleplay',q:'سلّم على زميلك بصوت واضح.',success_hint:'ابتسامة + مرحباً'},{type:'selfCheck',q:'ثقتك من 0 إلى 10؟',scaleMin:0,scaleMax:10}], scoring:'≥2 نقاط = احتياج أعلى', safeguards:'لو ذكر الطفل إساءة/تنمّر نوقف ونوجه للتصعيد' } };
-        state.assessment = { spec: state.trainingPlan.initialAssessment, result:null, answers:[] };
-        renderPlan(state.trainingPlan);
-      } finally {
-        dom.loadingSpinner.style.display='none'; dom.planContent.classList.remove('hidden'); saveState();
-      }
-    }
-
-    function renderPlan(plan){
-      dom.ai-analysis-summary.textContent = plan.analysisSummary || '';
-      dom.ai-needs-hypo.innerHTML = '';
-      (plan.needsHypothesis||[]).forEach(n=>{ const li=document.createElement('li'); li.textContent=n; dom.ai-needs-hypo.appendChild(li); });
-      dom.ai-plan-steps.innerHTML = '';
-      (plan.planSteps||[]).forEach(s=>{ const li=document.createElement('li'); li.textContent=s; dom.ai-plan-steps.appendChild(li); });
-    }
-
-    function approvePlan(){
-      state.currentPlanStep=0; state.chatHistory=[];
-      saveState(); updateUi(); showScreen('home-screen');
-      // مباشرة: بدء الاختبار الأولي مع الطفل
-      initiateChat(true); startInitialAssessment();
-    }
-
-    /* ============================ الاختبار الأولي ============================ */
-    function startInitialAssessment(){
-      const spec = state.assessment?.spec; if(!spec) return;
-      const intro = spec.intro || (state.language==='ar'?'خلّينا نعمل اختباراً قصيراً يساعدنا نعرف اللي ينفعك أكثر.':'Let’s do a short check-in.');
-      pushModel(intro + '\n\n- موافق\n- متردد');
-      showUserOptions('- موافق\n- متردد');
-    }
-
-    function scoreAssessment(){
-      const items = state.assessment?.spec?.items||[];
-      let score=0;
-      items.forEach((it,idx)=>{
-        const a=state.assessment.answers[idx];
-        if(it.type==='choice' && it.map && a in it.map) score += it.map[a];
-        if(it.type==='selfCheck' && typeof a==='number') score += a>=7?2:(a>=4?1:0);
-      });
-      const level = score>=3 ? 'احتياج مرتفع' : (score>=1 ? 'احتياج متوسط' : 'احتياج منخفض');
-      state.assessment.result = { score, level, at: Date.now() };
-      saveState();
-    }
-
-    /* ============================ محادثة ============================ */
     function addMessage(text,role='model'){
       const el=document.createElement('div');
       el.className=`chat-bubble max-w-[80%] rounded-2xl p-3 ${role==='user'?'bg-sky-500 text-white self-end':'bg-slate-200 text-slate-800 self-start'}`;
@@ -480,8 +493,7 @@ STRICT:
       options.forEach(txt=>{
         const b=document.createElement('button');
         b.className='w-full text-sky-700 bg-sky-100 font-medium py-2 px-3 rounded-lg text-center hover:bg-sky-200 transition-colors text-sm';
-        b.innerText=txt;
-        b.addEventListener('click',()=>handleUserChoice(txt));
+        b.innerText=txt; b.addEventListener('click',()=>handleUserChoice(txt));
         dom.chatOptionsContainer.appendChild(b);
       });
     }
@@ -489,34 +501,28 @@ STRICT:
       addMessage(choiceText,'user');
       state.chatHistory.push({role:'user',parts:[{text:choiceText}]}); saveState();
 
-      // التقاط إجابات الاختبار الأولي
+      // لو في الاختبار الأولي
       const spec = state.assessment?.spec;
       if(spec && !state.assessment.result){
         const items = spec.items||[];
-        // محاولة تحويل رقم
         const n = Number(choiceText);
         state.assessment.answers.push(!Number.isNaN(n) && choiceText.match(/^\d+$/) ? n : choiceText);
         if(state.assessment.answers.length>=items.length){ scoreAssessment(); }
       }
       getChatResponse(choiceText);
     }
-
-    function processChatResponse(text,isReloading=false){
-      const [main,...rest] = text.split(/\n\n/);
-      const opts = rest.join('\n\n');
-      if(!isReloading){
-        addMessage(main||'', 'model');
-        state.chatHistory.push({role:'model',parts:[{text}]}); saveState();
-      }
+    function processChatResponse(text,isReload=false){
+      const [main,...rest]=text.split(/\n\n/); const opts=rest.join('\n\n');
+      if(!isReload){ addMessage(main||'','model'); state.chatHistory.push({role:'model',parts:[{text}]}); saveState(); }
       showUserOptions(opts);
     }
     function pushModel(text){ addMessage(text,'model'); state.chatHistory.push({role:'model',parts:[{text}]}); saveState(); }
 
-    async function getChatResponse(userMessage){
+    async function getChatResponse(){
       showTyping(); dom.chatOptionsContainer.innerHTML='';
       try{
         const result = await callAI({ systemInstruction: chatSystem(), history: state.chatHistory });
-        const reply = result.text || (state.language==='ar'?'عفواً، لم أفهم.':'Sorry, I didn’t understand.');
+        const reply = result.text || (state.language==='ar'?'عذرًا، لم أفهم.':'Sorry, I didn’t understand.');
         hideTyping(); processChatResponse(reply);
       }catch(e){
         hideTyping(); addMessage(state.language==='ar'?'تعذّر الاتصال مؤقتاً.':'Temporary connection issue.','model');
@@ -535,27 +541,26 @@ STRICT:
       }
     }
 
-    /* ============================ لغة وواجهة ============================ */
-    function updateUi(){
+    function updateUI(){
       if(!state?.name) return;
       const t={
         ar:{g:`مرحباً بك يا ${state.name}`,m:`هدفنا:`,ready:`جاهز لمغامرة اليوم؟`,ai:`أهلاً بك! أنا ${state.aiName}`,desc:{'ذكر':'رفيجك الرقمي اللي بيساعدك في كل خطوة.','أنثى':'رفيجتج الرقمية اللي بتساعدج في كل خطوة.'},chat:`ابدأ الدردشة مع ${state.aiName}`,ph:'اكتب ردك هنا...'},
         en:{g:`Welcome, ${state.name}`,m:`Our goal:`,ready:`Ready for today’s adventure?`,ai:`Hey! I'm ${state.aiName}`,desc:{'ذكر':'Your digital buddy to help you every step.','أنثى':'Your digital buddy to help you every step.'},chat:`Start chat with ${state.aiName}`,ph:'Type your reply here...'}
       };
       const lang=state.language; document.documentElement.lang=lang; document.documentElement.dir= lang==='ar'?'rtl':'ltr';
-      dom.homeGreeting.textContent=t[lang].g;
-      dom.homeAiNameIntro.textContent=t[lang].ai;
-      dom.startChatBtnText.textContent=t[lang].chat;
-      dom.homeIntroText.textContent=t[lang].desc[state.gender];
-      dom.chatInput.placeholder=t[lang].ph;
-      if(state.trainingPlan?.planSteps?.[state.currentPlanStep]) dom.homeMissionStatus.textContent=`${t[lang].m} ${state.trainingPlan.planSteps[state.currentPlanStep]}`; else dom.homeMissionStatus.textContent=t[lang].ready;
+      document.getElementById('home-greeting').textContent=t[lang].g;
+      document.getElementById('home-ai-name-intro').textContent=t[lang].ai;
+      document.getElementById('start-chat-btn-text').textContent=t[lang].chat;
+      document.getElementById('home-intro-text').textContent=t[lang].desc[state.gender];
+      document.getElementById('chat-input').placeholder=t[lang].ph;
+      if(state.trainingPlan?.planSteps?.[state.currentPlanStep]) document.getElementById('home-mission-status').textContent=`${t[lang].m} ${state.trainingPlan.planSteps[state.currentPlanStep]}`; else document.getElementById('home-mission-status').textContent=t[lang].ready;
     }
 
     /* ============================ بدء التشغيل ============================ */
     function init(){
       const returning = loadState();
-      if(returning && state.name){ updateUi(); showScreen('home-screen'); }
-      else { resetState(); }
+      if(returning && state.name){ updateUI(); showScreen('home-screen'); }
+      else { resetState(); showScreen('age-selection-screen'); document.getElementById('consent-modal').classList.add('active'); }
       lucide.createIcons();
     }
     init();
