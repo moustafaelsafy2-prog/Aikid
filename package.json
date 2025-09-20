@@ -1,14 +1,12 @@
-{
+{{
   "name": "sadiki-ai",
   "version": "1.0.0",
-  "description": "صديقي الذكي — واجهة تفاعلية + دالة Gemini على Netlify",
   "private": true,
+  "description": "صديقي الذكي — أداة تربوية تفاعلية بذكاء اصطناعي مع امتثال إماراتي",
   "scripts": {
     "dev": "netlify dev",
-    "build": "echo \"Static build\"",
+    "build": "echo \"Static app\"",
     "start": "netlify dev"
   },
-  "engines": {
-    "node": ">=18"
-  }
+  "engines": { "node": ">=18" }
 }
