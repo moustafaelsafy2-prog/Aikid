@@ -5,6 +5,10 @@
 [functions]
   node_bundler = "esbuild"
 
+[build.environment]
+  NODE_VERSION = "20.18.0"
+  NPM_FLAGS = "--no-audit --no-fund"
+
 [[headers]]
   for = "/.netlify/functions/*"
   [headers.values]
