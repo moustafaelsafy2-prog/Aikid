@@ -1,12 +1,14 @@
-{{
+{
   "name": "sadiki-ai",
   "version": "1.0.0",
   "private": true,
-  "description": "صديقي الذكي — أداة تربوية تفاعلية بذكاء اصطناعي مع امتثال إماراتي",
+  "description": "Sadiki AI - child guidance tool (UAE compliance)",
   "scripts": {
+    "build": "echo \"static app\"",
     "dev": "netlify dev",
-    "build": "echo \"Static app\"",
     "start": "netlify dev"
   },
-  "engines": { "node": ">=18" }
+  "engines": {
+    "node": ">=18"
+  }
 }
