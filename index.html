@@ -8,31 +8,33 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet"/>
+  <!-- خط عربي مريح للقراءة -->
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet"/>
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <style>
+    :root{ --card: rgba(248,250,252,.96); }
     html,body{height:100%;margin:0;padding:0;overscroll-behavior-y:contain}
-    body{font-family:'Tajawal',sans-serif;-webkit-tap-highlight-color:transparent}
+    body{font-family:'Cairo',system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial,'Noto Sans',sans-serif;line-height:1.9;-webkit-tap-highlight-color:transparent}
 
+    /* خلفية تعبّر عن الطفولة الإماراتية (ثابتة) */
     #app-wrapper{
       background-image:
-        linear-gradient( rgba(245,248,252,.90), rgba(245,248,252,.94) ),
-        url('https://images.unsplash.com/photo-1607093800959-5b6b6f72b316?q=80&w=2000&auto=format&fit=crop');
-      background-size:cover;background-position:center
+        linear-gradient( rgba(245,248,252,.92), rgba(245,248,252,.94) ),
+        url('https://images.unsplash.com/photo-1584438784894-089d6a62b8a2?q=80&w=1920&auto=format&fit=crop'); /* أطفال خليج/مدرسة */
+      background-size:cover;background-position:center;background-attachment:fixed;
     }
     #app-container{height:100%;height:100dvh}
     .screen,.modal{display:none}.screen.active,.modal.active{display:flex}
-    .bg-screen{background:rgba(248,250,252,.96);backdrop-filter:blur(3px)}
-    .chat-bubble{animation:pop .25s cubic-bezier(.2,.9,.3,1.4)}
-    @keyframes pop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
+    .bg-screen{background:var(--card);backdrop-filter:blur(3px)}
+    .chat-bubble{animation:pop .22s cubic-bezier(.2,.9,.3,1.4)}
+    @keyframes pop{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
     #chat-messages::-webkit-scrollbar{width:6px}
     #chat-messages::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:10px}
     .age-btn.selected,.gender-btn.selected{border-color:#0ea5e9;background:#f0f9ff;color:#0284c7}
     #continue-profile-btn:disabled,#analyze-btn:disabled{background:#94a3b8;cursor:not-allowed}
     .badge{display:inline-flex;align-items:center;gap:.35rem;padding:.25rem .6rem;border-radius:9999px;font-size:.75rem}
     .brand-gradient{background:linear-gradient(135deg,#0ea5e9 0%,#14b8a6 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
-
     .hit{min-height:44px;min-width:44px}
     @media (orientation:landscape){ #app-container{max-width:960px} #chat-messages{padding-bottom:.25rem} }
     @media (min-width:1024px){ #app-container{max-width:1024px} }
@@ -40,8 +42,8 @@
 
     /* Modal */
     .modal-backdrop{background:rgba(0,0,0,.45);backdrop-filter:blur(2px)}
-    .modal-card{animation:zoom .2s ease}
-    @keyframes zoom{from{transform:scale(.92);opacity:.6}to{transform:scale(1);opacity:1}}
+    .modal-card{animation:zoom .18s ease}
+    @keyframes zoom{from{transform:scale(.94);opacity:.6}to{transform:scale(1);opacity:1}}
   </style>
 </head>
 <body class="bg-slate-200 text-slate-800 antialiased">
@@ -88,17 +90,21 @@
 
     /* ================== الشــاشــات ================== */
     main.innerHTML = `
-      <section id="start-screen" class="screen active bg-screen flex-col items-center justify-center p-8 text-center">
-        <div class="w-24 h-24 rounded-full bg-white/70 flex items-center justify-center mb-4"><i data-lucide="bot" class="w-12 h-12 text-sky-600"></i></div>
-        <h1 class="text-3xl font-bold mb-2">صديقي الذكي</h1>
-        <p class="text-slate-600 mb-8">مرشد رقمي يساعد طفلك على تخطي التحديات الاجتماعية بخطوات قصيرة وآمنة.</p>
-        <button id="start-btn" class="bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 px-8 rounded-full shadow-lg hit">ابدأ</button>
+      <!-- صفحة البداية بخلفية ثابتة -->
+      <section id="start-screen" class="screen active bg-transparent flex-col items-center justify-center p-8 text-center">
+        <div class="w-full max-w-md bg-white/85 rounded-2xl shadow-lg p-6">
+          <div class="w-20 h-20 rounded-full bg-sky-50 border border-sky-100 flex items-center justify-center mx-auto mb-3"><i data-lucide="bot" class="w-10 h-10 text-sky-600"></i></div>
+          <h1 class="text-3xl font-bold mb-2">صديقي الذكي</h1>
+          <p class="text-slate-600 mb-6">مرشد رقمي آمن يساعد طفلك على تخطي التحديات الاجتماعية بخطوات قصيرة ومناسبة للعمر.</p>
+          <button id="start-btn" class="bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 px-8 rounded-full shadow-lg hit">ابدأ</button>
+        </div>
       </section>
 
+      <!-- التعريف والالتزامات -->
       <section id="intro-screen" class="screen bg-screen flex-col items-stretch p-8 overflow-y-auto">
         <i data-lucide="shield-check" class="w-16 h-16 text-sky-500 mx-auto mb-4"></i>
         <h2 class="text-2xl font-bold text-center mb-2">كيف نعمل؟ والتزاماتنا</h2>
-        <p class="text-slate-600 text-center mb-6">نربط وصف وليّ الأمر بتحليل ذكي، نولّد خطة أولية للمراجعة، ثم اختبار قصير للطفل لتحديد الاحتياج الحقيقي، وبعدها تدريب متدرّج.</p>
+        <p class="text-slate-600 text-center mb-6">نربط وصف وليّ الأمر بتحليل ذكي، نجمع بيانات من الطفل بلطف لكشف احتياجات خفية، ثم ننتقل لتدريب موجّه متدرج.</p>
         <ul class="space-y-3 text-sm text-slate-700">
           <li class="flex items-start gap-3"><i data-lucide="scale" class="w-5 h-5 text-sky-500 mt-0.5"></i><span><b>امتثال:</b> الالتزام بقوانين الإمارات والمعايير الدولية لسلامة الطفل.</span></li>
           <li class="flex items-start gap-3"><i data-lucide="database" class="w-5 h-5 text-sky-500 mt-0.5"></i><span><b>خصوصية:</b> لا نطلب بيانات تعريفية؛ التخزين محلي؛ لا تُشارك المحادثات.</span></li>
@@ -111,6 +117,7 @@
         </div>
       </section>
 
+      <!-- الملف الشخصي -->
       <section id="profile-setup-screen" class="screen bg-screen flex-col p-8 overflow-y-auto">
         <i data-lucide="user-round-check" class="w-16 h-16 text-sky-500 mx-auto mb-6"></i>
         <h2 class="text-2xl font-bold text-center mb-2">ملف البطل الشخصي</h2>
@@ -140,6 +147,7 @@
         </div>
       </section>
 
+      <!-- إدخال ولي الأمر -->
       <section id="parent-input-screen" class="screen bg-screen flex-col p-8 overflow-y-auto">
         <i data-lucide="file-text" class="w-16 h-16 text-sky-500 mx-auto mb-6"></i>
         <h2 class="text-2xl font-bold text-center mb-2">رؤية وليّ الأمر</h2>
@@ -153,6 +161,7 @@
         </div>
       </section>
 
+      <!-- مراجعة الخطة -->
       <section id="plan-review-screen" class="screen bg-screen flex-col p-8 overflow-y-auto">
         <div id="loading-spinner" class="m-auto text-center items-center justify-center">
           <i data-lucide="loader-circle" class="w-16 h-16 text-sky-500 mx-auto mb-4 animate-spin"></i>
@@ -175,6 +184,7 @@
         </div>
       </section>
 
+      <!-- أسباب التعديل -->
       <section id="plan-change-screen" class="screen bg-screen flex-col p-8 overflow-y-auto">
         <i data-lucide="edit" class="w-16 h-16 text-sky-500 mx-auto mb-6"></i>
         <h2 class="text-2xl font-bold text-center mb-2">أسباب التعديل</h2>
@@ -184,6 +194,7 @@
         </div>
       </section>
 
+      <!-- الصفحة الرئيسية -->
       <section id="home-screen" class="screen bg-transparent flex-col p-6">
         <header class="flex justify-between items-center mb-6">
           <div><p id="home-greeting" class="text-slate-500"></p><h2 id="home-mission-status" class="text-2xl font-bold">جاهز لمغامرة اليوم؟</h2></div>
@@ -197,6 +208,7 @@
         </main>
       </section>
 
+      <!-- المحادثة -->
       <section id="chat-screen" class="screen bg-screen flex-col">
         <header class="bg-white p-4 flex items-center gap-4 border-b border-slate-200">
           <button id="end-chat-btn" class="p-2 rounded-full hover:bg-slate-100 hit"><i data-lucide="arrow-right"></i></button>
@@ -222,16 +234,17 @@
     const hideModal = (el)=> el.classList.remove('active');
 
     /* =============== الحالة =============== */
-    const STORAGE = 'sadiki-ai-v24';
+    const STORAGE = 'sadiki-ai-v25';
     let state = {};
     const save = ()=>{ try{ localStorage.setItem(STORAGE, JSON.stringify(state)); }catch{} };
     const load = ()=>{ try{ const d=localStorage.getItem(STORAGE); if(d){ state=JSON.parse(d); return true; } }catch{} return false; };
     const resetState = ()=> state = {
       language:'ar', age:null, gender:null, name:null, aiName:null,
       parentDesc:null, plan:null, chat:[], step:0, assessment:null,
-      askedQuestions: [] // لمنع تكرار الأسئلة
+      askedQuestions:[]
     };
 
+    /* امتثال وسلامة الإمارات */
     const UAE_COMPLIANCE = `
 - التزم بقوانين الإمارات والمعايير الدولية لسلامة الطفل.
 - لا تقدم تشخيصاً طبياً/نفسيّاً؛ عند مؤشرات الخطر وجّه لوليّ الأمر/المدرسة ومختص مرخّص.
@@ -295,7 +308,7 @@
     dom.analyzeBtn.addEventListener('click', ()=> generatePlan(false));
     dom.reAnalyze.addEventListener('click', ()=> generatePlan(true));
 
-    /* =============== بروكسي Gemini =============== */
+    /* =============== بروكسي Gemini (وظيفتك) =============== */
     async function callAIProxy({ systemInstruction, messages, history, mode='chat', forceLang='ar' }) {
       let outgoing = [];
       if (Array.isArray(messages) && messages.length) {
@@ -325,7 +338,15 @@
       return resp.json();
     }
 
-    /* =============== Prompts =============== */
+    /* =============== Prompts (احترافي) =============== */
+    // توجيه شامل يجمع البيانات ثم يتحوّل للتدريب
+    const MASTER_GUIDE = ()=> `
+${UAE_COMPLIANCE}
+مهمّتك: مرشد تربوي رقمي آمن للطفل. اعمل على مرحلتين:
+1) جمع بيانات دقيقة ومناسبة للعمر لاكتشاف الشخصية والتحديات الحقيقية (حتى لو خفيت على الوالدين). شجّع الطفل على الصراحة وعدم الخوف. اسأل أسئلة طبيعية ولطيفة بصيغة سؤال—not أوامر—not "اختر". بعد السؤال أعرض 3–4 مقترحات شعورية مختصرة ومتنافية تبدأ بـ "- " فقط، ثم سطر ثابت: "إن لم تناسبك أي مقترح، اكتب شعورك بطريقتك." لا تُكرّر سؤالاً سبق طرحه.
+2) بعد أن تتكوّن صورة واضحة، انتقل بسلاسة للتدريب: Intro → Practice (تمرين قصير) → Mission (مهمة واقعية صغيرة) → Follow-up. خصّص التدريب لحالة الطفل وذكّره بتقدّمه. حافظ على الأمان والامتثال؛ عند مؤشرات خطر أوقف التقدّم وقدّم رسالة تصعيد لوليّ الأمر/المدرسة.
+اللغة: التزم بلغة الطفل الظاهرة فقط.`;
+
     const planPrompt = (desc)=>`
 ${UAE_COMPLIANCE}
 أنت خبير تربية طفل وسلامة رقمية. حلّل وصف وليّ الأمر:
@@ -336,38 +357,35 @@ ${UAE_COMPLIANCE}
  "needsHypothesis":["3 نقاط فرضية دقيقة"],
  "planSteps":["3 خطوات تدريبية متدرجة وقابلة للقياس"],
  "initialAssessment":{
-   "intro":"عرّف بنفسك باحترام وبأسلوب مطمئن. اطرح الأسئلة كسؤال طبيعي موجّه للطفل، وليس على شكل 'اختر'.",
+   "intro":"عرّف بنفسك باحترام وبأسلوب مطمئن. ذكّر بأن الصراحة شجاعة وأن لا أحد سيغضب منه.",
    "items":[
-     {"type":"choice","q":"سؤال شعوري مفتوح الصياغة حول الموقف","options":["أشعر بأنه سهل","أحتاج مزيدًا من الشجاعة","يبدو صعبًا اليوم"],"map":{"أشعر بأنه سهل":0,"أحتاج مزيدًا من الشجاعة":1,"يبدو صعبًا اليوم":2}},
-     {"type":"roleplay","q":"موقف قصير لتمرين السلوك، بصياغة سؤال لطيف يدعوه للتجربة","success_hint":"تلميح تشجيعي"},
-     {"type":"selfCheck","q":"قيّم ثقتك الآن من 0 إلى 10 (يمكنك كتابة رقم أو وصف شعورك)","scaleMin":0,"scaleMax":10}
+     {"type":"choice","q":"سؤال شعوري طبيعي حول موقف اجتماعي يهم الطفل","options":["أشعر أنه سهل","أحتاج شوية شجاعة","صعب اليوم"],"map":{"أشعر أنه سهل":0,"أحتاج شوية شجاعة":1,"صعب اليوم":2}},
+     {"type":"roleplay","q":"موقف قصير للتجربة (تمثيل دور) بلطف","success_hint":"أحسنت! لاحظ كيف تغيّر إحساسك."},
+     {"type":"selfCheck","q":"قيّم ثقتك الآن من 0 إلى 10 أو اكتب شعورك بكلماتك","scaleMin":0,"scaleMax":10}
    ],
-   "scoring":"منهجية تحديد (مرتفع/متوسط/منخفض)",
+   "scoring":"منهجية (مرتفع/متوسط/منخفض)",
    "safeguards":"متى نوقف الحوار ونصعّد"
  }
-}
-لا تستخدم قوالب؛ ابنِ على وصف وليّ الأمر فقط.
-`;
+}`;
 
-    const chatRules = ()=>{
+    // قواعد المحادثة: سؤال كنص فقط + خيارات كأزرار
+    const chatRules = ()=> {
       const lang = state.language==='ar'?'Emirati Arabic':'English';
       const persona = (()=>{
         if(state.gender==='ذكر'){ if(state.age==='3-7') return {p:'Saif',s:'game'}; if(state.age==='8-12') return {p:'Rashid',s:'role-playing'}; return {p:'Sultan',s:'simulation & discussion'} }
         else { if(state.age==='3-7') return {p:'Noora',s:'game'}; if(state.age==='8-12') return {p:'Mariam',s:'role-playing'}; return {p:'Amna',s:'simulation & discussion'} }
       })();
       return `
-${UAE_COMPLIANCE}
-ROLE: أنت ${persona.p} مرشد داعم.
+${MASTER_GUIDE()}
+ROLE: أنت ${persona.p}.
 CHILD: "${state.name}" (${state.gender})، فئة ${state.age}.
+PARENT_DESC: ${state.parentDesc||'-'}
 PLAN: ${JSON.stringify(state.plan||{})}
 ASSESSMENT: ${JSON.stringify(state.assessment?.result||{})}
-STRICT:
-1) استخدم ${lang} فقط.
-2) اطرح السؤال كنص واضح داخل المحادثة (غير قابل للضغط). لا تقل "اختر".
-3) بعد السؤال، زوّد 3–4 خيارات تشخيصية دقيقة ومتنافية، تُعرض كأزرار منفصلة (نحن سنعرضها). أضف سطرًا ثابتًا: "إن لم تناسبك أي مقترح، اكتب شعورك بطريقتك."
-4) لا تكرّر الأسئلة. تقدّم للسؤال التالي فقط بعد تلقي إجابة جديدة.
-5) المنهجية: Intro → Assessment → Training (Practice, Mission, Follow-up). استخدم نتائج التقييم لتخصيص التدريب والتذكير بحالة الطفل.
-6) عند مؤشرات خطر: أوقف التقدّم ورسالة تصعيد لوليّ الأمر/المدرسة.`;
+STRICT OUTPUT:
+- السؤال/الرسالة الرئيسية كنص فقط (لن نعرضها كزر).
+- المقترحات إن وُجدت تكون في فقرة أخرى، وكل سطر يبدأ بـ "- ".
+- لا تُكرّر سؤالاً سبق أن طُرح (لدينا ذاكرة للأسئلة).`;
     };
 
     /* =============== توليد الخطة =============== */
@@ -383,45 +401,34 @@ STRICT:
 
       show('plan-review-screen'); dom.loading.style.display='flex'; dom.planContent.classList.add('hidden');
 
-      let attempt=0, maxAttempts=2, lastErr=null;
-      while(attempt<maxAttempts){
-        try{
-          const userMsg = { role: "user", content: planPrompt(desc) };
-          const { text } = await callAIProxy({
-            systemInstruction: planPrompt(desc),
-            messages: [userMsg],
-            mode:'plan',
-            forceLang:'ar'
-          });
-          const plan = JSON.parse( (text||'').replace(/```json|```/g,'').trim() );
-          state.plan = plan;
-          state.assessment = { spec: plan.initialAssessment, result:null, answers:[] };
-          renderPlan(plan);
-          dom.loading.style.display='none'; dom.planContent.classList.remove('hidden'); save();
-          return;
-        }catch(e){ lastErr = e; attempt++; }
-      }
-
-      dom.loading.style.display='none';
-      $('plan-review-screen').innerHTML = `
-        <div class="flex flex-col items-center justify-center text-center gap-3 py-12">
-          <i data-lucide="wifi-off" class="w-16 h-16 text-amber-500"></i>
-          <h3 class="text-xl font-bold">تعذّر إنشاء الخطة الآن</h3>
-          <p class="text-slate-600 text-sm max-w-md">تعذّر من المزوّد</p>
-          <div class="flex gap-3 mt-3">
+      try{
+        const { text } = await callAIProxy({
+          systemInstruction: planPrompt(desc),
+          messages: [{ role:"user", content: planPrompt(desc) }],
+          mode:'plan',
+          forceLang:'ar'
+        });
+        const plan = JSON.parse( (text||'').replace(/```json|```/g,'').trim() );
+        state.plan = plan;
+        state.assessment = { spec: plan.initialAssessment, result:null, answers:[] };
+        renderPlan(plan);
+        dom.loading.style.display='none'; dom.planContent.classList.remove('hidden'); save();
+      }catch(e){
+        dom.loading.style.display='none';
+        $('plan-review-screen').innerHTML = `
+          <div class="flex flex-col items-center justify-center text-center gap-3 py-12">
+            <i data-lucide="wifi-off" class="w-16 h-16 text-amber-500"></i>
+            <h3 class="text-xl font-bold">تعذّر إنشاء الخطة الآن</h3>
             <button id="retry-plan" class="bg-sky-600 text-white font-bold py-3 px-6 rounded-full hover:bg-sky-700 hit">إعادة المحاولة</button>
-            <button id="back-to-parent" class="bg-slate-200 text-slate-800 font-bold py-3 px-6 rounded-full hover:bg-slate-300 hit">رجوع</button>
-          </div>
-        </div>`;
-      lucide.createIcons();
-      $('retry-plan').addEventListener('click', ()=>generatePlan(isModification));
-      $('back-to-parent').addEventListener('click', ()=>show('parent-input-screen'));
+          </div>`;
+        lucide.createIcons(); $('retry-plan').addEventListener('click', ()=>generatePlan(isModification));
+      }
     }
 
     function renderPlan(plan){
       dom.planSummary.textContent = plan.analysisSummary||'';
       dom.needsList.innerHTML=''; (plan.needsHypothesis||[]).forEach(n=>{ const li=document.createElement('li'); li.textContent=n; dom.needsList.appendChild(li); });
-      dom.stepsList.innerHTML=''; (plan.planSteps||[]).forEach(s=>{ const li=document.createElement('li'); li.textContent=s; dom.aiName; dom.stepsList.appendChild(li); });
+      dom.stepsList.innerHTML=''; (plan.planSteps||[]).forEach(s=>{ const li=document.createElement('li'); li.textContent=s; dom.stepsList.appendChild(li); });
       dom.planContent.classList.remove('hidden');
     }
 
@@ -432,16 +439,17 @@ STRICT:
       beginAIOnboarding();
     });
 
-    /* =============== الاختبار الأولي / بدء المحادثة =============== */
+    /* =============== بدء المحادثة/التقييم الأولي =============== */
     function beginAIOnboarding(){
       show('chat-screen');
       dom.chatMessages.innerHTML=''; dom.chatOptions.innerHTML='';
       dom.freeTextHint.textContent = 'يمكنك الضغط على مقترح أو كتابة شعورك بحرّية. إذا لم يناسبك أي مقترح، اكتب ما تشعر به بكلماتك.';
       dom.freeTextHint.classList.remove('hidden');
-      const kick = state.language==='ar'
-        ? `ابدأ التمهيد ثم التقييم الأولي خطوة بخطوة من الخطة. اعرض السؤال كنص طبيعي (غير قابل للضغط) ثم أعرض 3–4 مقترحات شعورية دقيقة، وذكّر الطفل بأنه يستطيع كتابة شعوره بطريقته. لا تُكرّر السؤال.`
-        : `Begin warm-up then initial assessment. Show the question as plain text (non-clickable), then 3–4 precise feeling options, and remind the child they can type their own words. Do not repeat questions.`;
-      handleUser(kick);
+
+      // نرسل توجيهًا داخليًا للموديل فقط (لا يظهر للطفل)
+      state.chat.push({ role:'user', parts:[{ text:'(internal:start_initial_assessment_and_warmup)' }] });
+      save();
+      respond();
     }
 
     function scoreAssessment(){
@@ -457,34 +465,36 @@ STRICT:
 
     /* =============== المحادثة =============== */
     function addMsg(text, role='model'){
-      // لا نجعل السؤال خياراً؛ فقط فقاعة نصية
       const el=document.createElement('div');
       el.className=`chat-bubble max-w-[80%] rounded-2xl p-3 ${role==='user'?'bg-sky-600 text-white self-end':'bg-slate-200 text-slate-800 self-start'}`;
       el.innerText=text; dom.chatMessages.appendChild(el);
       setTimeout(()=>dom.chatMessages.scrollTop=dom.chatMessages.scrollHeight,30);
     }
 
-    function normalizedQuestion(q){
-      return String(q||'').replace(/\s+/g,' ').trim().slice(0,220);
-    }
+    function normalizedQuestion(q){ return String(q||'').replace(/\s+/g,' ').trim().slice(0,220); }
 
     function showOptions(text){
       dom.chatOptions.innerHTML='';
       dom.freeTextHint.classList.remove('hidden');
-
       if(!text) return;
-      // نستخرج حتى 4 خيارات مميزة فقط
-      const raw = text.split('\n').map(t=>t.trim()).filter(Boolean).map(t=>t.replace(/^- /,''));
-      const uniq = [];
-      for(const k of raw){
-        if(!uniq.includes(k)){ uniq.push(k); if(uniq.length>=4) break; }
-      }
+
+      // نأخذ فقط الأسطر التي تبدأ بـ "- " لضمان أنها خيارات وليست أسئلة
+      const raw = text.split('\n')
+        .map(t=>t.trim())
+        .filter(t=>t.startsWith('- '))
+        .map(t=>t.replace(/^- /,''));
+
+      // قص إلى 4 خيارات مختلفة
+      const uniq=[]; for(const k of raw){ if(!uniq.includes(k)){ uniq.push(k); if(uniq.length>=4) break; } }
+
       uniq.forEach(opt=>{
         const b=document.createElement('button');
         b.className='w-full text-sky-700 bg-sky-100 font-medium py-2 px-3 rounded-lg hover:bg-sky-200 text-sm hit';
         b.innerText=opt; b.addEventListener('click',()=>handleUser(opt));
         dom.chatOptions.appendChild(b);
       });
+
+      // خيار كتابة رد حر
       const other=document.createElement('button');
       other.className='w-full bg-white border border-slate-300 font-medium py-2 px-3 rounded-lg hover:bg-slate-100 text-sm hit';
       other.innerText = (state.language==='ar') ? 'شيء آخر — سأكتب ردي' : 'Something else — I\'ll type';
@@ -493,10 +503,9 @@ STRICT:
     }
 
     function pushModel(text){
-      // منع تكرار السؤال: إذا كان النص يطابق آخر سؤال معروف نتجاهله
       const q = normalizedQuestion(text);
       const asked = new Set(state.askedQuestions || []);
-      if(asked.has(q)){ return; }
+      if(asked.has(q)){ return; }            // لا نكرّر السؤال
       addMsg(text,'model');
       asked.add(q);
       state.askedQuestions = Array.from(asked);
@@ -520,10 +529,10 @@ STRICT:
           forceLang: (state.language==='ar'?'ar':'en')
         });
         hideTyping();
-        const [main,...rest]=(text||'').split(/\n\n/); // السؤال/الرسالة الرئيسية
-        const opts=rest.join('\n\n');                  // المقترحات فقط
+        const [main,...rest]=(text||'').split(/\n\n/);  // السؤال/النص الطبيعي
+        const optsText = rest.join('\n\n');             // فقرة الخيارات فقط
         if(main) pushModel(main);
-        showOptions(opts);
+        showOptions(optsText);
       }catch(e){
         hideTyping(); addMsg('توقف مؤقت في الاتصال. اضغط مقترحًا أو اكتب للمتابعة.','model');
       }
@@ -531,6 +540,7 @@ STRICT:
 
     function handleUser(text){
       addMsg(text,'user'); state.chat.push({role:'user',parts:[{text}]}); save();
+
       // التقاط إجابات التقييم الأولي
       const spec = state.assessment?.spec;
       if(spec && !state.assessment.result){
@@ -568,7 +578,7 @@ STRICT:
         state.chat.forEach(m=>addMsg(m.parts[0].text,m.role));
         const last=state.chat[state.chat.length-1]; if(last.role==='model'){ const [_,...rest]=last.parts[0].text.split(/\n\n/); showOptions(rest.join('\n\n')); }
       } else {
-        const hello = state.language==='ar'?`مرحباً يا ${state.aiName}، أنا ${state.name} وجاهز للبدء.`:`Hi ${state.aiName}, I'm ${state.name} and ready to start.`; handleUser(hello);
+        beginAIOnboarding();
       }
     });
 
