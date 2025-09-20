@@ -4,14 +4,18 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
   <title>صديقي الذكي — مشروع مدرسي (مدرسة الإمارات الوطنية)</title>
+
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet"/>
   <script src="https://unpkg.com/lucide@latest"></script>
+
   <style>
     html,body{height:100%;margin:0;padding:0;overscroll-behavior-y:contain}
     body{font-family:'Tajawal',sans-serif;-webkit-tap-highlight-color:transparent}
+
+    /* خلفية واضحة تعبّر عن الطفولة الإماراتية */
     #app-wrapper{
       background-image:
         linear-gradient( rgba(245,248,252,.90), rgba(245,248,252,.94) ),
@@ -29,12 +33,29 @@
     #continue-profile-btn:disabled,#analyze-btn:disabled{background:#94a3b8;cursor:not-allowed}
     .badge{display:inline-flex;align-items:center;gap:.35rem;padding:.25rem .6rem;border-radius:9999px;font-size:.75rem}
     .brand-gradient{background:linear-gradient(135deg,#0ea5e9 0%,#14b8a6 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+    /* NEW: استجابة قوية للأجهزة والاتجاهات + أهداف لمس كبيرة */
+    .hit{min-height:44px;min-width:44px}
+    @media (orientation:landscape){
+      #app-container{max-width:960px}
+      #chat-messages{padding-bottom:0.25rem}
+    }
+    @media (min-width:1024px){
+      #app-container{max-width:1024px}
+    }
+    @media (max-width:360px){
+      :root{font-size:15px}
+      #chat-form input{font-size:14px}
+    }
   </style>
 </head>
 <body class="bg-slate-200 text-slate-800 antialiased">
+
   <div id="app-wrapper">
     <div id="app-container" class="w-full max-w-md md:max-w-lg mx-auto bg-transparent shadow-lg flex flex-col overflow-hidden relative">
       <main id="main" class="flex-grow relative flex flex-col"></main>
+
+      <!-- حقوق الأداة -->
       <footer class="w-full shrink-0 bg-white/75 backdrop-blur border-t border-slate-200">
         <div class="px-3 py-2 text-[11px] sm:text-xs flex flex-col sm:flex-row items-center justify-between gap-2">
           <div class="flex items-center gap-2">
@@ -54,14 +75,17 @@
   document.addEventListener('DOMContentLoaded', () => {
     const main = document.getElementById('main');
 
+    /* ================== الشــاشــات ================== */
     main.innerHTML = `
+      <!-- صفحة البداية -->
       <section id="start-screen" class="screen active bg-screen flex-col items-center justify-center p-8 text-center">
         <div class="w-24 h-24 rounded-full bg-white/70 flex items-center justify-center mb-4"><i data-lucide="bot" class="w-12 h-12 text-sky-600"></i></div>
         <h1 class="text-3xl font-bold mb-2">صديقي الذكي</h1>
         <p class="text-slate-600 mb-8">مرشد رقمي يساعد طفلك على تخطي التحديات الاجتماعية بخطوات قصيرة وآمنة.</p>
-        <button id="start-btn" class="bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 px-8 rounded-full shadow-lg">ابدأ</button>
+        <button id="start-btn" class="bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 px-8 rounded-full shadow-lg hit">ابدأ</button>
       </section>
 
+      <!-- التعريف والالتزامات -->
       <section id="intro-screen" class="screen bg-screen flex-col items-stretch p-8 overflow-y-auto">
         <i data-lucide="shield-check" class="w-16 h-16 text-sky-500 mx-auto mb-4"></i>
         <h2 class="text-2xl font-bold text-center mb-2">كيف نعمل؟ والتزاماتنا</h2>
@@ -73,50 +97,56 @@
           <li class="flex items-start gap-3"><i data-lucide="child" class="w-5 h-5 text-sky-500 mt-0.5"></i><span><b>الهدف:</b> تمكين الطفل تدريجياً للخروج من المشكلة عبر تمارين قابلة للقياس.</span></li>
         </ul>
         <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <button id="intro-back" class="bg-slate-200 text-slate-800 font-bold py-3 px-6 rounded-full hover:bg-slate-300">رجوع</button>
-          <button id="intro-accept" class="bg-sky-600 text-white font-bold py-3 px-6 rounded-full hover:bg-sky-700">موافق</button>
+          <button id="intro-back" class="bg-slate-200 text-slate-800 font-bold py-3 px-6 rounded-full hover:bg-slate-300 hit">رجوع</button>
+          <button id="intro-accept" class="bg-sky-600 text-white font-bold py-3 px-6 rounded-full hover:bg-sky-700 hit">موافق</button>
         </div>
       </section>
 
+      <!-- الملف الشخصي -->
       <section id="profile-setup-screen" class="screen bg-screen flex-col p-8 overflow-y-auto">
         <i data-lucide="user-round-check" class="w-16 h-16 text-sky-500 mx-auto mb-6"></i>
         <h2 class="text-2xl font-bold text-center mb-2">ملف البطل الشخصي</h2>
         <div class="w-full space-y-6">
-          <div><label class="font-bold mb-2 block">اسم الطفل/الطفلة</label><input id="child-name-input" type="text" class="w-full bg-white/90 border-2 border-slate-200 rounded-xl p-3 text-lg focus:outline-none focus:border-sky-400" placeholder="مثال: خالد أو علياء"></div>
+          <div>
+            <label class="font-bold mb-2 block" for="child-name-input">اسم الطفل/الطفلة</label>
+            <input id="child-name-input" type="text" class="w-full bg-white/90 border-2 border-slate-200 rounded-xl p-3 text-lg focus:outline-none focus:border-sky-400" placeholder="مثال: خالد أو علياء" aria-label="اسم الطفل">
+          </div>
           <div>
             <p class="font-bold mb-2">الفئة العمرية</p>
             <div class="grid grid-cols-3 gap-3">
-              <button data-age="3-7"  class="age-btn bg-white/90 border-2 border-slate-200 p-3 rounded-xl font-bold">3–7</button>
-              <button data-age="8-12" class="age-btn bg-white/90 border-2 border-slate-200 p-3 rounded-xl font-bold">8–12</button>
-              <button data-age="13-18" class="age-btn bg-white/90 border-2 border-slate-200 p-3 rounded-xl font-bold">13–18</button>
+              <button data-age="3-7"  class="age-btn bg-white/90 border-2 border-slate-200 p-3 rounded-xl font-bold hit" aria-pressed="false">3–7</button>
+              <button data-age="8-12" class="age-btn bg-white/90 border-2 border-slate-200 p-3 rounded-xl font-bold hit" aria-pressed="false">8–12</button>
+              <button data-age="13-18" class="age-btn bg-white/90 border-2 border-slate-200 p-3 rounded-xl font-bold hit" aria-pressed="false">13–18</button>
             </div>
           </div>
           <div>
             <p class="font-bold mb-2">الجنس</p>
             <div class="grid grid-cols-2 gap-3">
-              <button data-gender="ذكر"  class="gender-btn bg-white/90 border-2 border-slate-200 p-3 rounded-xl font-bold">ذكر</button>
-              <button data-gender="أنثى" class="gender-btn bg-white/90 border-2 border-slate-200 p-3 rounded-xl font-bold">أنثى</button>
+              <button data-gender="ذكر"  class="gender-btn bg-white/90 border-2 border-slate-200 p-3 rounded-xl font-bold hit" aria-pressed="false">ذكر</button>
+              <button data-gender="أنثى" class="gender-btn bg-white/90 border-2 border-slate-200 p-3 rounded-xl font-bold hit" aria-pressed="false">أنثى</button>
             </div>
           </div>
         </div>
         <div class="mt-8">
-          <button id="continue-profile-btn" class="w-full bg-sky-600 text-white font-bold py-3 px-6 rounded-full text-lg shadow-lg" disabled>متابعة</button>
+          <button id="continue-profile-btn" class="w-full bg-sky-600 text-white font-bold py-3 px-6 rounded-full text-lg shadow-lg hit" disabled>متابعة</button>
         </div>
       </section>
 
+      <!-- إدخال ولي الأمر -->
       <section id="parent-input-screen" class="screen bg-screen flex-col p-8 overflow-y-auto">
         <i data-lucide="file-text" class="w-16 h-16 text-sky-500 mx-auto mb-6"></i>
         <h2 class="text-2xl font-bold text-center mb-2">رؤية وليّ الأمر</h2>
         <p class="text-slate-600 text-center mb-6">كلما كانت التفاصيل أدق، كانت الخطة أفضل. لا نطلب بيانات تعريفية.</p>
         <div class="space-y-6">
-          <div><label class="font-bold mb-2 block">1) شخصية الطفل</label><textarea id="child-personality" rows="3" class="w-full bg-white/90 border-2 border-slate-200 rounded-xl p-3 text-lg focus:outline-none focus:border-sky-400" placeholder="مثال: مبدع، هادئ، حساس، حركي..."></textarea></div>
-          <div><label class="font-bold mb-2 block">2) أهم التحديات الاجتماعية</label><textarea id="child-challenges" rows="4" class="w-full bg-white/90 border-2 border-slate-200 rounded-xl p-3 text-lg focus:outline-none focus:border-sky-400" placeholder="مثال: صعوبة تكوين صداقات، خجل من المشاركة..."></textarea></div>
+          <div><label class="font-bold mb-2 block" for="child-personality">1) شخصية الطفل</label><textarea id="child-personality" rows="3" class="w-full bg-white/90 border-2 border-slate-200 rounded-xl p-3 text-lg focus:outline-none focus:border-sky-400" placeholder="مثال: مبدع، هادئ، حساس، حركي..." aria-label="شخصية الطفل"></textarea></div>
+          <div><label class="font-bold mb-2 block" for="child-challenges">2) أهم التحديات الاجتماعية</label><textarea id="child-challenges" rows="4" class="w-full bg-white/90 border-2 border-slate-200 rounded-xl p-3 text-lg focus:outline-none focus:border-sky-400" placeholder="مثال: صعوبة تكوين صداقات، خجل من المشاركة..." aria-label="التحديات الاجتماعية"></textarea></div>
         </div>
         <div class="mt-8">
-          <button id="analyze-btn" class="w-full bg-sky-600 text-white font-bold py-3 px-6 rounded-full text-lg shadow-lg hover:bg-sky-700" disabled>تحليل وإنشاء الخطة الأولية</button>
+          <button id="analyze-btn" class="w-full bg-sky-600 text-white font-bold py-3 px-6 rounded-full text-lg shadow-lg hover:bg-sky-700 hit" disabled>تحليل وإنشاء الخطة الأولية</button>
         </div>
       </section>
 
+      <!-- مراجعة الخطة -->
       <section id="plan-review-screen" class="screen bg-screen flex-col p-8 overflow-y-auto">
         <div id="loading-spinner" class="m-auto text-center items-center justify-center">
           <i data-lucide="loader-circle" class="w-16 h-16 text-sky-500 mx-auto mb-4 animate-spin"></i>
@@ -133,47 +163,52 @@
             <div><h4 class="font-bold flex items-center gap-2"><i data-lucide="list-checks" class="w-5 h-5 text-sky-600"></i>خطوات التدريب</h4><ul id="ai-plan-steps" class="list-decimal list-inside mt-2 space-y-1 text-slate-700"></ul></div>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-6">
-            <button id="approve-plan-btn" class="w-full bg-emerald-600 text-white font-bold py-3 px-6 rounded-full shadow hover:bg-emerald-700">موافقة على الخطة</button>
-            <button id="request-edit-btn" class="w-full bg-amber-500 text-white font-bold py-3 px-6 rounded-full shadow hover:bg-amber-600">طلب تعديل</button>
+            <button id="approve-plan-btn" class="w-full bg-emerald-600 text-white font-bold py-3 px-6 rounded-full shadow hover:bg-emerald-700 hit">موافقة على الخطة</button>
+            <button id="request-edit-btn" class="w-full bg-amber-500 text-white font-bold py-3 px-6 rounded-full shadow hover:bg-amber-600 hit">طلب تعديل</button>
           </div>
         </div>
       </section>
 
+      <!-- أسباب التعديل -->
       <section id="plan-change-screen" class="screen bg-screen flex-col p-8 overflow-y-auto">
         <i data-lucide="edit" class="w-16 h-16 text-sky-500 mx-auto mb-6"></i>
         <h2 class="text-2xl font-bold text-center mb-2">أسباب التعديل</h2>
         <textarea id="plan-change-reason" rows="6" class="w-full bg-white/90 border-2 border-slate-200 rounded-xl p-3 text-lg focus:outline-none focus:border-sky-400" placeholder="اذكر الأسباب المحددة: صعوبة خطوة، مواقف واقعية، أهداف جديدة، حساسية ثقافية/مدرسية..."></textarea>
         <div class="mt-6">
-          <button id="re-analyze-btn" class="w-full bg-sky-600 text-white font-bold py-3 px-6 rounded-full text-lg shadow hover:bg-sky-700">إعادة التحليل وإنتاج خطة جديدة</button>
+          <button id="re-analyze-btn" class="w-full bg-sky-600 text-white font-bold py-3 px-6 rounded-full text-lg shadow hover:bg-sky-700 hit">إعادة التحليل وإنتاج خطة جديدة</button>
         </div>
       </section>
 
+      <!-- الصفحة الرئيسية للطفل -->
       <section id="home-screen" class="screen bg-transparent flex-col p-6">
         <header class="flex justify-between items-center mb-6">
           <div><p id="home-greeting" class="text-slate-500"></p><h2 id="home-mission-status" class="text-2xl font-bold">جاهز لمغامرة اليوم؟</h2></div>
-          <button id="reset-app-btn" class="p-2 rounded-full bg-white/60 hover:bg-red-100 text-red-500" title="إعادة الضبط"><i data-lucide="refresh-cw" class="w-5 h-5"></i></button>
+          <button id="reset-app-btn" class="p-2 rounded-full bg-white/60 hover:bg-red-100 text-red-500 hit" title="إعادة الضبط"><i data-lucide="refresh-cw" class="w-5 h-5"></i></button>
         </header>
         <main class="flex-grow flex flex-col justify-center items-center text-center">
           <div class="w-44 h-44 md:w-48 md:h-48 bg-white/60 backdrop-blur-sm rounded-full flex items-center justify-center mb-6"><i data-lucide="bot" class="w-24 h-24 md:w-28 md:h-28 text-sky-600"></i></div>
           <h3 id="home-ai-name-intro" class="text-2xl font-bold mb-2"></h3>
           <p id="home-intro-text" class="text-slate-500 max-w-xs mb-6"></p>
-          <button id="initiate-chat-btn" class="w-full bg-sky-600 text-white font-bold py-4 px-6 rounded-full text-lg shadow flex items-center justify-center gap-2"><i data-lucide="message-circle"></i><span id="start-chat-btn-text"></span></button>
+          <button id="initiate-chat-btn" class="w-full bg-sky-600 text-white font-bold py-4 px-6 rounded-full text-lg shadow flex items-center justify-center gap-2 hit"><i data-lucide="message-circle"></i><span id="start-chat-btn-text"></span></button>
         </main>
       </section>
 
+      <!-- المحادثة -->
       <section id="chat-screen" class="screen bg-screen flex-col">
         <header class="bg-white p-4 flex items-center gap-4 border-b border-slate-200">
-          <button id="end-chat-btn" class="p-2 rounded-full hover:bg-slate-100"><i data-lucide="arrow-right"></i></button>
+          <button id="end-chat-btn" class="p-2 rounded-full hover:bg-slate-100 hit"><i data-lucide="arrow-right"></i></button>
           <div class="w-10 h-10 bg-gradient-to-br from-cyan-100 to-sky-200 rounded-full flex items-center justify-center"><i data-lucide="bot" class="w-6 h-6 text-sky-600"></i></div>
           <div class="flex-grow"><h3 id="chat-header-name" class="font-bold"></h3><p class="text-xs text-green-500 font-medium flex items-center gap-1"><span class="w-2 h-2 bg-green-400 rounded-full"></span>متصل</p></div>
-          <button id="language-toggle-btn" class="p-2 rounded-full hover:bg-slate-100 text-slate-600" title="تبديل اللغة"><i data-lucide="languages" class="w-5 h-5"></i></button>
+          <button id="language-toggle-btn" class="p-2 rounded-full hover:bg-slate-100 text-slate-600 hit" title="تبديل اللغة"><i data-lucide="languages" class="w-5 h-5"></i></button>
         </header>
         <main id="chat-messages" class="flex-grow p-4 space-y-4 overflow-y-auto"></main>
         <footer class="p-4 border-t border-slate-200 bg-white/85 backdrop-blur-sm">
-          <div id="chat-options-container" class="mb-3 grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+          <!-- NEW: تلميح ثابت يوضح حرية الكتابة -->
+          <p id="free-text-hint" class="text-[12px] text-slate-500 mb-2 hidden"></p>
+          <div id="chat-options-container" class="mb-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2"></div>
           <form id="chat-form" class="flex items-center gap-2">
-            <input id="chat-input" type="text" placeholder="اكتب ردك هنا..." class="w-full bg-white border-2 border-slate-200 rounded-full py-2 px-4 focus:outline-none focus:border-sky-400"/>
-            <button type="submit" class="bg-sky-600 text-white rounded-full p-3 hover:bg-sky-700"><i data-lucide="send-horizontal" class="w-5 h-5"></i></button>
+            <input id="chat-input" type="text" placeholder="اكتب ردك هنا..." class="w-full bg-white border-2 border-slate-200 rounded-full py-2 px-4 focus:outline-none focus:border-sky-400" aria-label="اكتب ردك"/>
+            <button type="submit" class="bg-sky-600 text-white rounded-full p-3 hover:bg-sky-700 hit" aria-label="إرسال"><i data-lucide="send-horizontal" class="w-5 h-5"></i></button>
           </form>
         </footer>
       </section>
@@ -182,6 +217,7 @@
     const $ = (id) => document.getElementById(id);
     const show = (id) => document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id));
 
+    /* =============== الحالة =============== */
     const STORAGE = 'sadiki-ai-v23';
     let state = {};
     const save = ()=>{ try{ localStorage.setItem(STORAGE, JSON.stringify(state)); }catch{} };
@@ -216,18 +252,21 @@
       chatMessages: $('chat-messages'), chatOptions: $('chat-options-container'),
       chatForm: $('chat-form'), chatInput: $('chat-input'),
       endChat: $('end-chat-btn'), languageToggle: $('language-toggle-btn'),
-      resetApp: $('reset-app-btn')
+      resetApp: $('reset-app-btn'),
+      freeTextHint: $('free-text-hint') /* NEW */
     };
 
+    /* =============== تنقّل البداية =============== */
     dom.startBtn.addEventListener('click', ()=> show('intro-screen'));
     dom.introBack.addEventListener('click', ()=> show('start-screen'));
     dom.introAccept.addEventListener('click', ()=> show('profile-setup-screen'));
 
+    /* =============== الملف الشخصي =============== */
     dom.ageBtns.forEach(b=>b.addEventListener('click',e=>{
-      state.age=e.currentTarget.dataset.age; dom.ageBtns.forEach(x=>x.classList.remove('selected')); e.currentTarget.classList.add('selected'); validateProfile();
+      state.age=e.currentTarget.dataset.age; dom.ageBtns.forEach(x=>x.classList.remove('selected')); e.currentTarget.classList.add('selected'); e.currentTarget.setAttribute('aria-pressed','true'); validateProfile();
     }));
     dom.genderBtns.forEach(b=>b.addEventListener('click',e=>{
-      state.gender=e.currentTarget.dataset.gender; dom.genderBtns.forEach(x=>x.classList.remove('selected')); e.currentTarget.classList.add('selected'); validateProfile();
+      state.gender=e.currentTarget.dataset.gender; dom.genderBtns.forEach(x=>x.classList.remove('selected')); e.currentTarget.classList.add('selected'); e.currentTarget.setAttribute('aria-pressed','true'); validateProfile();
     }));
     dom.nameInput.addEventListener('input', validateProfile);
     dom.continueProfile.addEventListener('click', ()=>{
@@ -240,6 +279,7 @@
       dom.continueProfile.disabled = !(dom.nameInput.value.trim().length>1 && state.age && state.gender);
     }
 
+    /* =============== إدخال ولي الأمر → خطة =============== */
     dom.personality.addEventListener('input', validateParent);
     dom.challenges.addEventListener('input', validateParent);
     function validateParent(){ dom.analyzeBtn.disabled = !(dom.personality.value.trim().length>5 && dom.challenges.value.trim().length>10); }
@@ -247,16 +287,14 @@
     dom.analyzeBtn.addEventListener('click', ()=> generatePlan(false));
     dom.reAnalyze.addEventListener('click', ()=> generatePlan(true));
 
-    // ---------- بروكسي ----------
+    /* =============== بروكسي Gemini (كما هو لديك) =============== */
     async function callAIProxy({ systemInstruction, messages, history, mode='chat', forceLang='ar' }) {
-      // إذا وصلت messages نُرسلها كما هي؛ وإلا نبنيها من history
       let outgoing = [];
       if (Array.isArray(messages) && messages.length) {
         outgoing = messages;
       } else if (Array.isArray(history)) {
         outgoing = history.map(m => ({ role: m.role === 'user' ? 'user' : 'model', content: (m.parts?.[0]?.text || '') }));
       }
-
       const body = {
         system: systemInstruction || '',
         messages: outgoing,
@@ -269,18 +307,17 @@
         stream: false,
         timeout_ms: 28000
       };
-
       const resp = await fetch('/.netlify/functions/gemini-proxy', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
       });
       if (!resp.ok) {
-        let err;
-        try { err = await resp.json(); } catch { err = { error: resp.statusText, status: resp.status }; }
+        let err; try { err = await resp.json(); } catch { err = { error: resp.statusText, status: resp.status }; }
         throw err;
       }
       return resp.json();
     }
 
+    /* =============== Prompts =============== */
     const planPrompt = (desc)=>`
 ${UAE_COMPLIANCE}
 أنت خبير تربية طفل وسلامة رقمية. حلّل وصف وليّ الأمر:
@@ -291,11 +328,11 @@ ${UAE_COMPLIANCE}
  "needsHypothesis":["3 نقاط فرضية دقيقة"],
  "planSteps":["3 خطوات تدريبية متدرجة وقابلة للقياس"],
  "initialAssessment":{
-   "intro":"رسالة مطمئنة قبل الاختبار",
+   "intro":"عرّف بنفسك باحترام وبأسلوب مطمئن. اطرح الأسئلة كسؤال طبيعي موجّه للطفل، وليس على شكل 'اختر'.",
    "items":[
-     {"type":"choice","q":"سؤال شعوري مرتبط بالمشكلة","options":["تمام","شوية","صعب"],"map":{"تمام":0,"شوية":1,"صعب":2}},
-     {"type":"roleplay","q":"موقف قصير لتجربة السلوك","success_hint":"تلميح تشجيعي"},
-     {"type":"selfCheck","q":"ثقتك الآن (0-10)","scaleMin":0,"scaleMax":10}
+     {"type":"choice","q":"سؤال شعوري مفتوح الصياغة حول الموقف","options":["أشعر بأنه سهل","أحتاج مزيدًا من الشجاعة","يبدو صعبًا اليوم"],"map":{"أشعر بأنه سهل":0,"أحتاج مزيدًا من الشجاعة":1,"يبدو صعبًا اليوم":2}},
+     {"type":"roleplay","q":"موقف قصير لتمرين السلوك، بصياغة سؤال لطيف يدعوه للتجربة","success_hint":"تلميح تشجيعي"},
+     {"type":"selfCheck","q":"قيّم ثقتك الآن من 0 إلى 10 (يمكنك كتابة رقم أو وصف شعورك)","scaleMin":0,"scaleMax":10}
    ],
    "scoring":"منهجية تحديد (مرتفع/متوسط/منخفض)",
    "safeguards":"متى نوقف الحوار ونصعّد"
@@ -304,6 +341,8 @@ ${UAE_COMPLIANCE}
 لا تستخدم قوالب؛ ابنِ على وصف وليّ الأمر فقط.
 `;
 
+    /* NEW: قواعد المحادثة تؤكد أن الأسئلة تُصاغ كسؤال لا كقائمة اختيارات،
+            وأن تظهر دائمًا رسالة: (إن لم تناسبك الخيارات اكتب شعورك بحرية) */
     const chatRules = ()=>{
       const lang = state.language==='ar'?'Emirati Arabic':'English';
       const persona = (()=>{
@@ -318,13 +357,14 @@ PLAN: ${JSON.stringify(state.plan||{})}
 ASSESSMENT: ${JSON.stringify(state.assessment?.result||{})}
 STRICT:
 1) استخدم ${lang} فقط.
-2) المنهجية: Intro → Practice → Mission → Follow-up. الأسلوب: ${persona.s}.
-3) اربط الردود بمدخلات الوالدين والخطة والاختبار—بدون قوالب ثابتة.
-4) اقترح خيارات مشاعر/ردود فعل الطفل فقط. افصل الرد عن الخيارات بسطر فارغ وتبدأ الخيارات بـ "- ".
-5) عند مؤشرات خطر: أوقف التقدم وقدّم رسالة تصعيد لوليّ الأمر/المدرسة.
-`;
+2) اطرح الأسئلة بصيغة سؤال طبيعي موجّه للطفل (لا تقل "اختر" ولا تجعلها أوامر).
+3) المنهجية: Intro → Practice → Mission → Follow-up. الأسلوب: ${persona.s}.
+4) اقترح خيارات شعورية قصيرة (إن لزم) ثم أضف دائمًا سطرًا واضحًا: "إن لم تناسبك أيٌ من المقترحات، اكتب شعورك بطريقتك."
+5) افصل الرد عن المقترحات بسطرين؛ وابدأ المقترحات بـ "- ".
+6) عند مؤشرات خطر: أوقف التقدم وقدّم رسالة تصعيد لوليّ الأمر/المدرسة.`;
     };
 
+    /* =============== توليد الخطة =============== */
     async function generatePlan(isModification){
       let desc='';
       if(isModification){
@@ -340,7 +380,6 @@ STRICT:
       let attempt=0, maxAttempts=2, lastErr=null;
       while(attempt<maxAttempts){
         try{
-          // **** نرسل رسالة مستخدم صريحة حتى لا يكون contents فارغًا ****
           const userMsg = { role: "user", content: planPrompt(desc) };
           const { text } = await callAIProxy({
             systemInstruction: planPrompt(desc),
@@ -368,8 +407,8 @@ STRICT:
             <pre id="err-details" class="text-[11px] whitespace-pre-wrap break-words mt-2"></pre>
           </details>
           <div class="flex gap-3 mt-3">
-            <button id="retry-plan" class="bg-sky-600 text-white font-bold py-3 px-6 rounded-full hover:bg-sky-700">إعادة المحاولة</button>
-            <button id="back-to-parent" class="bg-slate-200 text-slate-800 font-bold py-3 px-6 rounded-full hover:bg-slate-300">رجوع</button>
+            <button id="retry-plan" class="bg-sky-600 text-white font-bold py-3 px-6 rounded-full hover:bg-sky-700 hit">إعادة المحاولة</button>
+            <button id="back-to-parent" class="bg-slate-200 text-slate-800 font-bold py-3 px-6 rounded-full hover:bg-slate-300 hit">رجوع</button>
           </div>
         </div>`;
       lucide.createIcons();
@@ -397,12 +436,15 @@ STRICT:
       beginAIOnboarding();
     });
 
+    /* =============== الاختبار الأولي: بتوجيه واضح للأسئلة الطبيعية =============== */
     function beginAIOnboarding(){
       show('chat-screen');
       dom.chatMessages.innerHTML=''; dom.chatOptions.innerHTML='';
+      dom.freeTextHint.textContent = 'تستطيع الضغط على مقترح أو كتابة شعورك بحرّية في مربع الكتابة بالأسفل.'; /* NEW */
+      dom.freeTextHint.classList.remove('hidden');
       const kick = state.language==='ar'
-        ? `ابدأ الاختبار الأولي خطوة بخطوة من initialAssessment الموجودة في الخطة. قدّم المقدمة ثم السؤال الأول فقط. بعد إجابة الطفل انتقل للسؤال التالي تلقائياً.`
-        : `Begin the initial assessment step-by-step from the plan's initialAssessment. Provide intro then first item only; proceed item by item after the child's reply.`;
+        ? `ابدأ التمهيد ثم الاختبار الأولي من initialAssessment في الخطة. اسأل بصيغة سؤال طبيعي وودود. لا تستخدم جملة "اختر". بعد كل إجابة قصيرة، انتقل للسؤال التالي تلقائيًا. تذكير دائم: "إن لم تناسبك الخيارات اكتب شعورك بطريقتك."`
+        : `Start warm-up then the initial assessment from the plan. Ask as natural questions (not "choose"). After each short reply, proceed to the next. Always remind: "If none fits, type your own feeling in your words."`;
       handleUser(kick);
     }
 
@@ -417,22 +459,40 @@ STRICT:
       state.assessment.result = { score, level, at: Date.now() }; save();
     }
 
+    /* =============== المحادثة =============== */
     function addMsg(text, role='model'){
       const el=document.createElement('div');
       el.className=`chat-bubble max-w-[80%] rounded-2xl p-3 ${role==='user'?'bg-sky-600 text-white self-end':'bg-slate-200 text-slate-800 self-start'}`;
       el.innerText=text; dom.chatMessages.appendChild(el);
       setTimeout(()=>dom.chatMessages.scrollTop=dom.chatMessages.scrollHeight,30);
     }
+
+    /* NEW: عرض تلميح دائم + زر "شيء آخر — سأكتب ردي" لترسيخ حرية الكتابة */
     function showOptions(text){
-      dom.chatOptions.innerHTML=''; if(!text) return;
+      dom.chatOptions.innerHTML='';
+      // تلميح أعلى الخيارات
+      dom.freeTextHint.textContent = (state.language==='ar')
+        ? 'يمكنك الضغط على مقترح أو كتابة شعورك بحرّية. إذا لم يناسبك أي مقترح، اكتب ما تشعر به بكلماتك.'
+        : 'You can press a suggestion or type freely. If none fits, type your own words.';
+      dom.freeTextHint.classList.remove('hidden');
+
+      if(!text) return;
       text.split('\n').map(t=>t.trim()).filter(Boolean).forEach(line=>{
         const clean=line.replace(/^- /,'');
         const b=document.createElement('button');
-        b.className='w-full text-sky-700 bg-sky-100 font-medium py-2 px-3 rounded-lg hover:bg-sky-200 text-sm';
+        b.className='w-full text-sky-700 bg-sky-100 font-medium py-2 px-3 rounded-lg hover:bg-sky-200 text-sm hit';
         b.innerText=clean; b.addEventListener('click',()=>handleUser(clean));
         dom.chatOptions.appendChild(b);
       });
+
+      // زر إضافي “شيء آخر — سأكتب ردي”
+      const other=document.createElement('button');
+      other.className='w-full bg-white border border-slate-300 font-medium py-2 px-3 rounded-lg hover:bg-slate-100 text-sm hit';
+      other.innerText = (state.language==='ar') ? 'شيء آخر — سأكتب ردي' : 'Something else — I\'ll type';
+      other.addEventListener('click',()=>{ dom.chatInput.focus(); });
+      dom.chatOptions.appendChild(other);
     }
+
     function pushModel(text){ addMsg(text,'model'); state.chat.push({role:'model',parts:[{text}]}); save(); }
 
     function showTyping(){
@@ -447,7 +507,7 @@ STRICT:
         const outgoing = state.chat.map(m => ({ role:m.role==='user'?'user':'model', content: m.parts?.[0]?.text || '' }));
         const { text } = await callAIProxy({
           systemInstruction: chatRules(),
-          messages: outgoing,               // نمرّر الرسائل صراحة
+          messages: outgoing,
           mode:'default',
           forceLang: (state.language==='ar'?'ar':'en')
         });
@@ -455,12 +515,14 @@ STRICT:
         const [main,...rest]=(text||'').split(/\n\n/); const opts=rest.join('\n\n');
         pushModel(main||''); showOptions(opts);
       }catch(e){
-        hideTyping(); pushModel('توقف مؤقت في الاتصال. اضغط أي خيار أو اكتب للمتابعة.');
+        hideTyping(); pushModel('توقف مؤقت في الاتصال. اضغط أي مقترح أو اكتب للمتابعة.');
       }
     }
 
     function handleUser(text){
       addMsg(text,'user'); state.chat.push({role:'user',parts:[{text}]}); save();
+
+      // التقاط إجابات التقييم الأولي
       const spec = state.assessment?.spec;
       if(spec && !state.assessment.result){
         const last = text.trim();
@@ -474,6 +536,7 @@ STRICT:
     dom.chatForm.addEventListener('submit', e=>{ e.preventDefault(); const v=dom.chatInput.value.trim(); if(v){ handleUser(v); dom.chatInput.value=''; } });
     dom.endChat.addEventListener('click', ()=>{ show('home-screen'); updateHome(); });
 
+    /* =============== واجهة الطفل =============== */
     function updateHome(){
       const t={ ar:{g:`مرحباً يا ${state.name}`,m:`هدفنا:`,ready:`جاهز لمغامرة اليوم؟`,ai:`أنا ${state.aiName}`,desc:{'ذكر':'رفيجك الرقمي اللي بيساعدك خطوة بخطوة.','أنثى':'رفيجتج الرقمية اللي بتساعدج خطوة بخطوة.'},chat:`ابدأ الدردشة مع ${state.aiName}`,ph:'اكتب ردك هنا...'},
                en:{g:`Welcome, ${state.name}`,m:`Our goal:`,ready:`Ready for today’s adventure?`,ai:`I'm ${state.aiName}`,desc:{'ذكر':'Your digital buddy to help you step by step.','أنثى':'Your digital buddy to help you step by step.'},chat:`Start chat with ${state.aiName}`,ph:'Type your reply here...'} };
@@ -490,6 +553,7 @@ STRICT:
     });
     dom.startChat.addEventListener('click', ()=>{
       show('chat-screen'); dom.chatMessages.innerHTML=''; dom.chatOptions.innerHTML='';
+      dom.freeTextHint.classList.add('hidden'); /* reset */
       if(state.chat.length){
         state.chat.forEach(m=>addMsg(m.parts[0].text,m.role));
         const last=state.chat[state.chat.length-1]; if(last.role==='model'){ const [_,...rest]=last.parts[0].text.split(/\n\n/); showOptions(rest.join('\n\n')); }
@@ -500,6 +564,7 @@ STRICT:
 
     dom.resetApp.addEventListener('click', ()=>{ localStorage.removeItem(STORAGE); location.reload(); });
 
+    /* =============== بدء التشغيل =============== */
     function init(){
       const ok = load();
       if(!ok){ resetState(); }
