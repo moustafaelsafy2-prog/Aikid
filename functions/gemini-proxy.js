@@ -295,13 +295,27 @@ function approxBase64Bytes(b64) {
   return Math.floor(len * 0.75);
 }
 
-// ---------- Tuning
+// ---------- Tuning (UPDATED: JSON for plan/qa)
 function tuneGeneration(mode) {
   if (mode === "qa") {
-    return { temperature: 0.22, topP: 0.9, maxOutputTokens: 4096, candidateCount: 1, responseMimeType: "text/plain" };
+    return {
+      temperature: 0.22,
+      topP: 0.9,
+      maxOutputTokens: 4096,
+      candidateCount: 1,
+      // نطلب JSON صريح في وضع الأسئلة/التقارير
+      responseMimeType: "application/json"
+    };
   }
   if (mode === "plan") {
-    return { temperature: 0.34, topP: 0.88, maxOutputTokens: 6144, candidateCount: 1, responseMimeType: "text/plain" };
+    return {
+      temperature: 0.28,
+      topP: 0.88,
+      maxOutputTokens: 6144,
+      candidateCount: 1,
+      // مهم جدًا للخطة حتى لا يضيف النموذج كلامًا حرًا
+      responseMimeType: "application/json"
+    };
   }
   if (mode === "image_brief") {
     return { temperature: 0.25, topP: 0.85, maxOutputTokens: 1536, candidateCount: 1, responseMimeType: "text/plain" };
@@ -338,23 +352,28 @@ function dedupeContinuation(prev, next) {
   return next;
 }
 
-// ---------- JSON enforcement/finalization
+// ---------- JSON enforcement/finalization (UPDATED)
 function finalize(text, lang, expect, mode) {
-  const mirrored = mirrorLanguage(text, lang);
-  if (expect === "json" || mode === "plan") {
-    const repaired = tryExtractJson(mirrored);
+  const expectingJson = (expect === "json" || mode === "plan");
+
+  if (expectingJson) {
+    // لا نستخدم mirrorLanguage هنا حتى لا نلوّث الـJSON
+    const repaired = tryExtractJson(text);
     if (repaired.ok) {
-      return JSON.stringify({ text: mirrored, parsed: repaired.json });
+      // نعيد JSON خام ضمن text (كسلسلة) لتتمكّن الواجهة من JSON.parse مباشرة
+      return JSON.stringify(repaired.json);
     }
-    // If cannot parse, still return text; client can fallback.
-    return JSON.stringify({ text: mirrored, parsed: null, note: "json_parse_failed" });
+    // إن فشل الاستخراج نعيد النص كما هو لتظهر المشكلة في الواجهة/السجلات
+    return text;
   }
-  return mirrored;
+
+  // الوضع العادي: نراعي اللغة فقط
+  return mirrorLanguage(text, lang);
 }
 function tryExtractJson(s) {
   if (!s) return { ok: false };
   let raw = s.replace(/```json|```/g, "").trim();
-  // Heuristic: snip to outermost braces
+  // قصّ إلى أقواس JSON الخارجية إن وُجدت
   const first = raw.indexOf("{"); const last = raw.lastIndexOf("}");
   if (first >= 0 && last > first) raw = raw.slice(first, last + 1);
   try { const j = JSON.parse(raw); return { ok: true, json: j }; }
