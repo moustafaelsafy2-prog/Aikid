@@ -4,18 +4,14 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
   <title>صديقي الذكي — مشروع مدرسي (مدرسة الإمارات الوطنية)</title>
-
-  <!-- UI -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet"/>
   <script src="https://unpkg.com/lucide@latest"></script>
-
   <style>
     html,body{height:100%;margin:0;padding:0;overscroll-behavior-y:contain}
     body{font-family:'Tajawal',sans-serif;-webkit-tap-highlight-color:transparent}
-    /* خلفية واضحة تعبّر عن الطفولة الإماراتية */
     #app-wrapper{
       background-image:
         linear-gradient( rgba(245,248,252,.90), rgba(245,248,252,.94) ),
@@ -36,12 +32,9 @@
   </style>
 </head>
 <body class="bg-slate-200 text-slate-800 antialiased">
-
   <div id="app-wrapper">
     <div id="app-container" class="w-full max-w-md md:max-w-lg mx-auto bg-transparent shadow-lg flex flex-col overflow-hidden relative">
       <main id="main" class="flex-grow relative flex flex-col"></main>
-
-      <!-- حقوق الأداة -->
       <footer class="w-full shrink-0 bg-white/75 backdrop-blur border-t border-slate-200">
         <div class="px-3 py-2 text-[11px] sm:text-xs flex flex-col sm:flex-row items-center justify-between gap-2">
           <div class="flex items-center gap-2">
@@ -61,9 +54,7 @@
   document.addEventListener('DOMContentLoaded', () => {
     const main = document.getElementById('main');
 
-    /* ================== الشــاشــات ================== */
     main.innerHTML = `
-      <!-- صفحة البداية -->
       <section id="start-screen" class="screen active bg-screen flex-col items-center justify-center p-8 text-center">
         <div class="w-24 h-24 rounded-full bg-white/70 flex items-center justify-center mb-4"><i data-lucide="bot" class="w-12 h-12 text-sky-600"></i></div>
         <h1 class="text-3xl font-bold mb-2">صديقي الذكي</h1>
@@ -71,7 +62,6 @@
         <button id="start-btn" class="bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 px-8 rounded-full shadow-lg">ابدأ</button>
       </section>
 
-      <!-- التعريف والالتزامات -->
       <section id="intro-screen" class="screen bg-screen flex-col items-stretch p-8 overflow-y-auto">
         <i data-lucide="shield-check" class="w-16 h-16 text-sky-500 mx-auto mb-4"></i>
         <h2 class="text-2xl font-bold text-center mb-2">كيف نعمل؟ والتزاماتنا</h2>
@@ -88,15 +78,11 @@
         </div>
       </section>
 
-      <!-- الملف الشخصي -->
       <section id="profile-setup-screen" class="screen bg-screen flex-col p-8 overflow-y-auto">
         <i data-lucide="user-round-check" class="w-16 h-16 text-sky-500 mx-auto mb-6"></i>
         <h2 class="text-2xl font-bold text-center mb-2">ملف البطل الشخصي</h2>
         <div class="w-full space-y-6">
-          <div>
-            <label class="font-bold mb-2 block">اسم الطفل/الطفلة</label>
-            <input id="child-name-input" type="text" class="w-full bg-white/90 border-2 border-slate-200 rounded-xl p-3 text-lg focus:outline-none focus:border-sky-400" placeholder="مثال: خالد أو علياء">
-          </div>
+          <div><label class="font-bold mb-2 block">اسم الطفل/الطفلة</label><input id="child-name-input" type="text" class="w-full bg-white/90 border-2 border-slate-200 rounded-xl p-3 text-lg focus:outline-none focus:border-sky-400" placeholder="مثال: خالد أو علياء"></div>
           <div>
             <p class="font-bold mb-2">الفئة العمرية</p>
             <div class="grid grid-cols-3 gap-3">
@@ -118,7 +104,6 @@
         </div>
       </section>
 
-      <!-- إدخال ولي الأمر -->
       <section id="parent-input-screen" class="screen bg-screen flex-col p-8 overflow-y-auto">
         <i data-lucide="file-text" class="w-16 h-16 text-sky-500 mx-auto mb-6"></i>
         <h2 class="text-2xl font-bold text-center mb-2">رؤية وليّ الأمر</h2>
@@ -132,7 +117,6 @@
         </div>
       </section>
 
-      <!-- مراجعة الخطة -->
       <section id="plan-review-screen" class="screen bg-screen flex-col p-8 overflow-y-auto">
         <div id="loading-spinner" class="m-auto text-center items-center justify-center">
           <i data-lucide="loader-circle" class="w-16 h-16 text-sky-500 mx-auto mb-4 animate-spin"></i>
@@ -155,7 +139,6 @@
         </div>
       </section>
 
-      <!-- أسباب التعديل -->
       <section id="plan-change-screen" class="screen bg-screen flex-col p-8 overflow-y-auto">
         <i data-lucide="edit" class="w-16 h-16 text-sky-500 mx-auto mb-6"></i>
         <h2 class="text-2xl font-bold text-center mb-2">أسباب التعديل</h2>
@@ -165,7 +148,6 @@
         </div>
       </section>
 
-      <!-- الصفحة الرئيسية للطفل -->
       <section id="home-screen" class="screen bg-transparent flex-col p-6">
         <header class="flex justify-between items-center mb-6">
           <div><p id="home-greeting" class="text-slate-500"></p><h2 id="home-mission-status" class="text-2xl font-bold">جاهز لمغامرة اليوم؟</h2></div>
@@ -179,7 +161,6 @@
         </main>
       </section>
 
-      <!-- المحادثة -->
       <section id="chat-screen" class="screen bg-screen flex-col">
         <header class="bg-white p-4 flex items-center gap-4 border-b border-slate-200">
           <button id="end-chat-btn" class="p-2 rounded-full hover:bg-slate-100"><i data-lucide="arrow-right"></i></button>
@@ -201,7 +182,6 @@
     const $ = (id) => document.getElementById(id);
     const show = (id) => document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id));
 
-    /* =============== الحالة =============== */
     const STORAGE = 'sadiki-ai-v23';
     let state = {};
     const save = ()=>{ try{ localStorage.setItem(STORAGE, JSON.stringify(state)); }catch{} };
@@ -222,39 +202,27 @@
       return 'صديقي الذكي';
     };
 
-    /* =============== عناصر DOM =============== */
     const dom = {
       startBtn: $('start-btn'), introBack: $('intro-back'), introAccept: $('intro-accept'),
-
-      ageBtns: [...document.querySelectorAll('.age-btn')],
-      genderBtns: [...document.querySelectorAll('.gender-btn')],
-      nameInput: $('child-name-input'),
-      continueProfile: $('continue-profile-btn'),
-
-      personality: $('child-personality'), challenges: $('child-challenges'),
-      analyzeBtn: $('analyze-btn'),
-
+      ageBtns: [...document.querySelectorAll('.age-btn')], genderBtns: [...document.querySelectorAll('.gender-btn')],
+      nameInput: $('child-name-input'), continueProfile: $('continue-profile-btn'),
+      personality: $('child-personality'), challenges: $('child-challenges'), analyzeBtn: $('analyze-btn'),
       loading: $('loading-spinner'), planContent: $('plan-content'),
       planSummary: $('ai-analysis-summary'), needsList: $('ai-needs-hypo'), stepsList: $('ai-plan-steps'),
       approve: $('approve-plan-btn'), requestEdit: $('request-edit-btn'),
-
       reason: $('plan-change-reason'), reAnalyze: $('re-analyze-btn'),
-
       greeting: $('home-greeting'), aiIntro: $('home-ai-name-intro'), introText: $('home-intro-text'),
       mission: $('home-mission-status'), startChat: $('initiate-chat-btn'),
-
       chatMessages: $('chat-messages'), chatOptions: $('chat-options-container'),
       chatForm: $('chat-form'), chatInput: $('chat-input'),
       endChat: $('end-chat-btn'), languageToggle: $('language-toggle-btn'),
       resetApp: $('reset-app-btn')
     };
 
-    /* =============== تنقّل البداية =============== */
     dom.startBtn.addEventListener('click', ()=> show('intro-screen'));
     dom.introBack.addEventListener('click', ()=> show('start-screen'));
     dom.introAccept.addEventListener('click', ()=> show('profile-setup-screen'));
 
-    /* =============== الملف الشخصي =============== */
     dom.ageBtns.forEach(b=>b.addEventListener('click',e=>{
       state.age=e.currentTarget.dataset.age; dom.ageBtns.forEach(x=>x.classList.remove('selected')); e.currentTarget.classList.add('selected'); validateProfile();
     }));
@@ -272,7 +240,6 @@
       dom.continueProfile.disabled = !(dom.nameInput.value.trim().length>1 && state.age && state.gender);
     }
 
-    /* =============== إدخال ولي الأمر → خطة =============== */
     dom.personality.addEventListener('input', validateParent);
     dom.challenges.addEventListener('input', validateParent);
     function validateParent(){ dom.analyzeBtn.disabled = !(dom.personality.value.trim().length>5 && dom.challenges.value.trim().length>10); }
@@ -280,18 +247,21 @@
     dom.analyzeBtn.addEventListener('click', ()=> generatePlan(false));
     dom.reAnalyze.addEventListener('click', ()=> generatePlan(true));
 
-    /* =============== بروكسي Gemini (Pro-first) =============== */
-    async function callAIProxy({ systemInstruction, history, mode='chat', forceLang='ar' }) {
-      const messages = Array.isArray(history) ? history.map(m => ({
-        role: m.role === 'user' ? 'user' : 'model',
-        content: (m.parts?.[0]?.text || '')
-      })) : [];
+    // ---------- بروكسي ----------
+    async function callAIProxy({ systemInstruction, messages, history, mode='chat', forceLang='ar' }) {
+      // إذا وصلت messages نُرسلها كما هي؛ وإلا نبنيها من history
+      let outgoing = [];
+      if (Array.isArray(messages) && messages.length) {
+        outgoing = messages;
+      } else if (Array.isArray(history)) {
+        outgoing = history.map(m => ({ role: m.role === 'user' ? 'user' : 'model', content: (m.parts?.[0]?.text || '') }));
+      }
 
       const body = {
         system: systemInstruction || '',
-        messages,
+        messages: outgoing,
         model: "auto",
-        mode,              // "plan" | "default"
+        mode,
         force_lang: forceLang,
         guard_level: "strict",
         long: true,
@@ -303,16 +273,14 @@
       const resp = await fetch('/.netlify/functions/gemini-proxy', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
       });
-      // مرّر جسم الخطأ للواجهة للتشخيص
       if (!resp.ok) {
         let err;
         try { err = await resp.json(); } catch { err = { error: resp.statusText, status: resp.status }; }
         throw err;
       }
-      return resp.json(); // { text, model, lang, ... }
+      return resp.json();
     }
 
-    /* =============== Prompts =============== */
     const planPrompt = (desc)=>`
 ${UAE_COMPLIANCE}
 أنت خبير تربية طفل وسلامة رقمية. حلّل وصف وليّ الأمر:
@@ -357,7 +325,6 @@ STRICT:
 `;
     };
 
-    /* =============== توليد الخطة (بدون أي سيناريو ثابت) =============== */
     async function generatePlan(isModification){
       let desc='';
       if(isModification){
@@ -373,7 +340,14 @@ STRICT:
       let attempt=0, maxAttempts=2, lastErr=null;
       while(attempt<maxAttempts){
         try{
-          const { text } = await callAIProxy({ systemInstruction: planPrompt(desc), history: [], mode:'plan', forceLang:'ar' });
+          // **** نرسل رسالة مستخدم صريحة حتى لا يكون contents فارغًا ****
+          const userMsg = { role: "user", content: planPrompt(desc) };
+          const { text } = await callAIProxy({
+            systemInstruction: planPrompt(desc),
+            messages: [userMsg],
+            mode:'plan',
+            forceLang:'ar'
+          });
           const plan = JSON.parse( (text||'').replace(/```json|```/g,'').trim() );
           state.plan = plan;
           state.assessment = { spec: plan.initialAssessment, result:null, answers:[] };
@@ -383,7 +357,6 @@ STRICT:
         }catch(e){ lastErr = e; attempt++; }
       }
 
-      // فشل → شاشة تشخيص تفصيلية (تعرض upstream.message/الحالة/السيفتي…)
       dom.loading.style.display='none';
       $('plan-review-screen').innerHTML = `
         <div class="flex flex-col items-center justify-center text-center gap-3 py-12">
@@ -424,7 +397,6 @@ STRICT:
       beginAIOnboarding();
     });
 
-    /* =============== الاختبار الأولي (يديره الذكاء) =============== */
     function beginAIOnboarding(){
       show('chat-screen');
       dom.chatMessages.innerHTML=''; dom.chatOptions.innerHTML='';
@@ -445,7 +417,6 @@ STRICT:
       state.assessment.result = { score, level, at: Date.now() }; save();
     }
 
-    /* =============== المحادثة =============== */
     function addMsg(text, role='model'){
       const el=document.createElement('div');
       el.className=`chat-bubble max-w-[80%] rounded-2xl p-3 ${role==='user'?'bg-sky-600 text-white self-end':'bg-slate-200 text-slate-800 self-start'}`;
@@ -473,7 +444,13 @@ STRICT:
     async function respond(){
       showTyping();
       try{
-        const { text } = await callAIProxy({ systemInstruction: chatRules(), history: state.chat, mode:'default', forceLang: (state.language==='ar'?'ar':'en') });
+        const outgoing = state.chat.map(m => ({ role:m.role==='user'?'user':'model', content: m.parts?.[0]?.text || '' }));
+        const { text } = await callAIProxy({
+          systemInstruction: chatRules(),
+          messages: outgoing,               // نمرّر الرسائل صراحة
+          mode:'default',
+          forceLang: (state.language==='ar'?'ar':'en')
+        });
         hideTyping();
         const [main,...rest]=(text||'').split(/\n\n/); const opts=rest.join('\n\n');
         pushModel(main||''); showOptions(opts);
@@ -484,8 +461,6 @@ STRICT:
 
     function handleUser(text){
       addMsg(text,'user'); state.chat.push({role:'user',parts:[{text}]}); save();
-
-      // الالتقاط البسيط لإجابات الاختبار الأولي (اختياري)
       const spec = state.assessment?.spec;
       if(spec && !state.assessment.result){
         const last = text.trim();
@@ -499,7 +474,6 @@ STRICT:
     dom.chatForm.addEventListener('submit', e=>{ e.preventDefault(); const v=dom.chatInput.value.trim(); if(v){ handleUser(v); dom.chatInput.value=''; } });
     dom.endChat.addEventListener('click', ()=>{ show('home-screen'); updateHome(); });
 
-    /* =============== واجهة الطفل =============== */
     function updateHome(){
       const t={ ar:{g:`مرحباً يا ${state.name}`,m:`هدفنا:`,ready:`جاهز لمغامرة اليوم؟`,ai:`أنا ${state.aiName}`,desc:{'ذكر':'رفيجك الرقمي اللي بيساعدك خطوة بخطوة.','أنثى':'رفيجتج الرقمية اللي بتساعدج خطوة بخطوة.'},chat:`ابدأ الدردشة مع ${state.aiName}`,ph:'اكتب ردك هنا...'},
                en:{g:`Welcome, ${state.name}`,m:`Our goal:`,ready:`Ready for today’s adventure?`,ai:`I'm ${state.aiName}`,desc:{'ذكر':'Your digital buddy to help you step by step.','أنثى':'Your digital buddy to help you step by step.'},chat:`Start chat with ${state.aiName}`,ph:'Type your reply here...'} };
@@ -526,7 +500,6 @@ STRICT:
 
     dom.resetApp.addEventListener('click', ()=>{ localStorage.removeItem(STORAGE); location.reload(); });
 
-    /* =============== بدء التشغيل =============== */
     function init(){
       const ok = load();
       if(!ok){ resetState(); }
