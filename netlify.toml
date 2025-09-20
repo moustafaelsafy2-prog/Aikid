@@ -1,60 +1,25 @@
-# =============================================================================
-# Netlify Configuration File (Professional Version)
-# This file provides comprehensive instructions for Netlify on how to build
-# and deploy your site, including serverless functions and security settings.
-#
-# ملف إعدادات Netlify (النسخة الاحترافية)
-# هذا الملف يقدم تعليمات شاملة لـ Netlify حول كيفية بناء ونشر موقعك،
-# بما في ذلك الوظائف السحابية وإعدادات الأمان.
-# =============================================================================
-
 [build]
-  # The directory where the serverless functions are located.
-  # This is the most important setting for your backend.
-  # المجلد الذي توجد فيه الوظائف السحابية. هذا هو الإعداد الأهم للواجهة الخلفية.
-  functions = "functions/"
-
-  # The directory that contains the deploy-ready HTML files and assets.
-  # For this project, it's the root directory.
-  # المجلد الذي يحتوي على الملفات الجاهزة للنشر (في هذا المشروع، هو المجلد الرئيسي).
+  functions = "functions"
   publish = "."
 
-  # --- Environment Variables ---
-  # --- متغيرات البيئة ---
-  # This is the correct way to specify the Node.js version for the functions runtime.
-  # Using a specific LTS (Long Term Support) version ensures consistent builds.
-  # هذه هي الطريقة الصحيحة لتحديد إصدار Node.js المستخدم للوظائف.
-  # استخدام إصدار LTS محدد يضمن بناء متسق ومستقر.
-  [build.environment]
-    NODE_VERSION = "18"
-
-# =============================================================================
-# Functions Configuration
-# Specify the bundler for serverless functions.
-#
-# إعدادات الوظائف السحابية
-# تحديد أداة الحزم للوظائف السحابية.
-# =============================================================================
-
 [functions]
-  # Use esbuild for faster bundling of serverless functions.
-  # استخدام esbuild لحزم أسرع للوظائف السحابية.
   node_bundler = "esbuild"
+  external_node_modules = []
 
+[dev]
+  functionsPort = 9999
 
-# =============================================================================
-# Redirects and Security Rules
-# Control how traffic is routed and enhance security.
-#
-# قواعد إعادة التوجيه والأمان
-# التحكم في كيفية توجيه الزوار وتعزيز الأمان.
-# =============================================================================
+[[headers]]
+  for = "/.netlify/functions/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Headers = "Content-Type"
+    Access-Control-Allow-Methods = "POST, OPTIONS"
 
-[[redirects]]
-  # This rule ensures that all traffic is forced to use HTTPS for security.
-  # هذه القاعدة تضمن أن جميع الاتصالات تتم بشكل إجباري عبر HTTPS للأمان.
-  from = "http://*"
-  to = "https://:splat"
-  status = 301
-  force = true
-
+# تحسين أمان أساسي للواجهة
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "no-referrer"
