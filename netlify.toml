@@ -1,13 +1,9 @@
 [build]
-  functions = "functions"
   publish = "."
+  functions = "functions"
 
 [functions]
   node_bundler = "esbuild"
-  external_node_modules = []
-
-[dev]
-  functionsPort = 9999
 
 [[headers]]
   for = "/.netlify/functions/*"
@@ -16,7 +12,6 @@
     Access-Control-Allow-Headers = "Content-Type"
     Access-Control-Allow-Methods = "POST, OPTIONS"
 
-# تحسين أمان أساسي للواجهة
 [[headers]]
   for = "/*"
   [headers.values]
