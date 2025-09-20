@@ -44,14 +44,26 @@ exports.handler = async (event) => {
     timeout_ms = DEFAULT_TIMEOUT_MS
   } = inBody;
 
+  // Language + guardrails
   const preview = sampleFrom(messages);
   const lang = chooseLang(force_lang, preview);
   const guard = guardrails(lang, guard_level);
 
-  const contents = normalizeMessages(messages, guard);
+  // Normalize messages (may still be empty)
+  let contents = normalizeMessages(messages, guard);
+
+  // ******** CRITICAL FALLBACK ********
+  // If frontend forgot to pass messages, build a minimal content from system or a starter string.
+  if (!contents.length) {
+    const text = (typeof system === "string" && system.trim()) ? system.trim() : "ابدأ الآن.";
+    contents = [{ role: "user", parts: [{ text }] }];
+  }
+
   const generationConfig = tune(mode);
-  const safetySettings   = buildSafety(guard_level);   // ← كانت مفقودة
-  const systemInstruction = system ? { role: "system", parts: [{ text: system }] } : undefined;
+  const safetySettings   = buildSafety(guard_level);
+  const systemInstruction = (system && typeof system === "string" && system.trim())
+    ? { role: "system", parts: [{ text: system }] }
+    : undefined;
 
   const candidates = (model === "auto" || !model) ? [...MODEL_POOL] : Array.from(new Set([model, ...MODEL_POOL]));
 
@@ -142,13 +154,9 @@ function contPrompt(lang){ return (lang==="ar") ? "تابع من حيث انته
 function shouldContinue(t){ if(!t) return false; const tail=t.slice(-40).trim(); return /[\u2026…]$/.test(tail)||/(?:continued|to be continued)[:.]?$/i.test(tail)||tail.endsWith("-"); }
 function dedupe(prev,next){ if(!next) return ""; const head=next.slice(0,200); if(prev && prev.endsWith(head)) return next.slice(head.length).trimStart(); return next; }
 
-/* ---------- Safety (مطلوبة) ---------- */
+/* ---------- Safety ---------- */
 function buildSafety(level = "strict") {
-  // Google safety settings: threshold controls blocking sensitivity.
-  const cat = (name) => ({
-    category: name,
-    threshold: level === "relaxed" ? "BLOCK_NONE" : "BLOCK_ONLY_HIGH"
-  });
+  const cat = (name) => ({ category: name, threshold: level === "relaxed" ? "BLOCK_NONE" : "BLOCK_ONLY_HIGH" });
   return [
     cat("HARM_CATEGORY_HARASSMENT"),
     cat("HARM_CATEGORY_HATE_SPEECH"),
