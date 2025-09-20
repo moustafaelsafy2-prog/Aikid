@@ -12,10 +12,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <style>
-    :root{
-      --vh: 1vh;
-      --card: rgba(248,250,252,.90);
-    }
+    :root{ --vh:1vh; --card:rgba(248,250,252,.92) }
     html,body{height:100%;margin:0;padding:0;overscroll-behavior-y:contain}
     body{font-family:'Cairo',system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial,'Noto Sans',sans-serif;line-height:1.9;-webkit-tap-highlight-color:transparent}
 
@@ -31,7 +28,8 @@
     .bg-screen{background:var(--card);backdrop-filter:blur(3px)}
     .chat-bubble{animation:pop .22s cubic-bezier(.2,.9,.3,1.4)}
     @keyframes pop{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
-    #chat-messages{scroll-padding-bottom:160px;}
+
+    #chat-messages{scroll-padding-bottom:160px;display:flex;flex-direction:column;gap:.5rem}
     #chat-messages::-webkit-scrollbar{width:6px}
     #chat-messages::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:10px}
     .age-btn.selected,.gender-btn.selected{border-color:#0ea5e9;background:#f0f9ff;color:#0284c7}
@@ -51,14 +49,44 @@
     .modal-card{animation:zoom .18s ease}
     @keyframes zoom{from{transform:scale(.94);opacity:.6}to{transform:scale(1);opacity:1)}
 
-    /* ===== مظهر محادثة شبيه واتسآب ===== */
-    .bubble{max-width:82%; border-radius:16px; padding:.55rem .75rem; position:relative; word-wrap:break-word}
-    .bubble-user{background:#dcf8c6; color:#111827; margin-inline-start:auto; border-top-right-radius:6px}
-    .bubble-bot{background:#ffffff; color:#111827; margin-inline-end:auto; border-top-left-radius:6px; border:1px solid rgba(0,0,0,.05)}
-    .bubble-meta{display:flex; gap:.35rem; align-items:center; justify-content:flex-end; font-size:.72rem; opacity:.7; margin-top:.15rem}
-    .tick{font-weight:700; letter-spacing:-.02em}
-    .tick.dim{opacity:.6}
-    #chat-screen main{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 32 32"><path fill="%23eef2f7" d="M0 0h32v32H0z"/><circle cx="6" cy="6" r="1" fill="%23e6edf6"/><circle cx="20" cy="14" r="1" fill="%23e6edf6"/><circle cx="12" cy="22" r="1" fill="%23e6edf6"/></svg>'); background-size:240px 240px}
+    /* ===== WhatsApp-like chat look (دقيق) ===== */
+    .msg-row{display:flex;width:100%}
+    .msg-row.user{justify-content:flex-end}
+    .msg-row.bot{justify-content:flex-start}
+
+    .bubble{
+      max-width:78%;
+      border-radius:16px;
+      padding:.6rem .8rem;
+      position:relative;
+      word-wrap:break-word;
+      box-shadow: 0 1px 0 rgba(0,0,0,.05);
+    }
+    /* لون الطفل (يمين) */
+    .bubble-user{
+      background:#dcf8c6; color:#0b141a;
+      border-top-right-radius:6px;
+    }
+    /* لون الذكاء الاصطناعي (يسار) */
+    .bubble-bot{
+      background:#ffffff; color:#0b141a;
+      border:1px solid rgba(0,0,0,.06);
+      border-top-left-radius:6px;
+    }
+
+    /* الذيول */
+    .bubble-user::after,.bubble-bot::after{content:"";position:absolute;bottom:.25rem;width:0;height:0;border:7px solid transparent}
+    .bubble-user::after{right:-6px;border-left-color:#dcf8c6;border-right:0;border-top:0}
+    .bubble-bot::after{left:-6px;border-right-color:#ffffff;border-left:0;border-top:0}
+
+    .bubble-meta{display:flex;gap:.35rem;align-items:center;justify-content:flex-end;font-size:.72rem;opacity:.7;margin-top:.18rem}
+    .tick{font-weight:700;letter-spacing:-.02em}
+    .tick.dim{opacity:.55}
+
+    /* فاصل اليوم */
+    .day-sep{display:flex;align-items:center;justify-content:center;gap:.6rem;margin:.4rem 0}
+    .day-sep:before,.day-sep:after{content:"";flex:1;height:1px;background:rgba(15,23,42,.12)}
+    .day-sep span{background:#eaf1f7;color:#0f172a;border:1px solid rgba(15,23,42,.06);padding:.15rem .6rem;border-radius:9999px;font-size:.75rem}
   </style>
 </head>
 <body class="bg-slate-200 text-slate-800 antialiased">
@@ -103,7 +131,7 @@
     const pinModal = document.getElementById('pin-modal');
     const PIN_CODE = '2222';
 
-    /* ================== الشــاشــات ================== */
+    /* ================== الشاشات ================== */
     main.innerHTML = `
       <!-- صفحة البداية -->
       <section id="start-screen" class="screen active bg-transparent flex-col items-center justify-center p-8 text-center">
@@ -231,7 +259,7 @@
           <div class="flex-grow"><h3 id="chat-header-name" class="font-bold"></h3><p class="text-xs text-green-500 font-medium flex items-center gap-1"><span class="w-2 h-2 bg-green-400 rounded-full"></span>متصل</p></div>
           <button id="language-toggle-btn" class="p-2 rounded-full hover:bg-slate-100 text-slate-600 hit" title="تبديل اللغة"><i data-lucide="languages" class="w-5 h-5"></i></button>
         </header>
-        <main id="chat-messages" class="flex-grow p-4 space-y-4 overflow-y-auto"></main>
+        <main id="chat-messages" class="flex-grow p-4 overflow-y-auto"></main>
         <footer id="chat-footer" class="p-4 border-t border-slate-200 bg-white/90 backdrop-blur-sm">
           <p id="free-text-hint" class="text-[12px] text-slate-500 mb-2 hidden"></p>
           <div id="chat-options-container" class="mb-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2"></div>
@@ -249,17 +277,17 @@
     const hideModal = (el)=> el.classList.remove('active');
 
     /* =============== الحالة =============== */
-    const STORAGE = 'sadiki-ai-v26';
+    const STORAGE = 'sadiki-ai-v27';
     let state = {};
     const save = ()=>{ try{ localStorage.setItem(STORAGE, JSON.stringify(state)); }catch{} };
     const load = ()=>{ try{ const d=localStorage.getItem(STORAGE); if(d){ state=JSON.parse(d); return true; } }catch{} return false; };
     const resetState = ()=> state = {
       language:'ar', age:null, gender:null, name:null, aiName:null,
       parentDesc:null, plan:null, chat:[], step:0, assessment:null,
-      askedQuestions:[]
+      askedQuestions:[], lastDateKey:null
     };
 
-    /* امتثال وسلامة الإمارات */
+    /* امتثال */
     const UAE_COMPLIANCE = `
 - التزم بقوانين الإمارات والمعايير الدولية لسلامة الطفل.
 - لا تقدم تشخيصاً طبياً/نفسيّاً؛ عند مؤشرات الخطر وجّه لوليّ الأمر/المدرسة ومختص مرخّص.
@@ -293,12 +321,10 @@
       chatFooter: $('chat-footer'), chatHeaderName: $('chat-header-name')
     };
 
-    /* ======== أدوات مظهر واتسآب ======== */
-    function hhmm(ts){ const d = ts? new Date(ts): new Date(); const h=String(d.getHours()).padStart(2,'0'); const m=String(d.getMinutes()).padStart(2,'0'); return `${h}:${m}`; }
-
-    /* ======== إصلاحات الخلفية والتمرير والكيبورد ======== */
+    /* ======== أدوات ======== */
     function setVh(){ document.documentElement.style.setProperty('--vh', (window.innerHeight*0.01)+'px'); }
     setVh(); window.addEventListener('resize', setVh);
+
     function adjustChatPadding(){
       const pad = (dom.chatFooter?.getBoundingClientRect().height || 96) + 24;
       dom.chatMessages.style.paddingBottom = pad+'px';
@@ -312,6 +338,17 @@
     }
     dom.chatInput.addEventListener('focus', ()=>{ setTimeout(()=>dom.chatInput.scrollIntoView({block:'end',behavior:'smooth'}), 60); });
     dom.chatInput.addEventListener('input', ()=>{ dom.chatMessages.scrollTop = dom.chatMessages.scrollHeight; });
+
+    function hhmm(ts){ const d = ts? new Date(ts): new Date(); const h=String(d.getHours()).padStart(2,'0'); const m=String(d.getMinutes()).padStart(2,'0'); return `${h}:${m}`; }
+    function ymd(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+    function dateLabel(ts){
+      const d = new Date(ts), today=new Date(), yd=new Date(); yd.setDate(today.getDate()-1);
+      const key = ymd(d);
+      let label = key;
+      if(ymd(today)===key) label = (state.language==='ar')?'اليوم':'Today';
+      else if(ymd(yd)===key) label = (state.language==='ar')?'أمس':'Yesterday';
+      return {key, label};
+    }
 
     /* =============== تنقّل البداية =============== */
     dom.startBtn.addEventListener('click', ()=> show('intro-screen'));
@@ -381,7 +418,7 @@ ${UAE_COMPLIANCE}
 المراحل:
 0) بناء علاقة ودّية (2–3 رسائل قصيرة): نادي الطفل باسمه، اسأل عن شيء يحبه، طَمْئِنْه أن الصراحة شجاعة ولا توجد إجابة صحيحة/خاطئة.
 1) جمع بيانات تدريجيًا لكشف الاحتياجات الخفية: مشاعر عند التعارف، الانضمام للّعب، طلب المساعدة، التعبير عن النفس، مواقف مزعجة متكررة. اسأل سؤالًا طبيعيًا واحدًا كل مرة. لا تُكرِّر سؤالًا طُرح سابقًا.
-2) إن لزم: قدم 3–4 مقترحات شعورية كبنود تبدأ بـ "- " ثم سطر ثابت: "إن لم تناسبك أي مقترح، اكتب شعورك بطريقتك."
+2) إن لزم: قدّم 3–4 مقترحات شعورية كبنود تبدأ بـ "- " ثم سطر ثابت: "إن لم تناسبك أي مقترح، اكتب شعورك بطريقتك."
 3) بعد تكوُّن صورة واضحة، انتقل للتدريب المتدرّج: Intro → Practice → Mission → Follow-up. خصِّص التدريب وفق ردود الطفل.
 4) مؤشرات الخطر: أوقف التقدّم وأرسل رسالة تصعيد.
 لغة الرد: ${state.language==='ar'?'Emirati Arabic':'English'} فقط.`;
@@ -463,12 +500,11 @@ ${MASTER_GUIDE()}
 
     $('request-edit-btn').addEventListener('click', ()=> show('plan-change-screen'));
     $('approve-plan-btn').addEventListener('click', ()=>{
-      state.step=0; state.chat=[]; state.askedQuestions=[];
-      save(); updateHome(); show('home-screen');
-      beginAIOnboarding();
+      state.step=0; state.chat=[]; state.askedQuestions=[]; state.lastDateKey=null;
+      save(); updateHome(); show('home-screen'); beginAIOnboarding();
     });
 
-    /* =============== بدء المحادثة/التقييم الأولي =============== */
+    /* =============== المحادثة / التقييم الأولي =============== */
     function beginAIOnboarding(){
       show('chat-screen');
       dom.chatMessages.innerHTML=''; dom.chatOptions.innerHTML='';
@@ -488,10 +524,28 @@ ${MASTER_GUIDE()}
       state.assessment.result = { score, level, at: Date.now() }; save();
     }
 
+    /* ====== فاصل اليوم ====== */
+    function insertDaySeparatorIfNeeded(ts){
+      const {key,label} = dateLabel(ts);
+      if(state.lastDateKey !== key){
+        const row = document.createElement('div');
+        row.className='day-sep';
+        const span=document.createElement('span'); span.textContent=label; row.appendChild(span);
+        dom.chatMessages.appendChild(row);
+        state.lastDateKey = key; save();
+      }
+    }
+
     /* =============== المحادثة (واتسآب لوك) =============== */
-    const addMessage = (text, role = 'model') => {
+    const addMessage = (text, role = 'model', ts) => {
+      const time = ts || Date.now();
+      insertDaySeparatorIfNeeded(time);
+
+      const row = document.createElement('div');
+      row.className = 'msg-row ' + (role === 'user' ? 'user' : 'bot');
+
       const wrap = document.createElement('div');
-      wrap.className = 'chat-bubble bubble ' + (role === 'user' ? 'bubble-user self-end' : 'bubble-bot self-start');
+      wrap.className = 'chat-bubble bubble ' + (role === 'user' ? 'bubble-user' : 'bubble-bot');
 
       const p = document.createElement('div');
       p.textContent = text;
@@ -499,19 +553,19 @@ ${MASTER_GUIDE()}
 
       const meta = document.createElement('div');
       meta.className = 'bubble-meta';
-      const time = document.createElement('span');
-      time.textContent = hhmm();
-      meta.appendChild(time);
+      const tspan = document.createElement('span');
+      tspan.textContent = hhmm(time);
+      meta.appendChild(tspan);
       if (role === 'user') {
         const tick = document.createElement('span');
         tick.className = 'tick dim';
         tick.textContent = '✓';
         meta.appendChild(tick);
-        wrap.dataset.tickRef = '1';
       }
       wrap.appendChild(meta);
+      row.appendChild(wrap);
+      dom.chatMessages.appendChild(row);
 
-      dom.chatMessages.appendChild(wrap);
       setTimeout(() => {
         dom.chatMessages.scrollTop = dom.chatMessages.scrollHeight;
         wrap.scrollIntoView({block:'end'});
@@ -545,17 +599,22 @@ ${MASTER_GUIDE()}
     }
 
     function pushModel(text){
+      const ts = Date.now();
       const q = normalizedQuestion(text);
       const asked = new Set(state.askedQuestions || []);
-      if(asked.has(q)){ return; }
-      addMessage(text,'model');
-      asked.add(q);
-      state.askedQuestions = Array.from(asked);
-      state.chat.push({role:'model',parts:[{text}]}); save();
+      if(!asked.has(q)){
+        addMessage(text,'model',ts);
+        asked.add(q);
+        state.askedQuestions = Array.from(asked);
+      }else{
+        addMessage(text,'model',ts); // عرض بصري حتى لو مكرر
+      }
+      state.chat.push({role:'model',parts:[{text}], ts}); save();
     }
 
     function showTyping(){
-      const el=`<div id="typing" class="chat-bubble bubble bubble-bot self-start"><span class="inline-block w-2 h-2 bg-slate-500 rounded-full animate-pulse"></span></div>`;
+      const el=`<div id="typing" class="msg-row bot"><div class="chat-bubble bubble bubble-bot"><span class="inline-block w-2 h-2 bg-slate-500 rounded-full animate-pulse"></span></div></div>`;
+      insertDaySeparatorIfNeeded(Date.now());
       dom.chatMessages.insertAdjacentHTML('beforeend',el); dom.chatMessages.scrollTop=dom.chatMessages.scrollHeight;
     }
     function hideTyping(){ document.getElementById('typing')?.remove(); }
@@ -579,17 +638,19 @@ ${MASTER_GUIDE()}
         if(main) pushModel(main);
         showOptions(optsText);
 
-        /* تحديث آخر فقاعة للمستخدم إلى ✓✓ عند وصول رد */
-        const bubbles = dom.chatMessages.querySelectorAll('.bubble-user .bubble-meta .tick.dim');
-        const lastTick = bubbles[bubbles.length - 1];
-        if (lastTick) { lastTick.textContent = '✓✓'; lastTick.classList.remove('dim'); }
+        // تحويل ✓ إلى ✓✓ بعد ردّ النموذج
+        const ticks = dom.chatMessages.querySelectorAll('.tick.dim');
+        const lastTick = ticks[ticks.length-1];
+        if(lastTick){ lastTick.textContent='✓✓'; lastTick.classList.remove('dim'); }
       }catch(e){
         hideTyping(); addMessage('توقف مؤقت في الاتصال. اضغط مقترحًا أو اكتب للمتابعة.','model');
       }
     }
 
     function handleUser(text){
-      addMessage(text,'user'); state.chat.push({role:'user',parts:[{text}]}); save();
+      const ts = Date.now();
+      addMessage(text,'user',ts);
+      state.chat.push({role:'user',parts:[{text}], ts}); save();
       const spec = state.assessment?.spec;
       if(spec && !state.assessment.result){
         const last = text.trim();
@@ -611,21 +672,23 @@ ${MASTER_GUIDE()}
       $('home-greeting').textContent=L.g; $('home-ai-name-intro').textContent=L.ai; $('home-intro-text').textContent=L.desc[state.gender];
       $('start-chat-btn-text').textContent=L.chat; $('chat-input').placeholder=L.ph;
       $('home-mission-status').textContent = (state.plan?.planSteps?.[state.step]) ? `${L.m} ${state.plan.planSteps[state.step]}` : L.ready;
-      dom.chatHeaderName.textContent = state.aiName;
+      $('chat-header-name').textContent = state.aiName;
     }
 
     $('language-toggle-btn').addEventListener('click', ()=>{
       state.language = state.language==='ar' ? 'en' : 'ar'; save(); updateHome();
-      state.chat.push({role:'user',parts:[{text:`(System instruction: switch language to ${state.language}.)`}]}); respond();
+      state.chat.push({role:'user',parts:[{text:`(System instruction: switch language to ${state.language}.)`}], ts: Date.now()}); respond();
     });
 
-    dom.startChat.addEventListener('click', ()=>{
+    $('initiate-chat-btn').addEventListener('click', ()=>{
       show('chat-screen'); dom.chatMessages.innerHTML=''; dom.chatOptions.innerHTML='';
       dom.freeTextHint.classList.add('hidden');
       state.askedQuestions = state.askedQuestions || [];
+      state.lastDateKey = null;
       if(state.chat.length){
-        state.chat.forEach(m=>addMessage(m.parts[0].text,m.role));
-        const last=state.chat[state.chat.length-1]; if(last.role==='model'){ const [_,...rest]=last.parts[0].text.split(/\n\n/); showOptions(rest.join('\n\n')); }
+        state.chat.forEach(m=>addMessage(m.parts[0].text,m.role,m.ts||Date.now()));
+        const last=state.chat[state.chat.length-1];
+        if(last.role==='model'){ const [_,...rest]=last.parts[0].text.split(/\n\n/); showOptions(rest.join('\n\n')); }
       } else {
         beginAIOnboarding();
       }
@@ -643,6 +706,9 @@ ${MASTER_GUIDE()}
     });
 
     /* =============== بدء التشغيل =============== */
+    function updateVh(){ document.documentElement.style.setProperty('--vh',(window.innerHeight*0.01)+'px'); }
+    window.addEventListener('resize',updateVh); updateVh();
+
     function init(){
       const ok = load();
       if(!ok){ resetState(); }
