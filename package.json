@@ -1,0 +1,16 @@
+{
+  "name": "sadiki-ai-yousef-salmeen",
+  "version": "1.0.0",
+  "description": "تطبيق ويب تجريبي لمشروع مدرسي يستخدم الذكاء الاصطناعي (Gemini) لتقديم الدعم للأطفال الذين يواجهون تحديات اجتماعية.",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Yousef Salmeen (يوسف سالمين)",
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "@google/generative-ai": "^0.14.1"
+  }
+}
+
