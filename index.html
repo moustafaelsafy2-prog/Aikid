@@ -1,44 +1,45 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
   <title>صديقي الذكي — مشروع مدرسي (مدرسة الإمارات الوطنية)</title>
+
+  <!-- UI -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet"/>
   <script src="https://unpkg.com/lucide@latest"></script>
+
   <style>
     html,body{height:100%;margin:0;padding:0;overscroll-behavior-y:contain}
     body{font-family:'Tajawal',sans-serif;-webkit-tap-highlight-color:transparent}
-    /* خلفية واضحة وذات تباين كافٍ */
+    /* خلفية واضحة تعبّر عن الطفولة الإماراتية */
     #app-wrapper{
       background-image:
-        linear-gradient( rgba(245,248,252,0.88), rgba(245,248,252,0.92) ),
-        url('https://images.unsplash.com/photo-1612914624945-1c9bd9bfb87d?q=80&w=1800&auto=format&fit=crop'); /* أطفال خليج/عرب بملابس يومية */
-      background-size: cover; background-position: center;
+        linear-gradient( rgba(245,248,252,.90), rgba(245,248,252,.94) ),
+        url('https://images.unsplash.com/photo-1607093800959-5b6b6f72b316?q=80&w=2000&auto=format&fit=crop');
+      background-size:cover;background-position:center
     }
     #app-container{height:100%;height:100dvh}
     .screen,.modal{display:none}.screen.active,.modal.active{display:flex}
-    .bg-screen{background:rgba(248,250,252,0.96);backdrop-filter:blur(3px)}
-    .fade-in{animation:fadeIn .4s ease}@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-    .scale-up{animation:scaleUp .28s cubic-bezier(.2,.9,.3,1.4)}@keyframes scaleUp{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
-    .chat-bubble{animation:popIn .25s cubic-bezier(.2,.9,.3,1.4)}@keyframes popIn{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
-    .typing-indicator span{animation:bounce 1.4s infinite ease-in-out both}
-    .typing-indicator span:nth-child(1){animation-delay:-.32s}.typing-indicator span:nth-child(2){animation-delay:-.16s}
-    @keyframes bounce{0%,80%,100%{transform:scale(0)}40%{transform:scale(1)}}
-    #chat-messages::-webkit-scrollbar{width:6px}#chat-messages::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:10px}
-    .gender-btn.selected,.age-btn.selected{border-color:#0ea5e9;background:#f0f9ff;color:#0284c7}
+    .bg-screen{background:rgba(248,250,252,.96);backdrop-filter:blur(3px)}
+    .chat-bubble{animation:pop .25s cubic-bezier(.2,.9,.3,1.4)}
+    @keyframes pop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
+    #chat-messages::-webkit-scrollbar{width:6px}
+    #chat-messages::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:10px}
+    .age-btn.selected,.gender-btn.selected{border-color:#0ea5e9;background:#f0f9ff;color:#0284c7}
     #continue-profile-btn:disabled,#analyze-btn:disabled{background:#94a3b8;cursor:not-allowed}
     .badge{display:inline-flex;align-items:center;gap:.35rem;padding:.25rem .6rem;border-radius:9999px;font-size:.75rem}
     .brand-gradient{background:linear-gradient(135deg,#0ea5e9 0%,#14b8a6 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
   </style>
 </head>
 <body class="bg-slate-200 text-slate-800 antialiased">
+
   <div id="app-wrapper">
     <div id="app-container" class="w-full max-w-md md:max-w-lg mx-auto bg-transparent shadow-lg flex flex-col overflow-hidden relative">
-      <div id="main-content-area" class="flex-grow relative flex flex-col"></div>
+      <main id="main" class="flex-grow relative flex flex-col"></main>
 
       <!-- حقوق الأداة -->
       <footer class="w-full shrink-0 bg-white/75 backdrop-blur border-t border-slate-200">
@@ -58,9 +59,9 @@
 
   <script>
   document.addEventListener('DOMContentLoaded', () => {
-    const main = document.getElementById('main-content-area');
+    const main = document.getElementById('main');
 
-    /* ======================= الشاشات ======================= */
+    /* ================== الشــاشــات ================== */
     main.innerHTML = `
       <!-- صفحة البداية -->
       <section id="start-screen" class="screen active bg-screen flex-col items-center justify-center p-8 text-center">
@@ -70,7 +71,7 @@
         <button id="start-btn" class="bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 px-8 rounded-full shadow-lg">ابدأ</button>
       </section>
 
-      <!-- التعريف والالتزامات (للموافقة) -->
+      <!-- التعريف والالتزامات -->
       <section id="intro-screen" class="screen bg-screen flex-col items-stretch p-8 overflow-y-auto">
         <i data-lucide="shield-check" class="w-16 h-16 text-sky-500 mx-auto mb-4"></i>
         <h2 class="text-2xl font-bold text-center mb-2">كيف نعمل؟ والتزاماتنا</h2>
@@ -87,14 +88,14 @@
         </div>
       </section>
 
-      <!-- اختيار العمر/الملف -->
+      <!-- الملف الشخصي -->
       <section id="profile-setup-screen" class="screen bg-screen flex-col p-8 overflow-y-auto">
         <i data-lucide="user-round-check" class="w-16 h-16 text-sky-500 mx-auto mb-6"></i>
         <h2 class="text-2xl font-bold text-center mb-2">ملف البطل الشخصي</h2>
         <div class="w-full space-y-6">
           <div>
             <label class="font-bold mb-2 block">اسم الطفل/الطفلة</label>
-            <input id="child-name-input" type="text" class="w-full bg-white/90 border-2 border-slate-200 rounded-xl p-3 text-lg focus:outline-none focus:border-sky-400 transition" placeholder="مثال: خالد أو علياء">
+            <input id="child-name-input" type="text" class="w-full bg-white/90 border-2 border-slate-200 rounded-xl p-3 text-lg focus:outline-none focus:border-sky-400" placeholder="مثال: خالد أو علياء">
           </div>
           <div>
             <p class="font-bold mb-2">الفئة العمرية</p>
@@ -117,7 +118,7 @@
         </div>
       </section>
 
-      <!-- إدخال وليّ الأمر -->
+      <!-- إدخال ولي الأمر -->
       <section id="parent-input-screen" class="screen bg-screen flex-col p-8 overflow-y-auto">
         <i data-lucide="file-text" class="w-16 h-16 text-sky-500 mx-auto mb-6"></i>
         <h2 class="text-2xl font-bold text-center mb-2">رؤية وليّ الأمر</h2>
@@ -154,7 +155,7 @@
         </div>
       </section>
 
-      <!-- أسباب تعديل الخطة -->
+      <!-- أسباب التعديل -->
       <section id="plan-change-screen" class="screen bg-screen flex-col p-8 overflow-y-auto">
         <i data-lucide="edit" class="w-16 h-16 text-sky-500 mx-auto mb-6"></i>
         <h2 class="text-2xl font-bold text-center mb-2">أسباب التعديل</h2>
@@ -168,7 +169,7 @@
       <section id="home-screen" class="screen bg-transparent flex-col p-6">
         <header class="flex justify-between items-center mb-6">
           <div><p id="home-greeting" class="text-slate-500"></p><h2 id="home-mission-status" class="text-2xl font-bold">جاهز لمغامرة اليوم؟</h2></div>
-          <button id="reset-app-btn" class="p-2 rounded-full bg-white/60 hover:bg-red-100 text-red-500"><i data-lucide="refresh-cw" class="w-5 h-5"></i></button>
+          <button id="reset-app-btn" class="p-2 rounded-full bg-white/60 hover:bg-red-100 text-red-500" title="إعادة الضبط"><i data-lucide="refresh-cw" class="w-5 h-5"></i></button>
         </header>
         <main class="flex-grow flex flex-col justify-center items-center text-center">
           <div class="w-44 h-44 md:w-48 md:h-48 bg-white/60 backdrop-blur-sm rounded-full flex items-center justify-center mb-6"><i data-lucide="bot" class="w-24 h-24 md:w-28 md:h-28 text-sky-600"></i></div>
@@ -178,7 +179,7 @@
         </main>
       </section>
 
-      <!-- شاشة المحادثة -->
+      <!-- المحادثة -->
       <section id="chat-screen" class="screen bg-screen flex-col">
         <header class="bg-white p-4 flex items-center gap-4 border-b border-slate-200">
           <button id="end-chat-btn" class="p-2 rounded-full hover:bg-slate-100"><i data-lucide="arrow-right"></i></button>
@@ -197,56 +198,15 @@
       </section>
     `;
 
-    /* ============== حالة وتوصيفات ============== */
-    const $ = id => document.getElementById(id);
-    const dom = {
-      startBtn: $('start-btn'),
-      introBack: $('intro-back'),
-      introAccept: $('intro-accept'),
+    const $ = (id) => document.getElementById(id);
+    const show = (id) => document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id));
 
-      ageBtns: [...document.querySelectorAll('.age-btn')],
-      genderBtns: [...document.querySelectorAll('.gender-btn')],
-      nameInput: $('child-name-input'),
-      continueProfile: $('continue-profile-btn'),
-
-      personality: $('child-personality'),
-      challenges: $('child-challenges'),
-      analyzeBtn: $('analyze-btn'),
-
-      loading: $('loading-spinner'),
-      planContent: $('plan-content'),
-      planSummary: $('ai-analysis-summary'),
-      needsList: $('ai-needs-hypo'),
-      stepsList: $('ai-plan-steps'),
-      approve: $('approve-plan-btn'),
-      requestEdit: $('request-edit-btn'),
-
-      reason: $('plan-change-reason'),
-      reAnalyze: $('re-analyze-btn'),
-
-      greeting: $('home-greeting'),
-      aiIntro: $('home-ai-name-intro'),
-      introText: $('home-intro-text'),
-      mission: $('home-mission-status'),
-      startChat: $('initiate-chat-btn'),
-
-      chatMessages: $('chat-messages'),
-      chatOptions: $('chat-options-container'),
-      chatForm: $('chat-form'),
-      chatInput: $('chat-input'),
-      endChat: $('end-chat-btn'),
-      languageToggle: $('language-toggle-btn'),
-
-      reset: $('reset-app-btn')
-    };
-
+    /* =============== الحالة =============== */
+    const STORAGE = 'sadiki-ai-v23';
     let state = {};
-    const STORAGE = 'sadiki-v22';
-    const API = '/.netlify/functions/gemini';
-    const show = id => document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id===id));
-    const save = () => { try{ localStorage.setItem(STORAGE, JSON.stringify(state)); }catch{} };
-    const load = () => { try{ const d=localStorage.getItem(STORAGE); if(d){ state=JSON.parse(d); return true;} }catch{} return false; };
-    const resetState = () => state = { language:'ar', age:null, gender:null, name:null, aiName:null, parentDesc:null, plan:null, chat:[], step:0, assessment:null };
+    const save = ()=>{ try{ localStorage.setItem(STORAGE, JSON.stringify(state)); }catch{} };
+    const load = ()=>{ try{ const d=localStorage.getItem(STORAGE); if(d){ state=JSON.parse(d); return true; } }catch{} return false; };
+    const resetState = ()=> state = { language:'ar', age:null, gender:null, name:null, aiName:null, parentDesc:null, plan:null, chat:[], step:0, assessment:null };
 
     const UAE_COMPLIANCE = `
 - التزم بقوانين الإمارات والمعايير الدولية لسلامة الطفل.
@@ -262,19 +222,44 @@
       return 'صديقي الذكي';
     };
 
-    /* ============== تنقّل البداية ============== */
+    /* =============== عناصر DOM =============== */
+    const dom = {
+      startBtn: $('start-btn'), introBack: $('intro-back'), introAccept: $('intro-accept'),
+
+      ageBtns: [...document.querySelectorAll('.age-btn')],
+      genderBtns: [...document.querySelectorAll('.gender-btn')],
+      nameInput: $('child-name-input'),
+      continueProfile: $('continue-profile-btn'),
+
+      personality: $('child-personality'), challenges: $('child-challenges'),
+      analyzeBtn: $('analyze-btn'),
+
+      loading: $('loading-spinner'), planContent: $('plan-content'),
+      planSummary: $('ai-analysis-summary'), needsList: $('ai-needs-hypo'), stepsList: $('ai-plan-steps'),
+      approve: $('approve-plan-btn'), requestEdit: $('request-edit-btn'),
+
+      reason: $('plan-change-reason'), reAnalyze: $('re-analyze-btn'),
+
+      greeting: $('home-greeting'), aiIntro: $('home-ai-name-intro'), introText: $('home-intro-text'),
+      mission: $('home-mission-status'), startChat: $('initiate-chat-btn'),
+
+      chatMessages: $('chat-messages'), chatOptions: $('chat-options-container'),
+      chatForm: $('chat-form'), chatInput: $('chat-input'),
+      endChat: $('end-chat-btn'), languageToggle: $('language-toggle-btn'),
+      resetApp: $('reset-app-btn')
+    };
+
+    /* =============== تنقّل البداية =============== */
     dom.startBtn.addEventListener('click', ()=> show('intro-screen'));
     dom.introBack.addEventListener('click', ()=> show('start-screen'));
     dom.introAccept.addEventListener('click', ()=> show('profile-setup-screen'));
 
-    /* ============== ملف الطفل ============== */
+    /* =============== الملف الشخصي =============== */
     dom.ageBtns.forEach(b=>b.addEventListener('click',e=>{
-      state.age=e.currentTarget.dataset.age;
-      dom.ageBtns.forEach(x=>x.classList.remove('selected')); e.currentTarget.classList.add('selected'); validateProfile();
+      state.age=e.currentTarget.dataset.age; dom.ageBtns.forEach(x=>x.classList.remove('selected')); e.currentTarget.classList.add('selected'); validateProfile();
     }));
     dom.genderBtns.forEach(b=>b.addEventListener('click',e=>{
-      state.gender=e.currentTarget.dataset.gender;
-      dom.genderBtns.forEach(x=>x.classList.remove('selected')); e.currentTarget.classList.add('selected'); validateProfile();
+      state.gender=e.currentTarget.dataset.gender; dom.genderBtns.forEach(x=>x.classList.remove('selected')); e.currentTarget.classList.add('selected'); validateProfile();
     }));
     dom.nameInput.addEventListener('input', validateProfile);
     dom.continueProfile.addEventListener('click', ()=>{
@@ -287,7 +272,7 @@
       dom.continueProfile.disabled = !(dom.nameInput.value.trim().length>1 && state.age && state.gender);
     }
 
-    /* ============== إدخال وليّ الأمر → خطة ============== */
+    /* =============== إدخال ولي الأمر → خطة =============== */
     dom.personality.addEventListener('input', validateParent);
     dom.challenges.addEventListener('input', validateParent);
     function validateParent(){ dom.analyzeBtn.disabled = !(dom.personality.value.trim().length>5 && dom.challenges.value.trim().length>10); }
@@ -295,6 +280,37 @@
     dom.analyzeBtn.addEventListener('click', ()=> generatePlan(false));
     dom.reAnalyze.addEventListener('click', ()=> generatePlan(true));
 
+    /* =============== بروكسي Gemini (Pro-first) =============== */
+    async function callAIProxy({ systemInstruction, history, mode='chat', forceLang='ar' }) {
+      const messages = Array.isArray(history) ? history.map(m => ({
+        role: m.role === 'user' ? 'user' : 'model',
+        content: (m.parts?.[0]?.text || '')
+      })) : [];
+
+      const body = {
+        system: systemInstruction || '',
+        messages,
+        model: "auto",
+        mode,              // "plan" | "default"
+        force_lang: forceLang,
+        guard_level: "strict",
+        long: true,
+        max_chunks: 4,
+        stream: false,
+        timeout_ms: 28000
+      };
+
+      const resp = await fetch('/.netlify/functions/gemini-proxy', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+      });
+      if (!resp.ok) {
+        let err = 'Network error'; try { err = (await resp.json()).error || resp.statusText; } catch {}
+        throw new Error(err);
+      }
+      return resp.json(); // { text, model, lang, ... }
+    }
+
+    /* =============== Prompts =============== */
     const planPrompt = (desc)=>`
 ${UAE_COMPLIANCE}
 أنت خبير تربية طفل وسلامة رقمية. حلّل وصف وليّ الأمر:
@@ -318,101 +334,6 @@ ${UAE_COMPLIANCE}
 لا تستخدم قوالب؛ ابنِ على وصف وليّ الأمر فقط.
 `;
 
-    async function callAI(payload){
-      const r = await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-      if(!r.ok){ let e=''; try{const j=await r.json(); e=j.error||r.statusText;}catch{e=r.statusText;} throw new Error(e); }
-      return r.json();
-    }
-
-    async function generatePlan(isModification){
-      let desc='';
-      if(isModification){
-        const reason = dom.reason.value.trim();
-        if(reason.length<10){ dom.reason.focus(); return; }
-        desc = (state.parentDesc||'') + ` | أسباب التعديل: ${reason}`;
-      }else{
-        desc = `الشخصية: ${dom.personality.value.trim()} | التحديات: ${dom.challenges.value.trim()}`;
-        state.parentDesc = desc;
-      }
-
-      show('plan-review-screen'); dom.loading.style.display='flex'; dom.planContent.classList.add('hidden');
-      try{
-        const { text } = await callAI({ systemInstruction: planPrompt(desc), history: [] });
-        const json = JSON.parse( (text||'').replace(/```json|```/g,'').trim() );
-        state.plan = json;
-        state.assessment = { spec: json.initialAssessment, result:null, answers:[] };
-        renderPlan(json);
-      }catch(e){
-        // fallback آمن
-        const fb = { analysisSummary:'طفل يحتاج تمهيداً اجتماعياً تدريجياً.', needsHypothesis:['تحية قصيرة','تعزيز ثقة البدء','نشاط لعب مشترك'], planSteps:['قل مرحباً بثقة','اسأل سؤالاً بسيطاً','ادعُ صديقاً لنشاط'], initialAssessment:{ intro:'أسئلة قصيرة نعرف بها ما يناسبك.', items:[{type:'choice',q:'كيف تحس لما تبدأ كلام؟',options:['تمام','شوية','صعب'],map:{'تمام':0,'شوية':1,'صعب':2}},{type:'roleplay',q:'جرّب تحية قصيرة الآن.',success_hint:'ابتسامة + مرحباً'},{type:'selfCheck',q:'ثقتك من 0 إلى 10؟',scaleMin:0,scaleMax:10}], scoring:'≥2 نقاط = احتياج أعلى', safeguards:'عند ذكر إساءة/إيذاء نوقف ونصعّد.' } };
-        state.plan = fb; state.assessment = { spec: fb.initialAssessment, result:null, answers:[] };
-        renderPlan(fb);
-      } finally {
-        dom.loading.style.display='none'; dom.planContent.classList.remove('hidden'); save();
-      }
-    }
-
-    function renderPlan(plan){
-      dom.planSummary.textContent = plan.analysisSummary||'';
-      dom.needsList.innerHTML=''; (plan.needsHypothesis||[]).forEach(n=>{ const li=document.createElement('li'); li.textContent=n; dom.needsList.appendChild(li); });
-      dom.stepsList.innerHTML=''; (plan.planSteps||[]).forEach(s=>{ const li=document.createElement('li'); li.textContent=s; dom.stepsList.appendChild(li); });
-    }
-
-    dom.requestEdit.addEventListener('click', ()=> show('plan-change-screen'));
-    dom.approve.addEventListener('click', ()=>{
-      state.step=0; state.chat=[];
-      save(); updateHome(); show('home-screen');
-      // الاختبار الأولي مباشرة
-      startAssessment(); 
-    });
-
-    /* ============== الاختبار الأولي ============== */
-    function startAssessment(){
-      const spec = state.assessment?.spec; if(!spec) return;
-      pushModel( (spec.intro||'نبدأ باختبار قصير يساعدنا نعرف الأفضل لك.') + '\n\n- موافق\n- متردد' );
-      showOptions('- موافق\n- متردد');
-    }
-    function scoreAssessment(){
-      const items = state.assessment?.spec?.items||[]; let score=0;
-      items.forEach((it,i)=>{
-        const a=state.assessment.answers[i];
-        if(it.type==='choice' && it.map && a in it.map) score += it.map[a];
-        if(it.type==='selfCheck' && typeof a==='number') score += a>=7?2:(a>=4?1:0);
-      });
-      const level = score>=3 ? 'احتياج مرتفع' : (score>=1 ? 'احتياج متوسط' : 'احتياج منخفض');
-      state.assessment.result = { score, level, at: Date.now() }; save();
-    }
-
-    /* ============== محادثة ============== */
-    function addMsg(text, role='model'){
-      const el=document.createElement('div');
-      el.className = `chat-bubble max-w-[80%] rounded-2xl p-3 ${role==='user'?'bg-sky-600 text-white self-end':'bg-slate-200 text-slate-800 self-start'}`;
-      el.innerText = text; dom.chatMessages.appendChild(el);
-      setTimeout(()=>dom.chatMessages.scrollTop=dom.chatMessages.scrollHeight,30);
-    }
-    function showOptions(text){
-      dom.chatOptions.innerHTML='';
-      if(!text) return;
-      text.split('\n').map(t=>t.trim()).filter(Boolean).forEach(t=>{
-        const clean=t.replace(/^- /,'');
-        const b=document.createElement('button');
-        b.className='w-full text-sky-700 bg-sky-100 font-medium py-2 px-3 rounded-lg hover:bg-sky-200 text-sm';
-        b.innerText=clean; b.addEventListener('click',()=>handleUser(clean));
-        dom.chatOptions.appendChild(b);
-      });
-    }
-    function pushModel(text){ addMsg(text,'model'); state.chat.push({role:'model',parts:[{text}]}); save(); }
-    function handleUser(text){
-      addMsg(text,'user'); state.chat.push({role:'user',parts:[{text}]}); save();
-      // أثناء الاختبار
-      const spec = state.assessment?.spec;
-      if(spec && !state.assessment.result){
-        const n=Number(text); state.assessment.answers.push(!Number.isNaN(n)&&/^\d+$/.test(text)?n:text);
-        if(state.assessment.answers.length >= (spec.items||[]).length) scoreAssessment();
-      }
-      respond();
-    }
-
     const chatRules = ()=>{
       const lang = state.language==='ar'?'Emirati Arabic':'English';
       const persona = (()=>{
@@ -428,54 +349,174 @@ ASSESSMENT: ${JSON.stringify(state.assessment?.result||{})}
 STRICT:
 1) استخدم ${lang} فقط.
 2) المنهجية: Intro → Practice → Mission → Follow-up. الأسلوب: ${persona.s}.
-3) لا قوالب ثابتة؛ اربط الردود بمدخلات الوالدين والخطة والاختبار.
+3) اربط الردود بمدخلات الوالدين والخطة والاختبار—بدون قوالب ثابتة.
 4) اقترح خيارات مشاعر/ردود فعل الطفل فقط. افصل الرد عن الخيارات بسطر فارغ وتبدأ الخيارات بـ "- ".
-5) عند مؤشرات خطر: أوقف التقدم وقدّم رسالة تصعيد جاهزة لوليّ الأمر/المدرسة.
+5) عند مؤشرات خطر: أوقف التقدم وقدّم رسالة تصعيد لوليّ الأمر/المدرسة.
 `;
     };
+
+    /* =============== توليد الخطة (بدون أي سيناريو ثابت) =============== */
+    async function generatePlan(isModification){
+      let desc='';
+      if(isModification){
+        const reason = dom.reason.value.trim(); if(reason.length<10){ dom.reason.focus(); return; }
+        desc = (state.parentDesc||'') + ` | أسباب التعديل: ${reason}`;
+      }else{
+        desc = `الشخصية: ${dom.personality.value.trim()} | التحديات: ${dom.challenges.value.trim()}`;
+        state.parentDesc = desc;
+      }
+
+      show('plan-review-screen'); dom.loading.style.display='flex'; dom.planContent.classList.add('hidden');
+
+      let attempt=0, maxAttempts=2, lastErr='';
+      while(attempt<maxAttempts){
+        try{
+          const { text } = await callAIProxy({ systemInstruction: planPrompt(desc), history: [], mode:'plan', forceLang:'ar' });
+          const plan = JSON.parse( (text||'').replace(/```json|```/g,'').trim() );
+          state.plan = plan;
+          state.assessment = { spec: plan.initialAssessment, result:null, answers:[] };
+          renderPlan(plan);
+          dom.loading.style.display='none'; dom.planContent.classList.remove('hidden'); save();
+          return;
+        }catch(e){ lastErr = e.message||String(e); attempt++; }
+      }
+      // فشل → زر إعادة محاولة
+      dom.loading.style.display='none';
+      $('plan-review-screen').innerHTML = `
+        <div class="flex flex-col items-center justify-center text-center gap-3 py-12">
+          <i data-lucide="wifi-off" class="w-16 h-16 text-amber-500"></i>
+          <h3 class="text-xl font-bold">تعذّر إنشاء الخطة الآن</h3>
+          <p class="text-slate-600 text-sm max-w-md">السبب: ${lastErr}</p>
+          <div class="flex gap-3">
+            <button id="retry-plan" class="bg-sky-600 text-white font-bold py-3 px-6 rounded-full hover:bg-sky-700">إعادة المحاولة</button>
+            <button id="back-to-parent" class="bg-slate-200 text-slate-800 font-bold py-3 px-6 rounded-full hover:bg-slate-300">رجوع</button>
+          </div>
+        </div>`;
+      lucide.createIcons();
+      $('retry-plan').addEventListener('click', ()=>generatePlan(isModification));
+      $('back-to-parent').addEventListener('click', ()=>show('parent-input-screen'));
+    }
+
+    function renderPlan(plan){
+      dom.planSummary.textContent = plan.analysisSummary||'';
+      dom.needsList.innerHTML=''; (plan.needsHypothesis||[]).forEach(n=>{ const li=document.createElement('li'); li.textContent=n; dom.needsList.appendChild(li); });
+      dom.stepsList.innerHTML=''; (plan.planSteps||[]).forEach(s=>{ const li=document.createElement('li'); li.textContent=s; dom.stepsList.appendChild(li); });
+      dom.planContent.classList.remove('hidden');
+    }
+
+    dom.requestEdit.addEventListener('click', ()=> show('plan-change-screen'));
+    dom.approve.addEventListener('click', ()=>{
+      state.step=0; state.chat=[];
+      save(); updateHome(); show('home-screen');
+      beginAIOnboarding();
+    });
+
+    /* =============== الاختبار الأولي (يديره الذكاء) =============== */
+    function beginAIOnboarding(){
+      show('chat-screen');
+      dom.chatMessages.innerHTML=''; dom.chatOptions.innerHTML='';
+      const kick = state.language==='ar'
+        ? `ابدأ الاختبار الأولي خطوة بخطوة من initialAssessment الموجودة في الخطة. قدّم المقدمة ثم السؤال الأول فقط. بعد إجابة الطفل انتقل للسؤال التالي تلقائياً.`
+        : `Begin the initial assessment step-by-step from the plan's initialAssessment. Provide intro then first item only; proceed item by item after the child's reply.`;
+      handleUser(kick);
+    }
+
+    function scoreAssessment(){
+      const items = state.assessment?.spec?.items||[]; let score=0;
+      items.forEach((it,i)=>{
+        const a=state.assessment.answers[i];
+        if(it.type==='choice' && it.map && a in it.map) score += it.map[a];
+        if(it.type==='selfCheck' && typeof a==='number') score += a>=7?2:(a>=4?1:0);
+      });
+      const level = score>=3 ? 'احتياج مرتفع' : (score>=1 ? 'احتياج متوسط' : 'احتياج منخفض');
+      state.assessment.result = { score, level, at: Date.now() }; save();
+    }
+
+    /* =============== المحادثة =============== */
+    function addMsg(text, role='model'){
+      const el=document.createElement('div');
+      el.className=`chat-bubble max-w-[80%] rounded-2xl p-3 ${role==='user'?'bg-sky-600 text-white self-end':'bg-slate-200 text-slate-800 self-start'}`;
+      el.innerText=text; dom.chatMessages.appendChild(el);
+      setTimeout(()=>dom.chatMessages.scrollTop=dom.chatMessages.scrollHeight,30);
+    }
+    function showOptions(text){
+      dom.chatOptions.innerHTML=''; if(!text) return;
+      text.split('\n').map(t=>t.trim()).filter(Boolean).forEach(line=>{
+        const clean=line.replace(/^- /,'');
+        const b=document.createElement('button');
+        b.className='w-full text-sky-700 bg-sky-100 font-medium py-2 px-3 rounded-lg hover:bg-sky-200 text-sm';
+        b.innerText=clean; b.addEventListener('click',()=>handleUser(clean));
+        dom.chatOptions.appendChild(b);
+      });
+    }
+    function pushModel(text){ addMsg(text,'model'); state.chat.push({role:'model',parts:[{text}]}); save(); }
+
+    function showTyping(){
+      const el=`<div id="typing" class="chat-bubble self-start bg-slate-200 p-3 rounded-2xl"><span class="inline-block w-2 h-2 bg-slate-500 rounded-full animate-pulse"></span></div>`;
+      dom.chatMessages.insertAdjacentHTML('beforeend',el); dom.chatMessages.scrollTop=dom.chatMessages.scrollHeight;
+    }
+    function hideTyping(){ document.getElementById('typing')?.remove(); }
 
     async function respond(){
       showTyping();
       try{
-        const { text } = await callAI({ systemInstruction: chatRules(), history: state.chat });
+        const { text } = await callAIProxy({ systemInstruction: chatRules(), history: state.chat, mode:'default', forceLang: (state.language==='ar'?'ar':'en') });
         hideTyping();
-        const [main,...rest] = (text||'').split(/\n\n/); const opts=rest.join('\n\n');
+        const [main,...rest]=(text||'').split(/\n\n/); const opts=rest.join('\n\n');
         pushModel(main||''); showOptions(opts);
       }catch(e){
-        hideTyping(); pushModel('حدثت مشكلة اتصال بسيطة. لنجرّب مرة أخرى.');
+        hideTyping(); pushModel('توقف مؤقت في الاتصال. اضغط أي خيار أو اكتب للمتابعة.');
       }
     }
-    function showTyping(){
-      const el=`<div id="typing" class="chat-bubble self-start bg-slate-200 p-3 rounded-2xl"><div class="typing-indicator"><span class="w-2 h-2 bg-slate-400 rounded-full inline-block"></span><span class="w-2 h-2 bg-slate-400 rounded-full inline-block"></span><span class="w-2 h-2 bg-slate-400 rounded-full inline-block"></span></div></div>`;
-      dom.chatMessages.insertAdjacentHTML('beforeend',el);
-      dom.chatMessages.scrollTop = dom.chatMessages.scrollHeight;
+
+    function handleUser(text){
+      addMsg(text,'user'); state.chat.push({role:'user',parts:[{text}]}); save();
+
+      // الالتقاط البسيط لإجابات الاختبار الأولي (اختياري)
+      const spec = state.assessment?.spec;
+      if(spec && !state.assessment.result){
+        const last = text.trim();
+        const asNumber = /^\d+$/.test(last) ? Number(last) : null;
+        state.assessment.answers.push(asNumber ?? last);
+        if(state.assessment.answers.length >= (spec.items||[]).length) scoreAssessment();
+      }
+      respond();
     }
-    function hideTyping(){ document.getElementById('typing')?.remove(); }
 
     dom.chatForm.addEventListener('submit', e=>{ e.preventDefault(); const v=dom.chatInput.value.trim(); if(v){ handleUser(v); dom.chatInput.value=''; } });
     dom.endChat.addEventListener('click', ()=>{ show('home-screen'); updateHome(); });
 
-    /* ============== واجهة الطفل ============== */
+    /* =============== واجهة الطفل =============== */
     function updateHome(){
       const t={ ar:{g:`مرحباً يا ${state.name}`,m:`هدفنا:`,ready:`جاهز لمغامرة اليوم؟`,ai:`أنا ${state.aiName}`,desc:{'ذكر':'رفيجك الرقمي اللي بيساعدك خطوة بخطوة.','أنثى':'رفيجتج الرقمية اللي بتساعدج خطوة بخطوة.'},chat:`ابدأ الدردشة مع ${state.aiName}`,ph:'اكتب ردك هنا...'},
                en:{g:`Welcome, ${state.name}`,m:`Our goal:`,ready:`Ready for today’s adventure?`,ai:`I'm ${state.aiName}`,desc:{'ذكر':'Your digital buddy to help you step by step.','أنثى':'Your digital buddy to help you step by step.'},chat:`Start chat with ${state.aiName}`,ph:'Type your reply here...'} };
       const L=t[state.language];
-      dom.greeting.textContent=L.g; dom.aiIntro.textContent=L.ai; dom.introText.textContent=L.desc[state.gender];
-      $('start-chat-btn-text').textContent=L.chat; dom.chatInput.placeholder=L.ph;
-      dom.mission.textContent = (state.plan?.planSteps?.[state.step]) ? `${L.m} ${state.plan.planSteps[state.step]}` : L.ready;
+      $('home-greeting').textContent=L.g; $('home-ai-name-intro').textContent=L.ai; $('home-intro-text').textContent=L.desc[state.gender];
+      $('start-chat-btn-text').textContent=L.chat; $('chat-input').placeholder=L.ph;
+      $('home-mission-status').textContent = (state.plan?.planSteps?.[state.step]) ? `${L.m} ${state.plan.planSteps[state.step]}` : L.ready;
+      $('chat-header-name').textContent = state.aiName;
     }
 
+    $('language-toggle-btn').addEventListener('click', ()=>{
+      state.language = state.language==='ar' ? 'en' : 'ar'; save(); updateHome();
+      state.chat.push({role:'user',parts:[{text:`(System instruction: switch language to ${state.language}.)`}]}); respond();
+    });
     dom.startChat.addEventListener('click', ()=>{
       show('chat-screen'); dom.chatMessages.innerHTML=''; dom.chatOptions.innerHTML='';
-      if(state.chat.length){ state.chat.forEach(m=>addMsg(m.parts[0].text,m.role)); const last=state.chat[state.chat.length-1]; if(last.role==='model') { const [_,...rest]=last.parts[0].text.split(/\n\n/); showOptions(rest.join('\n\n')); } }
-      else { const hello = state.language==='ar'?`مرحباً يا ${state.aiName}، أنا ${state.name} وجاهز للبدء.`:`Hi ${state.aiName}, I'm ${state.name} and ready to start.`; handleUser(hello); }
+      if(state.chat.length){
+        state.chat.forEach(m=>addMsg(m.parts[0].text,m.role));
+        const last=state.chat[state.chat.length-1]; if(last.role==='model'){ const [_,...rest]=last.parts[0].text.split(/\n\n/); showOptions(rest.join('\n\n')); }
+      } else {
+        const hello = state.language==='ar'?`مرحباً يا ${state.aiName}، أنا ${state.name} وجاهز للبدء.`:`Hi ${state.aiName}, I'm ${state.name} and ready to start.`; handleUser(hello);
+      }
     });
 
-    dom.reset.addEventListener('click', ()=>{ localStorage.removeItem(STORAGE); location.reload(); });
+    dom.resetApp.addEventListener('click', ()=>{ localStorage.removeItem(STORAGE); location.reload(); });
 
-    /* ============== تهيئة ============== */
+    /* =============== بدء التشغيل =============== */
     function init(){
       const ok = load();
+      if(!ok){ resetState(); }
       if(ok && state.name){ updateHome(); show('home-screen'); }
       lucide.createIcons();
     }
