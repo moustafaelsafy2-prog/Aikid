@@ -25,6 +25,8 @@
       --safeB: env(safe-area-inset-bottom, 0px);
       --card: rgba(248,250,252,.92);
       --footerH: 0px;                                   /* تُملأ آليًا من JS */
+      --chatHeadH: 56px;                                /* ارتفاع هيدر المحادثة */
+      --chatFootH: 68px;                                /* ارتفاع فوتر المحادثة */
     }
 
     /* قاعدة أساسية لكل الأجهزة */
@@ -86,11 +88,12 @@
     /* خلفية زجاجية للكروت */
     .bg-screen{ background:var(--card); backdrop-filter: blur(4px); }
 
-    /* تذييل ثابت متوافق */
+    /* ====== تذييل ثابت (لا يتحرك) لكل الأجهزة ====== */
     .app-footer{
-      position: sticky;
+      position: fixed;                 /* ثابت */
       bottom: 0;
-      inset-inline: 0;
+      left: 0;
+      right: 0;
       z-index: 40;
       background: rgba(255,255,255,.92);
       backdrop-filter: blur(6px);
@@ -98,18 +101,44 @@
       padding-bottom: max(8px, calc(var(--safeB)/2));
     }
 
-    /* كل شاشة قابلة للتمرير بسلاسة مع حشوة أسفل تضمن عدم قص الأزرار */
+    /* كل شاشة قابلة للتمرير بسلاسة مع حشوة أسفل تضمن عدم قص الأزرار
+       (نضيف حشوة مساوية لارتفاع فوتر المحادثة + فوتر التطبيق الثابت) */
     .screen{
       min-height: 0;                  /* لإصلاح flex overflow على Safari/Android */
       flex: 1 1 auto;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
-      padding-bottom: calc(var(--footerH) + var(--safeB) + 24px);
+      padding-bottom: calc(var(--chatFootH) + var(--footerH) + var(--safeB) + 24px);
       padding-top: max(0px, var(--safeT));
     }
     /* شاشة مراجعة الخطة تحتاج مساحة أكبر لزرّي الموافقة/التعديل */
-    #plan-review-screen #plan-content{ padding-bottom: calc(var(--footerH) + var(--safeB) + 64px); }
+    #plan-review-screen #plan-content{ padding-bottom: calc(var(--chatFootH) + var(--footerH) + var(--safeB) + 64px); }
     #plan-review-screen .bg-white{ overflow: visible; } /* لمنع قصّ القوائم الطويلة */
+
+    /* ====== هيدر المحادثة ثابت ====== */
+    #chat-screen > header{
+      position: fixed;                /* ثابت */
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 50;
+      background: #ffffff;
+    }
+    /* مساحة أعلى منطقة رسائل المحادثة = ارتفاع الهيدر الثابت */
+    #chat-screen #chat-messages{
+      padding-top: calc(var(--chatHeadH) + 8px);
+    }
+
+    /* ====== فوتر المحادثة ثابت فوق فوتر التطبيق ====== */
+    #chat-screen #chat-footer{
+      position: fixed;                /* ثابت */
+      left: 0;
+      right: 0;
+      bottom: calc(var(--footerH));  /* فوق فوتر التطبيق */
+      z-index: 49;
+      background: rgba(255,255,255,.9);
+      backdrop-filter: blur(6px);
+    }
 
     /* عناصر المحادثة (فقاعات واتساب مبسطة) */
     #chat-messages{ display:flex; flex-direction:column; gap:.5rem; scroll-padding-bottom:160px; }
@@ -162,7 +191,6 @@
     .brand-gradient{ background:linear-gradient(135deg,#0ea5e9 0%,#14b8a6 100%); -webkit-background-clip:text; background-clip:text; color:transparent; }
     .hit{ min-height:44px; min-width:44px; }
     #chat-screen{ position:relative; }
-    #chat-screen footer{ position:sticky; bottom:0; z-index:10; }
 
     /* تحسينات لأوضاع العرض المختلفة */
     @media (orientation:landscape){
@@ -181,7 +209,7 @@
       <!-- المحتوى يُحقن ديناميكياً -->
       <main id="main" class="flex-1 relative flex flex-col" role="main" aria-label="المحتوى الرئيسي"></main>
 
-      <!-- تذييل متوافق مع كل الأجهزة -->
+      <!-- تذييل متوافق مع كل الأجهزة (ثابت) -->
       <footer id="app-footer" class="app-footer w-full shrink-0" role="contentinfo" aria-label="تذييل">
         <div class="px-3 py-2 text-[11px] sm:text-xs flex flex-col sm:flex-row items-center justify-between gap-2">
           <div class="flex items-center gap-2" aria-label="شعارات الأمان">
@@ -375,7 +403,7 @@
 
       <!-- المحادثة -->
       <section id="chat-screen" class="screen bg-screen flex-col" aria-label="المحادثة">
-        <header class="bg-white p-4 flex items-center gap-4 border-b border-slate-200 sticky top-0 z-30">
+        <header class="bg-white p-4 flex items-center gap-4 border-b border-slate-200">
           <button id="end-chat-btn" class="p-2 rounded-full hover:bg-slate-100 hit" aria-label="إنهاء الدردشة"><i data-lucide="arrow-right"></i></button>
           <div class="w-10 h-10 bg-gradient-to-br from-cyan-100 to-sky-200 rounded-full flex items-center justify-center"><i data-lucide="bot" class="w-6 ه-6 text-sky-600" aria-hidden="true"></i></div>
           <div class="flex-grow"><h3 id="chat-header-name" class="font-bold"></h3><p class="text-xs text-green-500 font-medium flex items-center gap-1"><span class="w-2 ه-2 bg-green-400 rounded-full"></span>متصل</p></div>
@@ -383,7 +411,7 @@
           <button id="language-toggle-btn" class="p-2 rounded-full hover:bg-slate-100 text-slate-600 hit" title="تبديل اللغة" aria-label="تبديل اللغة"><i data-lucide="languages" class="w-5 ه-5"></i></button>
         </header>
         <main id="chat-messages" class="flex-grow p-4 overflow-y-auto" aria-live="polite"></main>
-        <footer id="chat-footer" class="p-4 border-t border-slate-200 bg-white/90 backdrop-blur-sm">
+        <footer id="chat-footer" class="p-4 border-t border-slate-200">
           <p id="free-text-hint" class="text-[12px] text-slate-500 mb-2 hidden"></p>
           <div id="chat-options-container" class="mb-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2" role="listbox" aria-label="مقترحات الرد"></div>
           <form id="chat-form" class="flex items-center gap-2" aria-label="إرسال رسالة">
@@ -412,14 +440,27 @@
       window.visualViewport.addEventListener('scroll', setVH);
     }
 
-    /* قياس ارتفاع التذييل لتفادي تغطية الأزرار/النصوص */
+    /* قياس ارتفاع فوتر التطبيق الثابت + هيدر/فوتر المحادثة الثابتين لضبط الحشوات */
     const appFooter = document.getElementById('app-footer');
+    const chatHeader = document.querySelector('#chat-screen > header');
+    const chatFooter = document.getElementById('chat-footer');
+
     const setFooterVar = () => {
       const h = appFooter?.getBoundingClientRect().height || 0;
       document.documentElement.style.setProperty('--footerH', h + 'px');
     };
+    const setChatBarsVars = () => {
+      const hh = chatHeader?.getBoundingClientRect().height || 56;
+      const hf = chatFooter?.getBoundingClientRect().height || 68;
+      document.documentElement.style.setProperty('--chatHeadH', hh + 'px');
+      document.documentElement.style.setProperty('--chatFootH', hf + 'px');
+    };
+
     setFooterVar();
+    setChatBarsVars();
     new ResizeObserver(setFooterVar).observe(appFooter);
+    if (chatHeader) new ResizeObserver(setChatBarsVars).observe(chatHeader);
+    if (chatFooter) new ResizeObserver(setChatBarsVars).observe(chatFooter);
 
     /* ============ ثوابت أمان PIN (محلي) ============ */
     const PIN_CODE = '2222';
@@ -481,7 +522,9 @@
     /* ============ مساعدات عرض للمحادثة ============ */
     function adjustChatPadding(){
       const pad = (dom.chatFooter?.getBoundingClientRect().height || 96) + 24;
-      dom.chatMessages.style.paddingBottom = pad+'px';
+      // إضافة مسافة أسفل الرسائل تكفي فوتر المحادثة + فوتر التطبيق
+      document.documentElement.style.setProperty('--chatFootH', (dom.chatFooter?.getBoundingClientRect().height || 68) + 'px');
+      dom.chatMessages.style.paddingBottom = `calc(var(--chatFootH) + 16px)`;
       dom.chatMessages.scrollTop = dom.chatMessages.scrollHeight;
     }
     new ResizeObserver(adjustChatPadding).observe(dom.chatFooter);
