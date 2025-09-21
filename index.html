@@ -162,7 +162,7 @@
 
       <!-- الملف الشخصي -->
       <section id="profile-setup-screen" class="screen bg-screen flex-col p-8 overflow-y-auto" aria-label="ملف الطفل">
-        <i data-lucide="user-round-check" class="w-16 ه-16 text-sky-500 mx-auto mb-6" aria-hidden="true"></i>
+        <i data-lucide="user-round-check" class="w-16 h-16 text-sky-500 mx-auto mb-6" aria-hidden="true"></i>
         <h2 class="text-2xl font-bold text-center mb-2">ملف البطل الشخصي</h2>
         <div class="w-full space-y-6">
           <div><label class="font-bold mb-2 block" for="child-name-input">اسم الطفل/الطفلة</label>
@@ -190,7 +190,7 @@
 
       <!-- إدخال وليّ الأمر -->
       <section id="parent-input-screen" class="screen bg-screen flex-col p-8 overflow-y-auto" aria-label="رؤية وليّ الأمر">
-        <i data-lucide="file-text" class="w-16 ه-16 text-sky-500 mx-auto mb-6" aria-hidden="true"></i>
+        <i data-lucide="file-text" class="w-16 h-16 text-sky-500 mx-auto mb-6" aria-hidden="true"></i>
         <h2 class="text-2xl font-bold text-center mb-2">رؤية وليّ الأمر</h2>
         <p class="text-slate-600 text-center mb-6">كلما كانت التفاصيل أدق، كانت الخطة أفضل. لا نطلب بيانات تعريفية.</p>
         <div class="space-y-6">
@@ -210,7 +210,7 @@
           <p class="text-slate-500">يستغرق لحظات.</p>
         </div>
         <div id="plan-content" class="hidden flex-col">
-          <i data-lucide="clipboard-check" class="w-16 ه-16 text-green-500 mx-auto mb-6" aria-hidden="true"></i>
+          <i data-lucide="clipboard-check" class="w-16 h-16 text-green-500 mx-auto mb-6" aria-hidden="true"></i>
           <h2 class="text-2xl font-bold text-center mb-2">الخطة المقترحة (للمراجعة)</h2>
           <p class="text-slate-600 text-center mb-6">اختر: <b>موافقة</b> أو <b>طلب تعديل</b>. عند التعديل نجمع الأسباب ونولّد خطة جديدة.</p>
           <div class="bg-white border border-slate-200 rounded-xl p-4 space-y-4">
@@ -227,7 +227,7 @@
 
       <!-- أسباب التعديل -->
       <section id="plan-change-screen" class="screen bg-screen flex-col p-8 overflow-y-auto" aria-label="أسباب التعديل">
-        <i data-lucide="edit" class="w-16 ه-16 text-sky-500 mx-auto mb-6" aria-hidden="true"></i>
+        <i data-lucide="edit" class="w-16 h-16 text-sky-500 mx-auto mb-6" aria-hidden="true"></i>
         <h2 class="text-2xl font-bold text-center mb-2">أسباب التعديل</h2>
         <textarea id="plan-change-reason" rows="6" class="w-full bg-white/90 border-2 border-slate-200 rounded-xl p-3 text-lg focus:outline-none focus:border-sky-400" placeholder="اذكر الأسباب المحددة: صعوبة خطوة، مواقف واقعية، أهداف جديدة، حساسية ثقافية/مدرسية..."></textarea>
         <div class="mt-6"><button id="re-analyze-btn" class="w-full bg-sky-600 text-white font-bold py-3 px-6 rounded-full text-lg shadow hover:bg-sky-700 hit" aria-label="إعادة التحليل">إعادة التحليل وإنتاج خطة جديدة</button></div>
@@ -238,8 +238,8 @@
         <header class="flex justify-between items-center mb-6">
           <div><p id="home-greeting" class="text-slate-500"></p><h2 id="home-mission-status" class="text-2xl font-bold">جاهز لمغامرة اليوم؟</h2></div>
           <div class="flex items-center gap-2">
-            <button id="parent-panel-btn" class="p-2 rounded-full bg-white/60 hover:bg-sky-100 text-sky-600 hit" title="لوحة وليّ الأمر" aria-label="لوحة وليّ الأمر"><i data-lucide="file-lock" class="w-5 ه-5"></i></button>
-            <button id="reset-app-btn" class="p-2 rounded-full bg-white/60 hover:bg-red-100 text-red-500 hit" title="حذف المحادثة" aria-label="حذف المحادثة"><i data-lucide="trash-2" class="w-5 ه-5"></i></button>
+            <button id="parent-panel-btn" class="p-2 rounded-full bg-white/60 hover:bg-sky-100 text-sky-600 hit" title="لوحة وليّ الأمر" aria-label="لوحة وليّ الأمر"><i data-lucide="file-lock" class="w-5 h-5"></i></button>
+            <button id="reset-app-btn" class="p-2 rounded-full bg-white/60 hover:bg-red-100 text-red-500 hit" title="حذف المحادثة" aria-label="حذف المحادثة"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
           </div>
         </header>
         <main class="flex-grow flex flex-col justify-center items-center text-center">
@@ -254,10 +254,10 @@
       <section id="chat-screen" class="screen bg-screen flex-col" aria-label="المحادثة">
         <header class="bg-white p-4 flex items-center gap-4 border-b border-slate-200">
           <button id="end-chat-btn" class="p-2 rounded-full hover:bg-slate-100 hit" aria-label="إنهاء الدردشة"><i data-lucide="arrow-right"></i></button>
-          <div class="w-10 h-10 bg-gradient-to-br from-cyan-100 to-sky-200 rounded-full flex items-center justify-center"><i data-lucide="bot" class="w-6 ه-6 text-sky-600" aria-hidden="true"></i></div>
-          <div class="flex-grow"><h3 id="chat-header-name" class="font-bold"></h3><p class="text-xs text-green-500 font-medium flex items-center gap-1"><span class="w-2 h-2 bg-green-400 rounded-full"></span>متصل</p></div>
-          <button id="parent-panel-btn-chat" class="p-2 rounded-full hover:bg-slate-100 text-slate-600 hit" title="لوحة وليّ الأمر" aria-label="لوحة وليّ الأمر"><i data-lucide="file-lock" class="w-5 ه-5"></i></button>
-          <button id="language-toggle-btn" class="p-2 rounded-full hover:bg-slate-100 text-slate-600 hit" title="تبديل اللغة" aria-label="تبديل اللغة"><i data-lucide="languages" class="w-5 ه-5"></i></button>
+          <div class="w-10 h-10 bg-gradient-to-br from-cyan-100 to-sky-200 rounded-full flex items-center justify-center"><i data-lucide="bot" class="w-6 h-6 text-sky-600" aria-hidden="true"></i></div>
+          <div class="flex-grow"><h3 id="chat-header-name" class="font-bold"></h3><p class="text-xs text-green-500 font-medium flex items-center gap-1"><span class="w-2 ه-2 bg-green-400 rounded-full"></span>متصل</p></div>
+          <button id="parent-panel-btn-chat" class="p-2 rounded-full hover:bg-slate-100 text-slate-600 hit" title="لوحة وليّ الأمر" aria-label="لوحة وليّ الأمر"><i data-lucide="file-lock" class="w-5 h-5"></i></button>
+          <button id="language-toggle-btn" class="p-2 rounded-full hover:bg-slate-100 text-slate-600 hit" title="تبديل اللغة" aria-label="تبديل اللغة"><i data-lucide="languages" class="w-5 h-5"></i></button>
         </header>
         <main id="chat-messages" class="flex-grow p-4 overflow-y-auto" aria-live="polite"></main>
         <footer id="chat-footer" class="p-4 border-t border-slate-200 bg-white/90 backdrop-blur-sm">
@@ -265,7 +265,7 @@
           <div id="chat-options-container" class="mb-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2" role="listbox" aria-label="مقترحات الرد"></div>
           <form id="chat-form" class="flex items-center gap-2" aria-label="إرسال رسالة">
             <input id="chat-input" type="text" placeholder="اكتب ردك هنا..." class="w-full bg-white border-2 border-slate-200 rounded-full py-2 px-4 focus:outline-none focus:border-sky-400" autocomplete="off" aria-label="حقل كتابة الرسالة"/>
-            <button type="submit" class="bg-sky-600 text-white rounded-full p-3 hover:bg-sky-700 hit" aria-label="إرسال"><i data-lucide="send-horizontal" class="w-5 ه-5"></i></button>
+            <button type="submit" class="bg-sky-600 text-white rounded-full p-3 hover:bg-sky-700 hit" aria-label="إرسال"><i data-lucide="send-horizontal" class="w-5 h-5"></i></button>
           </form>
         </footer>
       </section>
@@ -695,7 +695,7 @@ ${UAE_COMPLIANCE}
         dom.planContent.classList.add('hidden');
         $('plan-review-screen').innerHTML = `
           <div class="flex flex-col items-center justify-center text-center gap-3 py-12">
-            <i data-lucide="wifi-off" class="w-16 ه-16 text-amber-500" aria-hidden="true"></i>
+            <i data-lucide="wifi-off" class="w-16 h-16 text-amber-500" aria-hidden="true"></i>
             <h3 class="text-xl font-bold">تعذّر إنشاء الخطة الآن</h3>
             <p class="text-slate-500 text-sm">تحقق من الاتصال ثم جرّب مجددًا.</p>
             <button id="retry-plan" class="bg-sky-600 text-white font-bold py-3 px-6 rounded-full hover:bg-sky-700 hit" aria-label="إعادة المحاولة">إعادة المحاولة</button>
@@ -986,15 +986,6 @@ ${UAE_COMPLIANCE}
       if(!ok) resetState();
       if(ok && state.name){ updateHome(); show('home-screen'); }
       if(window.lucide) lucide.createIcons();
-    }
-    function updateHome(){
-      const t={ ar:{g:`مرحباً يا ${state.name||''}`,m:`هدفنا:`,ready:`جاهز لمغامرة اليوم؟`,ai:`أنا ${state.aiName||'صديقك'}`,desc:{'ذكر':'رفيجك الرقمي اللي بيساعدك خطوة بخطوة.','أنثى':'رفيجتج الرقمية اللي بتساعدج خطوة بخطوة.'},chat:`ابدأ الدردشة مع ${state.aiName||'صديقي الذكي'}`,ph:'اكتب ردك هنا...'},
-               en:{g:`Welcome, ${state.name||''}`,m:`Our goal:`,ready:`Ready for today’s adventure?`,ai:`I'm ${state.aiName||'your buddy'}`,desc:{'ذكر':'Your digital buddy to help you step by step.','أنثى':'Your digital buddy to help you step by step.'},chat:`Start chat with ${state.aiName||'Sadiki'}`,ph:'Type your reply here...'} };
-      const L=t[state.language||'ar'];
-      $('home-greeting').textContent=L.g; $('home-ai-name-intro').textContent=L.ai; $('home-intro-text').textContent=L.desc[state.gender||'ذكر'];
-      $('start-chat-btn-text').textContent=L.chat; dom.chatInput.placeholder=L.ph;
-      $('home-mission-status').textContent = (state.plan?.planSteps?.[state.step]) ? `${L.m} ${state.plan.planSteps[state.step]}` : L.ready;
-      $('chat-header-name').textContent = state.aiName || 'صديقي الذكي';
     }
     init();
   });
