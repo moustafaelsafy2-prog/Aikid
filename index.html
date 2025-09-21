@@ -85,47 +85,6 @@
     .screen, .modal{ display:none; }
     .screen.active, .modal.active{ display:flex; }
 
-    /* خلفية متجمّدة للّوحة + إصلاح التمرير */
-    .modal{
-      position: fixed;
-      inset: 0;
-      z-index: 100;                      /* أعلى من الفوتر الثابت */
-      background: rgba(0,0,0,.45);
-      backdrop-filter: blur(4px);
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-    }
-    /* ورقة (Sheet) قابلة للتمرير الداخلي */
-    .modal .sheet{
-      background:#fff;
-      width:100%;
-      max-width: 42rem;                  /* ~ max-w-2xl */
-      max-height: calc(100dvh - 2rem);   /* يمنع تجاوز الشاشة */
-      border-radius: 1rem;
-      box-shadow: 0 20px 50px rgba(0,0,0,.2);
-      display:flex;
-      flex-direction:column;
-      overflow:hidden;                   /* الهيدر ثابت والمحتوى هو الذي يمرّ */
-    }
-    .modal .sheet > header{
-      position: sticky;
-      top: 0;
-      z-index: 1;
-      background:#fff;
-      border-bottom: 1px solid rgb(226 232 240);
-      padding: 1rem;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-    }
-    .modal .sheet .body{
-      flex: 1 1 auto;
-      overflow-y: auto;                  /* هنا التمرير */
-      -webkit-overflow-scrolling: touch; /* نعومة على iOS */
-      padding: 1.5rem;
-    }
-
     /* خلفية زجاجية للكروت */
     .bg-screen{ background:var(--card); backdrop-filter: blur(4px); }
 
@@ -142,7 +101,8 @@
       padding-bottom: max(8px, calc(var(--safeB)/2));
     }
 
-    /* كل شاشة قابلة للتمرير */
+    /* كل شاشة قابلة للتمرير بسلاسة مع حشوة أسفل تضمن عدم قص الأزرار
+       (نضيف حشوة مساوية لارتفاع فوتر المحادثة + فوتر التطبيق الثابت) */
     .screen{
       min-height: 0;                  /* لإصلاح flex overflow على Safari/Android */
       flex: 1 1 auto;
@@ -164,7 +124,10 @@
       z-index: 50;
       background: #ffffff;
     }
-    #chat-screen #chat-messages{ padding-top: calc(var(--chatHeadH) + 8px); }
+    /* مساحة أعلى منطقة رسائل المحادثة = ارتفاع الهيدر الثابت */
+    #chat-screen #chat-messages{
+      padding-top: calc(var(--chatHeadH) + 8px);
+    }
 
     /* ====== فوتر المحادثة ثابت فوق فوتر التطبيق ====== */
     #chat-screen #chat-footer{
@@ -177,7 +140,7 @@
       backdrop-filter: blur(6px);
     }
 
-    /* عناصر المحادثة */
+    /* عناصر المحادثة (فقاعات واتساب مبسطة) */
     #chat-messages{ display:flex; flex-direction:column; gap:.5rem; scroll-padding-bottom:160px; }
     #chat-messages .msg-row{ display:flex; width:100%; }
     #chat-messages .msg-row.user{ justify-content:flex-end !important; }
@@ -229,9 +192,9 @@
     .hit{ min-height:44px; min-width:44px; }
     #chat-screen{ position:relative; }
 
-    /* تحسينات العرض */
+    /* تحسينات لأوضاع العرض المختلفة */
     @media (orientation:landscape){
-      #app-container{ max-width: 60rem; }
+      #app-container{ max-width: 60rem; }      /* يجعل التجربة أفضل على الأجهزة اللوحية بالعرض */
       #chat-messages{ padding-bottom:.25rem; }
     }
     @media (min-width:1024px){
@@ -263,63 +226,53 @@
   </div>
 
   <!-- Modal: حذف / PIN عام -->
-  <div id="pin-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="pin-title">
-    <div class="sheet w-full max-w-sm">
-      <header class="flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <i data-lucide="shield-alert" class="w-5 h-5 text-amber-600" aria-hidden="true"></i>
-          <h3 id="pin-title" class="text-lg font-bold">تأكيد العملية</h3>
-        </div>
-        <button class="p-2 rounded-full hover:bg-slate-100 hit" aria-label="إغلاق" data-close="pin-modal"><i data-lucide="x"></i></button>
-      </header>
-      <div class="body">
-        <p class="text-slate-600 text-sm mb-4">أدخل رمز الحماية (2222).</p>
-        <input id="pin-input" type="tel" inputmode="numeric" maxlength="4" placeholder="••••" class="w-full text-center tracking-[1em] bg-slate-100 border-2 border-slate-200 rounded-xl p-3 text-2xl focus:outline-none focus:border-sky-400" aria-label="إدخال رمز الحماية">
-        <p id="pin-error" class="text-red-500 text-xs mt-2 hidden" role="alert">رمز غير صحيح</p>
-        <p id="pin-lockmsg" class="text-amber-600 text-xs mt-2 hidden" role="alert"></p>
-        <div class="grid grid-cols-2 gap-3 mt-5">
-          <button id="pin-cancel" class="bg-slate-200 text-slate-800 font-bold py-2 rounded-full hit" aria-label="إلغاء">إلغاء</button>
-          <button id="pin-ok" class="bg-red-500 text-white font-bold py-2 rounded-full hit" aria-label="تأكيد">تأكيد</button>
-        </div>
+  <div id="pin-modal" class="modal fixed inset-0 bg-black/45 backdrop-blur-sm items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="pin-title">
+    <div class="bg-white w-full max-w-sm rounded-2xl shadow-xl p-6 text-center">
+      <i data-lucide="shield-alert" class="w-14 h-14 text-amber-500 mx-auto mb-3" aria-hidden="true"></i>
+      <h3 id="pin-title" class="text-lg font-bold mb-1">تأكيد العملية</h3>
+      <p class="text-slate-600 text-sm mb-4">أدخل رمز الحماية (2222).</p>
+      <input id="pin-input" type="tel" inputmode="numeric" maxlength="4" placeholder="••••" class="w-full text-center tracking-[1em] bg-slate-100 border-2 border-slate-200 rounded-xl p-3 text-2xl focus:outline-none focus:border-sky-400" aria-label="إدخال رمز الحماية">
+      <p id="pin-error" class="text-red-500 text-xs mt-2 hidden" role="alert">رمز غير صحيح</p>
+      <p id="pin-lockmsg" class="text-amber-600 text-xs mt-2 hidden" role="alert"></p>
+      <div class="grid grid-cols-2 gap-3 mt-5">
+        <button id="pin-cancel" class="bg-slate-200 text-slate-800 font-bold py-2 rounded-full hit" aria-label="إلغاء">إلغاء</button>
+        <button id="pin-ok" class="bg-red-500 text-white font-bold py-2 rounded-full hit" aria-label="تأكيد">تأكيد</button>
       </div>
     </div>
   </div>
 
   <!-- Modal: لوحة وليّ الأمر -->
-  <div id="parent-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="parent-title">
-    <div class="sheet w-full">
-      <header>
+  <div id="parent-modal" class="modal fixed inset-0 bg-black/45 backdrop-blur-sm items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="parent-title">
+    <div class="bg-white w-full max-w-2xl rounded-2xl shadow-xl overflow-hidden">
+      <header class="p-4 border-b border-slate-200 flex items-center justify-between">
         <div class="flex items-center gap-2"><i data-lucide="layout-dashboard" class="w-5 h-5 text-sky-600" aria-hidden="true"></i><h3 id="parent-title" class="text-lg font-bold">لوحة وليّ الأمر</h3></div>
         <button id="parent-close" class="p-2 rounded-full hover:bg-slate-100 hit" aria-label="إغلاق اللوحة"><i data-lucide="x"></i></button>
       </header>
-      <div class="body">
-        <div id="parent-auth" class="">
-          <p class="text-slate-600 mb-3">أدخل الرمز (2222) للوصول:</p>
-          <div class="flex items-center gap-3">
-            <input id="parent-pin" type="tel" inputmode="numeric" maxlength="4" placeholder="••••" class="flex-1 text-center tracking-[1em] bg-slate-100 border-2 border-slate-200 rounded-xl p-3 text-2xl focus:outline-none focus:border-sky-400" aria-label="رمز وليّ الأمر">
-            <button id="parent-unlock" class="bg-sky-600 text-white font-bold py-2 px-6 rounded-full hit" aria-label="فتح اللوحة">فتح</button>
-          </div>
-          <p id="parent-auth-error" class="text-red-500 text-xs mt-2 hidden" role="alert">رمز غير صحيح</p>
-          <p id="parent-lockmsg" class="text-amber-600 text-xs mt-2 hidden" role="alert"></p>
+      <div id="parent-auth" class="p-6">
+        <p class="text-slate-600 mb-3">أدخل الرمز (2222) للوصول:</p>
+        <div class="flex items-center gap-3">
+          <input id="parent-pin" type="tel" inputmode="numeric" maxlength="4" placeholder="••••" class="flex-1 text-center tracking-[1em] bg-slate-100 border-2 border-slate-200 rounded-xl p-3 text-2xl focus:outline-none focus:border-sky-400" aria-label="رمز وليّ الأمر">
+          <button id="parent-unlock" class="bg-sky-600 text-white font-bold py-2 px-6 rounded-full hit" aria-label="فتح اللوحة">فتح</button>
         </div>
-
-        <div id="parent-dashboard" class="hidden space-y-4">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div class="bg-slate-50 border border-slate-200 rounded-xl p-3"><div class="text-xs text-slate-500">اسم الطفل</div><div id="pd-name" class="font-bold"></div></div>
-            <div class="bg-slate-50 border border-slate-200 rounded-xl p-3"><div class="text-xs text-slate-500">نتيجة المؤشّر</div><div id="pd-level" class="font-bold"></div></div>
-            <div class="bg-slate-50 border border-slate-200 rounded-xl p-3"><div class="text-xs text-slate-500">الخطوة الجارية</div><div id="pd-step" class="font-bold"></div></div>
-          </div>
-          <div class="bg-white border border-slate-200 rounded-xl p-4">
-            <h4 class="font-bold flex items-center gap-2"><i data-lucide="user-round-cog" class="w-5 h-5 text-sky-600" aria-hidden="true"></i>ملخص الشخصيّة والتحديات</h4>
-            <p id="pd-summary" class="text-slate-700 mt-2"></p>
-          </div>
-          <div class="bg-white border border-slate-200 rounded-xl p-4">
-            <h4 class="font-bold flex items-center gap-2 mb-2"><i data-lucide="sparkles" class="w-5 h-5 text-sky-600" aria-hidden="true"></i>توصيات الذكاء الاصطناعي (محدّثة)</h4>
-            <ul id="pd-recos" class="list-disc list-inside space-y-1 text-slate-700"></ul>
-            <div class="mt-3 flex items-center gap-2">
-              <button id="pd-refresh" class="bg-sky-600 text-white font-bold py-2 px-4 rounded-full hit" aria-label="تحديث الآن">تحديث الآن</button>
-              <span id="pd-updated" class="text-xs text-slate-500" aria-live="polite"></span>
-            </div>
+        <p id="parent-auth-error" class="text-red-500 text-xs mt-2 hidden" role="alert">رمز غير صحيح</p>
+        <p id="parent-lockmsg" class="text-amber-600 text-xs mt-2 hidden" role="alert"></p>
+      </div>
+      <div id="parent-dashboard" class="hidden p-6 space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-3"><div class="text-xs text-slate-500">اسم الطفل</div><div id="pd-name" class="font-bold"></div></div>
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-3"><div class="text-xs text-slate-500">نتيجة المؤشّر</div><div id="pd-level" class="font-bold"></div></div>
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-3"><div class="text-xs text-slate-500">الخطوة الجارية</div><div id="pd-step" class="font-bold"></div></div>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-xl p-4">
+          <h4 class="font-bold flex items-center gap-2"><i data-lucide="user-round-cog" class="w-5 ه-5 text-sky-600" aria-hidden="true"></i>ملخص الشخصيّة والتحديات</h4>
+          <p id="pd-summary" class="text-slate-700 mt-2"></p>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-xl p-4">
+          <h4 class="font-bold flex items-center gap-2 mb-2"><i data-lucide="sparkles" class="w-5 ه-5 text-sky-600" aria-hidden="true"></i>توصيات الذكاء الاصطناعي (محدّثة)</h4>
+          <ul id="pd-recos" class="list-disc list-inside space-y-1 text-slate-700"></ul>
+          <div class="mt-3 flex items-center gap-2">
+            <button id="pd-refresh" class="bg-sky-600 text-white font-bold py-2 px-4 rounded-full hit" aria-label="تحديث الآن">تحديث الآن</button>
+            <span id="pd-updated" class="text-xs text-slate-500" aria-live="polite"></span>
           </div>
         </div>
       </div>
@@ -455,7 +408,7 @@
           <div class="w-10 h-10 bg-gradient-to-br from-cyan-100 to-sky-200 rounded-full flex items-center justify-center"><i data-lucide="bot" class="w-6 ه-6 text-sky-600" aria-hidden="true"></i></div>
           <div class="flex-grow"><h3 id="chat-header-name" class="font-bold"></h3><p class="text-xs text-green-500 font-medium flex items-center gap-1"><span class="w-2 ه-2 bg-green-400 rounded-full"></span>متصل</p></div>
           <button id="parent-panel-btn-chat" class="p-2 rounded-full hover:bg-slate-100 text-slate-600 hit" title="لوحة وليّ الأمر" aria-label="لوحة وليّ الأمر"><i data-lucide="file-lock" class="w-5 ه-5"></i></button>
-          <button id="language-toggle-btn" class="p-2 rounded-full hover:bg-slate-100 text-slate-600 hit" title="تبديل اللغة"><i data-lucide="languages" class="w-5 ه-5"></i></button>
+          <button id="language-toggle-btn" class="p-2 rounded-full hover:bg-slate-100 text-slate-600 hit" title="تبديل اللغة" aria-label="تبديل اللغة"><i data-lucide="languages" class="w-5 ه-5"></i></button>
         </header>
         <main id="chat-messages" class="flex-grow p-4 overflow-y-auto" aria-live="polite"></main>
         <footer id="chat-footer" class="p-4 border-t border-slate-200">
@@ -487,7 +440,7 @@
       window.visualViewport.addEventListener('scroll', setVH);
     }
 
-    /* قياس ارتفاع فوتر التطبيق + عناصر المحادثة */
+    /* قياس ارتفاع فوتر التطبيق الثابت + هيدر/فوتر المحادثة الثابتين لضبط الحشوات */
     const appFooter = document.getElementById('app-footer');
     const chatHeader = document.querySelector('#chat-screen > header');
     const chatFooter = document.getElementById('chat-footer');
@@ -569,6 +522,7 @@
     /* ============ مساعدات عرض للمحادثة ============ */
     function adjustChatPadding(){
       const pad = (dom.chatFooter?.getBoundingClientRect().height || 96) + 24;
+      // إضافة مسافة أسفل الرسائل تكفي فوتر المحادثة + فوتر التطبيق
       document.documentElement.style.setProperty('--chatFootH', (dom.chatFooter?.getBoundingClientRect().height || 68) + 'px');
       dom.chatMessages.style.paddingBottom = `calc(var(--chatFootH) + 16px)`;
       dom.chatMessages.scrollTop = dom.chatMessages.scrollHeight;
@@ -582,7 +536,7 @@
       vv.addEventListener('resize', onVV); vv.addEventListener('scroll', onVV);
     }
 
-    /* ============ سياسة مختصرة داخليًا ============ */
+    /* ============ سياسة وامتثال مختصر داخلي ============ */
     const UAE_COMPLIANCE = `
 - الامتثال لاتفاقية حقوق الطفل وقانون وديمة في الإمارات.
 - إرشاد تربوي/سلوكي فقط؛ لا تشخيص أو دواء أو جمع بيانات تعريفية.
@@ -989,7 +943,7 @@ ${UAE_COMPLIANCE}
 السطر الثابت: "إن لم تناسبك أي مقترح، اكتب شعورك بطريقتك."
 تجنّب المديح المبالغ، الأسئلة المتعددة، والطب/القانون.
 سياق السؤال: "${questionCtx}".
-بيانات الطفل: الاسم="\${state.name}", الفئة=\${state.age}, الجنس=\${state.gender}.
+بيانات الطفل: الاسم="${state.name}", الفئة=${state.age}, الجنس=${state.gender}.
 `;
 
     async function respond(first=false){
@@ -999,7 +953,7 @@ ${UAE_COMPLIANCE}
         const questionCtx = lastUser ? lastUser.parts[0].text : '';
 
         const outgoing = first
-          ? [{ role:'user', content:\`ابدأ بتحية بسيطة ل"\${state.name}"، وقدّم تمرينًا صغيرًا أو سؤالًا واحدًا فقط.\` }]
+          ? [{ role:'user', content:`ابدأ بتحية بسيطة ل"${state.name}"، وقدّم تمرينًا صغيرًا أو سؤالًا واحدًا فقط.` }]
           : state.chat.map(m => ({ role:m.role==='user'?'user':'model', content: m.parts?.[0]?.text || '' }));
 
         const { text } = await callAIProxy({
@@ -1070,11 +1024,19 @@ ${UAE_COMPLIANCE}
       const steps = state.plan.planSteps || [];
       const current = steps[step] || steps[0] || 'ابدأ بخطوة صغيرة يومية لمدة 5–10 دقائق.';
       const level = state.assessment?.result?.level || '—';
+      const age = state.age || '';
+      const name = state.name || 'الطفل';
 
-      recos.push(\`ركّز هذا الأسبوع على: \${current}\`);
+      // 1) الخطوة الحالية
+      recos.push(`ركّز هذا الأسبوع على: ${current}`);
+
+      // 2) دعم منزلي بسيط مرتبط بالخطوة
       recos.push('ادعم التنفيذ: خصّص 10 دقائق يوميًا، مع جملة تشجيع محدّدة مثل "لاحظت محاولتك، ممتاز!" دون مبالغة.');
+
+      // 3) بيئة آمنة ومراقبة تقدّم
       recos.push('راقِب التقدّم: سجّل مرّة يوميًا (تم/لم يتم/بمساعدة). بعد 4 أيام نجاح متتالية انتقل للخطوة التالية.');
 
+      // 4) مواءمة حسب مستوى الاحتياج
       if(level === 'احتياج مرتفع'){
         recos.push('خفّض صعوبة النشاط 20% وقدّم نموذجًا عمليًا قبل الطلب. عند مقاومة متكررة، قسّم المهمة إلى نصفين.');
       } else if(level === 'احتياج متوسط'){
@@ -1085,10 +1047,16 @@ ${UAE_COMPLIANCE}
         recos.push('أتمّم التقييم الأولي داخل الحوار لتحصل على توصيات أكثر دقة.');
       }
 
+      // 5) ربط بفرضية الاحتياجات
       const needs = (state.plan.needsHypothesis || []).slice(0,2);
-      if(needs.length){ recos.push(\`نقاط تركيز: \${needs.join('، ')}.\`); }
+      if(needs.length){
+        recos.push(`نقاط تركيز: ${needs.join('، ')}.`);
+      }
 
+      // 6) إشارات التصعيد الآمن
       recos.push('تصعيد آمن: إذا ظهر تجنّب شديد مستمر لأكثر من أسبوعين أو بكاء/ألم بطني يومي قبل المدرسة، يُفضّل استشارة مختص مرخّص.');
+
+      // 7) اقتراح متابعة أسبوعية
       recos.push('مراجعة أسبوعية: يوم الجمعة دوّن ما نجح وما تعثّر وعدّل خطوة الأسبوع القادم وفق الملاحظات.');
 
       return recos;
@@ -1104,25 +1072,25 @@ ${UAE_COMPLIANCE}
         list.appendChild(li);
       });
       const d = new Date();
-      dom.pdUpdated.textContent = \`آخر تحديث: \${d.toLocaleDateString('ar-AE')} \${d.toLocaleTimeString('ar-AE', {hour:'2-digit', minute:'2-digit'})}\`;
+      dom.pdUpdated.textContent = `آخر تحديث: ${d.toLocaleDateString('ar-AE')} ${d.toLocaleTimeString('ar-AE', {hour:'2-digit', minute:'2-digit'})}`;
     }
 
     /* الصفحة الرئيسية */
     function updateHome(){
       const t={
-        ar:{g:\`مرحباً يا \${state.name||''}\`,m:\`هدفنا:\`,ready:\`جاهز لمغامرة اليوم؟\`,ai:\`أنا \${state.aiName||'صديقك'}\`,desc:{'ذكر':'رفيق رقمي يساعدك خطوة بخطوة.','أنثى':'رفيقة رقمية تساعدك خطوة بخطوة.'},chat:\`ابدأ الدردشة مع \${state.aiName||'صديقي الذكي'}\`,ph:'اكتب ردك هنا...'},
-        en:{g:\`Welcome, \${state.name||''}\`,m:\`Our goal:\`,ready:\`Ready for today’s adventure?\`,ai:\`I'm \${state.aiName||'your buddy'}\`,desc:{'ذكر':'Your digital buddy to help you step by step.','أنثى':'Your digital buddy to help you step by step.'},chat:\`Start chat with \${state.aiName||'Sadiki'}\`,ph:'Type your reply here...'}
+        ar:{g:`مرحباً يا ${state.name||''}`,m:`هدفنا:`,ready:`جاهز لمغامرة اليوم؟`,ai:`أنا ${state.aiName||'صديقك'}`,desc:{'ذكر':'رفيق رقمي يساعدك خطوة بخطوة.','أنثى':'رفيقة رقمية تساعدك خطوة بخطوة.'},chat:`ابدأ الدردشة مع ${state.aiName||'صديقي الذكي'}`,ph:'اكتب ردك هنا...'},
+        en:{g:`Welcome, ${state.name||''}`,m:`Our goal:`,ready:`Ready for today’s adventure?`,ai:`I'm ${state.aiName||'your buddy'}`,desc:{'ذكر':'Your digital buddy to help you step by step.','أنثى':'Your digital buddy to help you step by step.'},chat:`Start chat with ${state.aiName||'Sadiki'}`,ph:'Type your reply here...'}
       };
       const L=t[state.language||'ar'];
-      document.getElementById('home-greeting').textContent=L.g; document.getElementById('home-ai-name-intro').textContent=L.ai; document.getElementById('home-intro-text').textContent=L.desc[state.gender||'ذكر'];
-      document.getElementById('start-chat-btn-text').textContent=L.chat; dom.chatInput.placeholder=L.ph;
-      document.getElementById('home-mission-status').textContent = (state.plan?.planSteps?.[state.step]) ? \`\${L.m} \${state.plan.planSteps[state.step]}\` : L.ready;
-      document.getElementById('chat-header-name').textContent = state.aiName || 'صديقي الذكي';
+      $('home-greeting').textContent=L.g; $('home-ai-name-intro').textContent=L.ai; $('home-intro-text').textContent=L.desc[state.gender||'ذكر'];
+      $('start-chat-btn-text').textContent=L.chat; dom.chatInput.placeholder=L.ph;
+      $('home-mission-status').textContent = (state.plan?.planSteps?.[state.step]) ? `${L.m} ${state.plan.planSteps[state.step]}` : L.ready;
+      $('chat-header-name').textContent = state.aiName || 'صديقي الذكي';
     }
 
     document.getElementById('language-toggle-btn').addEventListener('click', ()=>{
       state.language = state.language==='ar' ? 'en' : 'ar'; save(); updateHome();
-      state.chat.push({role:'user',parts:[{text:\`(System instruction: switch language to \${state.language}.)\`}], ts: Date.now()}); respond();
+      state.chat.push({role:'user',parts:[{text:`(System instruction: switch language to ${state.language}.)`}], ts: Date.now()}); respond();
     });
 
     document.getElementById('initiate-chat-btn').addEventListener('click', ()=>{
@@ -1142,72 +1110,56 @@ ${UAE_COMPLIANCE}
     /* حذف البيانات (PIN) */
     document.getElementById('reset-app-btn').addEventListener('click', ()=>{
       const s=getPinState();
-      document.getElementById('pin-input').value=''; document.getElementById('pin-error').classList.add('hidden'); document.getElementById('pin-lockmsg').classList.add('hidden');
-      if(isLocked()){ lockMsg(document.getElementById('pin-lockmsg'), s); }
-      showModal(document.getElementById('pin-modal'));
+      $('pin-input').value=''; $('pin-error').classList.add('hidden'); $('pin-lockmsg').classList.add('hidden');
+      if(isLocked()){ lockMsg($('pin-lockmsg'), s); }
+      showModal($('pin-modal'));
       const onOk=()=>{
         const st=getPinState();
-        if(isLocked()){ lockMsg(document.getElementById('pin-lockmsg'), st); return; }
-        if(document.getElementById('pin-input').value===PIN_CODE){
-          hideModal(document.getElementById('pin-modal')); localStorage.removeItem(STORAGE); setPinState({fail:0,until:0}); location.reload();
+        if(isLocked()){ lockMsg($('pin-lockmsg'), st); return; }
+        if($('pin-input').value===PIN_CODE){
+          hideModal($('pin-modal')); localStorage.removeItem(STORAGE); setPinState({fail:0,until:0}); location.reload();
         } else {
           st.fail = (st.fail||0)+1;
-          if(st.fail>=MAX_PIN_ATTEMPTS){ st.until = Date.now()+LOCKOUT_MS; lockMsg(document.getElementById('pin-lockmsg'), st); }
+          if(st.fail>=MAX_PIN_ATTEMPTS){ st.until = Date.now()+LOCKOUT_MS; lockMsg($('pin-lockmsg'), st); }
           setPinState(st);
-          document.getElementById('pin-error').classList.remove('hidden');
+          $('pin-error').classList.remove('hidden');
         }
       };
-      const onCancel=()=>{ hideModal(document.getElementById('pin-modal')); document.getElementById('pin-ok').removeEventListener('click',onOk); document.getElementById('pin-cancel').removeEventListener('click',onCancel); };
-      document.getElementById('pin-ok').addEventListener('click',onOk); document.getElementById('pin-cancel').addEventListener('click',onCancel);
+      const onCancel=()=>{ hideModal($('pin-modal')); $('pin-ok').removeEventListener('click',onOk); $('pin-cancel').removeEventListener('click',onCancel); };
+      $('pin-ok').addEventListener('click',onOk); $('pin-cancel').addEventListener('click',onCancel);
     });
 
     /* لوحة وليّ الأمر */
     function openParentPanel(){
       const s=getPinState();
-      dom.parentAuthErr.classList.add('hidden'); dom.parentPin.value=''; dom.parentLockMsg.classList.add('hidden');
-      if(isLocked()){ lockMsg(dom.parentLockMsg, s); }
-      dom.parentAuth.classList.remove('hidden'); dom.parentDash.classList.add('hidden');
-      showModal(dom.parentModal);
+      $('parent-auth-error').classList.add('hidden'); $('parent-pin').value=''; $('parent-lockmsg').classList.add('hidden');
+      if(isLocked()){ lockMsg($('parent-lockmsg'), s); }
+      $('parent-auth').classList.remove('hidden'); $('parent-dashboard').classList.add('hidden');
+      showModal($('parent-modal'));
     }
     document.getElementById('parent-panel-btn').addEventListener('click', openParentPanel);
     document.getElementById('parent-panel-btn-chat').addEventListener('click', openParentPanel);
-
-    // إغلاق عبر زر X
-    dom.parentClose.addEventListener('click', ()=> hideModal(dom.parentModal));
-    // إغلاق بالنقر على الخلفية
-    dom.parentModal.addEventListener('click', (e)=>{
-      if(e.target === dom.parentModal){ hideModal(dom.parentModal); }
-    });
-    // إغلاق بـ Esc
-    document.addEventListener('keydown', (e)=>{
-      if(e.key === 'Escape' && dom.parentModal.classList.contains('active')) hideModal(dom.parentModal);
-      if(e.key === 'Escape' && document.getElementById('pin-modal').classList.contains('active')) hideModal(document.getElementById('pin-modal'));
-    });
-    // زر إغلاق موحّد لمودال PIN
-    document.querySelectorAll('[data-close="pin-modal"]').forEach(btn=>{
-      btn.addEventListener('click', ()=> hideModal(document.getElementById('pin-modal')));
-    });
-
+    document.getElementById('parent-close').addEventListener('click', ()=> hideModal($('parent-modal')));
     document.getElementById('parent-unlock').addEventListener('click', ()=>{
       const st=getPinState();
-      if(isLocked()){ lockMsg(dom.parentLockMsg, st); return; }
-      if(dom.parentPin.value===PIN_CODE){
+      if(isLocked()){ lockMsg($('parent-lockmsg'), st); return; }
+      if($('parent-pin').value===PIN_CODE){
         setPinState({fail:0,until:0});
-        dom.parentAuth.classList.add('hidden'); dom.parentDash.classList.remove('hidden'); fillParentBasics(); renderParentRecommendations();
+        $('parent-auth').classList.add('hidden'); $('parent-dashboard').classList.remove('hidden'); fillParentBasics(); renderParentRecommendations();
       }else{
-        st.fail=(st.fail||0)+1; if(st.fail>=MAX_PIN_ATTEMPTS){ st.until=Date.now()+LOCKOUT_MS; lockMsg(dom.parentLockMsg, st); }
+        st.fail=(st.fail||0)+1; if(st.fail>=MAX_PIN_ATTEMPTS){ st.until=Date.now()+LOCKOUT_MS; lockMsg($('parent-lockmsg'), st); }
         setPinState(st);
-        dom.parentAuthErr.classList.remove('hidden');
+        $('parent-auth-error').classList.remove('hidden');
       }
     });
 
     function fillParentBasics(){
-      dom.pdName.textContent = state.name || '-';
-      dom.pdStep.textContent = state.plan?.planSteps?.[state.step] || '—';
-      dom.pdLevel.textContent = state.assessment?.result?.level || '—';
-      dom.pdSummary.textContent = state.plan?.analysisSummary || (state.parentDesc||'—');
-      dom.pdUpdated.textContent = '';
-      dom.pdRecos.innerHTML = '';
+      $('pd-name').textContent = state.name || '-';
+      $('pd-step').textContent = state.plan?.planSteps?.[state.step] || '—';
+      $('pd-level').textContent = state.assessment?.result?.level || '—';
+      $('pd-summary').textContent = state.plan?.analysisSummary || (state.parentDesc||'—');
+      $('pd-updated').textContent = '';
+      $('pd-recos').innerHTML = '';
     }
 
     // زر التحديث يعيد توليد التوصيات ويظهر وقت آخر تحديث
@@ -1224,14 +1176,14 @@ ${UAE_COMPLIANCE}
     }
     function updateHome(){
       const t={
-        ar:{g:\`مرحباً يا \${state.name||''}\`,m:\`هدفنا:\`,ready:\`جاهز لمغامرة اليوم؟\`,ai:\`أنا \${state.aiName||'صديقك'}\`,desc:{'ذكر':'رفيق رقمي يساعدك خطوة بخطوة.','أنثى':'رفيقة رقمية تساعدك خطوة بخطوة.'},chat:\`ابدأ الدردشة مع \${state.aiName||'صديقي الذكي'}\`,ph:'اكتب ردك هنا...'},
-        en:{g:\`Welcome, \${state.name||''}\`,m:\`Our goal:\`,ready:\`Ready for today’s adventure?\`,ai:\`I'm \${state.aiName||'your buddy'}\`,desc:{'ذكر':'Your digital buddy to help you step by step.','أنثى':'Your digital buddy to help you step by step.'},chat:\`Start chat with \${state.aiName||'Sadiki'}\`,ph:'Type your reply here...'}
+        ar:{g:`مرحباً يا ${state.name||''}`,m:`هدفنا:`,ready:`جاهز لمغامرة اليوم؟`,ai:`أنا ${state.aiName||'صديقك'}`,desc:{'ذكر':'رفيق رقمي يساعدك خطوة بخطوة.','أنثى':'رفيقة رقمية تساعدك خطوة بخطوة.'},chat:`ابدأ الدردشة مع ${state.aiName||'صديقي الذكي'}`,ph:'اكتب ردك هنا...'},
+        en:{g:`Welcome, ${state.name||''}`,m:`Our goal:`,ready:`Ready for today’s adventure?`,ai:`I'm ${state.aiName||'your buddy'}`,desc:{'ذكر':'Your digital buddy to help you step by step.','أنثى':'Your digital buddy to help you step by step.'},chat:`Start chat with ${state.aiName||'Sadiki'}`,ph:'Type your reply here...'}
       };
       const L=t[state.language||'ar'];
-      document.getElementById('home-greeting').textContent=L.g; document.getElementById('home-ai-name-intro').textContent=L.ai; document.getElementById('home-intro-text').textContent=L.desc[state.gender||'ذكر'];
-      document.getElementById('start-chat-btn-text').textContent=L.chat; dom.chatInput.placeholder=L.ph;
-      document.getElementById('home-mission-status').textContent = (state.plan?.planSteps?.[state.step]) ? \`\${L.m} \${state.plan.planSteps[state.step]}\` : L.ready;
-      document.getElementById('chat-header-name').textContent = state.aiName || 'صديقي الذكي';
+      $('home-greeting').textContent=L.g; $('home-ai-name-intro').textContent=L.ai; $('home-intro-text').textContent=L.desc[state.gender||'ذكر'];
+      $('start-chat-btn-text').textContent=L.chat; dom.chatInput.placeholder=L.ph;
+      $('home-mission-status').textContent = (state.plan?.planSteps?.[state.step]) ? `${L.m} ${state.plan.planSteps[state.step]}` : L.ready;
+      $('chat-header-name').textContent = state.aiName || 'صديقي الذكي';
     }
     init();
   });
