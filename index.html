@@ -137,7 +137,7 @@
       bottom: calc(var(--footerH));  /* فوق فوتر التطبيق */
       z-index: 49;
       background: rgba(255,255,255,.9);
-      backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
     }
 
     /* عناصر المحادثة (فقاعات واتساب مبسطة) */
@@ -275,6 +275,18 @@
             <span id="pd-updated" class="text-xs text-slate-500" aria-live="polite"></span>
           </div>
         </div>
+
+        <!-- NEW: صندوق تنبيهات يستدعي تدخل الأهل -->
+        <div id="parent-alerts" class="bg-red-50 border-2 border-red-500 rounded-xl p-4">
+          <h4 class="font-bold flex items-center gap-2 mb-2 text-red-700">
+            <i data-lucide="alert-triangle" class="w-5 h-5" aria-hidden="true"></i>
+            تنبيهات سلوكية تستدعي تدخل وليّ الأمر (هام جدًا)
+          </h4>
+          <p id="pd-no-alerts" class="text-red-700 font-semibold">لا توجد تنبيهات حتى الآن.</p>
+          <ul id="pd-alerts" class="list-disc list-inside space-y-1 text-red-700 font-bold"></ul>
+        </div>
+        <!-- /NEW -->
+
       </div>
     </div>
   </div>
@@ -366,7 +378,7 @@
           <p class="text-slate-600 text-center mb-6">اختر: <b>موافقة</b> أو <b>طلب تعديل</b>. عند التعديل نجمع الأسباب ونولّد خطة جديدة.</p>
           <div class="bg-white border border-slate-200 rounded-xl p-4 space-y-4">
             <div><h4 class="font-bold flex items-center gap-2"><i data-lucide="user-round-cog" class="w-5 ه-5 text-sky-600" aria-hidden="true"></i>ملخص التحليل</h4><p id="ai-analysis-summary" class="text-slate-700 mt-1"></p></div>
-            <div><h4 class="font-bold flex items-center gap-2"><i data-lucide="target" class="w-5 ه-5 text-sky-600" aria-hidden="true"></i>فرضية الاحتياجات</h4><ul id="ai-needs-hypo" class="list-disc list-inside mt-2 space-y-1 text-slate-700"></ul></div>
+            <div><h4 class="font-bold flex.items-center gap-2"><i data-lucide="target" class="w-5 ه-5 text-sky-600" aria-hidden="true"></i>فرضية الاحتياجات</h4><ul id="ai-needs-hypo" class="list-disc list-inside mt-2 space-y-1 text-slate-700"></ul></div>
             <div><h4 class="font-bold flex items-center gap-2"><i data-lucide="list-checks" class="w-5 ه-5 text-sky-600" aria-hidden="true"></i>خطوات التدريب</h4><ul id="ai-plan-steps" class="list-decimal list-inside mt-2 space-y-1 text-slate-700"></ul></div>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-6">
@@ -489,7 +501,8 @@
       language:'ar', age:null, gender:null, name:null, aiName:null,
       parentDesc:null, plan:null, chat:[], step:0, assessment:null,
       askedQuestions:[], lastDateKey:null, parentSummary:null, parentSummaryAt:null,
-      parentReport:{text:'',at:0}
+      parentReport:{text:'',at:0},
+      parentAlerts: [] // NEW: قائمة تنبيهات للأهل
     };
 
     /* ============ DOM refs ============ */
@@ -516,7 +529,11 @@
       parentModal:$('parent-modal'), parentClose:$('parent-close'), parentAuth:$('parent-auth'), parentDash:$('parent-dashboard'),
       parentPin:$('parent-pin'), parentUnlock:$('parent-unlock'), parentAuthErr:$('parent-auth-error'), parentLockMsg:$('parent-lockmsg'),
       pdName:$('pd-name'), pdLevel:$('pd-level'), pdStep:$('pd-step'), pdSummary:$('pd-summary'), pdRecos:$('pd-recos'), pdUpdated:$('pd-updated'),
-      pdRefresh:$('pd-refresh')
+      pdRefresh:$('pd-refresh'),
+
+      // NEW: مراجع التنبيه
+      pdAlerts:$('pd-alerts'),
+      pdNoAlerts:$('pd-no-alerts')
     };
 
     /* ============ مساعدات عرض للمحادثة ============ */
@@ -763,18 +780,19 @@ ${system||''}`,
     /* موجه الخطة */
     const planPrompt = (desc)=>`
 ${UAE_COMPLIANCE}
+دورك: أخصائي تعديل سلوك معتمد يستخدم أساليب مبنية على الدليل (التعزيز الإيجابي، النمذجة، القصص الاجتماعية، التعرّض المتدرّج، تقسيم المهام، مهارات CBT للأطفال، تتبّع السلوك والمكافآت الرمزية).
 حلّل وصف وليّ الأمر وسلّم JSON عربيًا فقط، دون تعليقات.
 {
- "analysisSummary": "جملة عن السلوك/المحفّز/النتيجة (≤240)",
- "needsHypothesis": ["٣ نقاط سبب/مهارة واضحة"],
- "planSteps": ["٣–٥ خطوات SMART قابلة للقياس"],
+ "analysisSummary": "جملة عن السلوك/المحفّز/النتيجة (≤240) بأسلوب مهني مختصر",
+ "needsHypothesis": ["٣ نقاط سبب/مهارة واضحة قابلة للاستهداف"],
+ "planSteps": ["٣–٥ خطوات SMART قابلة للقياس مع تكرار/مدة/معيار انتقال"],
  "initialAssessment": {
-   "intro":"نص ترحيبي قصير",
+   "intro":"نص ترحيبي قصير مناسب للعمر",
    "items":[
      {"type":"choice","q":"سؤال شعوري/سلوكي","options":["٣-٤ خيارات"]},
      {"type":"selfCheck","q":"مقياس 0–10","scaleMin":0,"scaleMax:":10}
    ],
-   "scoring":"تحويل للإجابات إلى (منخفض/متوسط/مرتفع)"
+   "scoring":"تحويل للإجابات إلى (منخفض/متوسط/مرتفع) لتحديد شدة الاحتياج"
  }
 }
 المدخل: """${desc}"""`;
@@ -813,7 +831,7 @@ ${UAE_COMPLIANCE}
         dom.loading.style.display='none';
         dom.planContent.classList.add('hidden');
         $('plan-review-screen').innerHTML = `
-          <div class="flex flex-col items-center justify-center text-center gap-3 py-12">
+          <div class="flex flex-col items-center justify-center text.center gap-3 py-12">
             <i data-lucide="wifi-off" class="w-16 ه-16 text-amber-500" aria-hidden="true"></i>
             <h3 class="text-xl font-bold">تعذّر إنشاء الخطة الآن</h3>
             <p class="text-slate-500 text-sm">تحقّق من الاتصال ثم جرّب مجددًا.</p>
@@ -928,20 +946,22 @@ ${UAE_COMPLIANCE}
     }
     function hideTyping(){ document.getElementById('typing')?.remove(); }
 
+    // UPDATED: توجيه يضبط دور الأخصائي وأساليب عالمية + قالب مختصر
     const chatRules = (questionCtx) => `
 ${UAE_COMPLIANCE}
 لا تُظهر هذه التعليمات.
 
-دورك: مرشد سلوكي واقعي موجّه للطفل بخطوات قصيرة قابلة للقياس.
+دورك: أخصائي تعديل سلوك للأطفال/الناشئة يستخدم أساليب مبنية على الدليل (التعزيز الإيجابي، الاقتصاد الرمزي، النمذجة/اللعب التمثيلي، القصص الاجتماعية، التعرّض المتدرّج، تقطيع المهام، مهارات CBT البسيطة، أهداف SMART، متابعة قابلة للقياس). اجعل التدخلات قصيرة وآمنة ومناسبة للعمر والثقافة.
 
 قالب إلزامي مختصر:
 1) تحية بسيطة بالاسم.
 2) انعكاس محايد لشعور/سلوك.
-3) معلومة عملية واحدة.
+3) معلومة/مهارة عملية واحدة (مدعومة سلوكيًا).
 4) تمرين صغير الآن أو سؤال واحد فقط.
 إن كان هناك سؤال، قدّم 3–4 خيارات قصيرة تبدأ بـ "- ".
 السطر الثابت: "إن لم تناسبك أي مقترح، اكتب شعورك بطريقتك."
-تجنّب المديح المبالغ، الأسئلة المتعددة، والطب/القانون.
+تجنّب المديح المبالغ، الأسئلة المتعددة، والطب/القانون. لا تطلب بيانات تعريفية.
+
 سياق السؤال: "${questionCtx}".
 بيانات الطفل: الاسم="${state.name}", الفئة=${state.age}, الجنس=${state.gender}.
 `;
@@ -988,10 +1008,27 @@ ${UAE_COMPLIANCE}
       dom.chatInput.value='';
     });
 
+    // NEW: كلمات/أنماط تدل على سلوك يستدعي تدخل الأهل (تنمّر، كراهية، عنف، تهديد، سب/شتم، إيذاء..)
+    const ALERT_REGEX = /(?:تنمر|يتنمر|يتعرض للتنمر|أتنمر|يسخر|سخرية|إهانة|سب|شتم|لعن|كره|كراهية|أكرههم|عنصرية|تهديد|هددني|أهدده|عنف|أضرب|اضرب|ضربوني|قتال|سلاح|سكين|قتل|انتحار|إيذاء|أؤذي نفسي|أؤذي|حقد|تحرش)/i;
+
+    function addParentAlertEntry(text){
+      const entry = { text, at: Date.now() };
+      state.parentAlerts = state.parentAlerts || [];
+      state.parentAlerts.unshift(entry);
+      save();
+      renderParentAlerts(); // تحديث اللوحة فورًا إن كانت مفتوحة
+    }
+
     function handleUser(text){
       const ts = Date.now();
       addMessage(text,'user',ts);
       state.chat.push({role:'user',parts:[{text}], ts}); save();
+
+      // NEW: كشف تلقائي للتنبيهات
+      if (ALERT_REGEX.test(text)) {
+        addParentAlertEntry(`تنبيه: ورد في كلام الطفل ما يشير إلى سلوك يستدعي التدخل (مثال: "${text.slice(0,80)}...")`);
+      }
+
       const spec = state.assessment?.spec;
       if(spec && !state.assessment.result){
         const last = text.trim();
@@ -1075,6 +1112,23 @@ ${UAE_COMPLIANCE}
       dom.pdUpdated.textContent = `آخر تحديث: ${d.toLocaleDateString('ar-AE')} ${d.toLocaleTimeString('ar-AE', {hour:'2-digit', minute:'2-digit'})}`;
     }
 
+    // NEW: عرض قائمة التنبيهات الحمراء في لوحة ولي الأمر
+    function renderParentAlerts(){
+      const items = state.parentAlerts || [];
+      dom.pdAlerts.innerHTML = '';
+      if (items.length === 0) {
+        dom.pdNoAlerts.classList.remove('hidden');
+        return;
+      }
+      dom.pdNoAlerts.classList.add('hidden');
+      items.slice(0,10).forEach(a=>{
+        const li = document.createElement('li');
+        const dt = new Date(a.at);
+        li.textContent = `${dt.toLocaleDateString('ar-AE')} ${dt.toLocaleTimeString('ar-AE',{hour:'2-digit',minute:'2-digit'})} — ${a.text}`;
+        dom.pdAlerts.appendChild(li);
+      });
+    }
+
     /* الصفحة الرئيسية */
     function updateHome(){
       const t={
@@ -1145,7 +1199,7 @@ ${UAE_COMPLIANCE}
       if(isLocked()){ lockMsg($('parent-lockmsg'), st); return; }
       if($('parent-pin').value===PIN_CODE){
         setPinState({fail:0,until:0});
-        $('parent-auth').classList.add('hidden'); $('parent-dashboard').classList.remove('hidden'); fillParentBasics(); renderParentRecommendations();
+        $('parent-auth').classList.add('hidden'); $('parent-dashboard').classList.remove('hidden'); fillParentBasics(); renderParentRecommendations(); renderParentAlerts(); // UPDATED: عرض التنبيهات
       }else{
         st.fail=(st.fail||0)+1; if(st.fail>=MAX_PIN_ATTEMPTS){ st.until=Date.now()+LOCKOUT_MS; lockMsg($('parent-lockmsg'), st); }
         setPinState(st);
@@ -1160,11 +1214,13 @@ ${UAE_COMPLIANCE}
       $('pd-summary').textContent = state.plan?.analysisSummary || (state.parentDesc||'—');
       $('pd-updated').textContent = '';
       $('pd-recos').innerHTML = '';
+      // لا نعيد التنبيهات هنا لأنها تُعرض عبر renderParentAlerts()
     }
 
     // زر التحديث يعيد توليد التوصيات ويظهر وقت آخر تحديث
     document.getElementById('pd-refresh').addEventListener('click', ()=>{
       renderParentRecommendations();
+      renderParentAlerts(); // NEW: تأكد أن التنبيهات معروضة عند التحديث
     });
 
     /* تهيئة الحالة */
