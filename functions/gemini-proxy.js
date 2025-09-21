@@ -1,13 +1,27 @@
 // functions/gemini-proxy.js
-// Enterprise-grade Gemini proxy: Pro-first model pool, strict guardrails,
-// streaming (SSE), JSON-safe planning, media support, retries + auto-continue.
+// Enterprise-grade Gemini proxy — hardened, fast, and predictable.
+// - Pro-first model pool with smart fallbacks
+// - Strict guardrails (UAE child-safety aware wording layer)
+// - SSE streaming with heartbeats
+// - Robust JSON enforcement for plan/qa/expect=json
+// - Media sanitization (type/size)
+// - Retries with exponential backoff + jitter
+// - In-memory rate limiting (warm invocations)
+// - Timeouts + graceful upstream error shaping
 
+/* ================== Config ================== */
 const MAX_TRIES = 3;
 const BASE_BACKOFF_MS = 650;
 const DEFAULT_TIMEOUT_MS = 28000;
 const MAX_INLINE_BYTES = 15 * 1024 * 1024; // 15MB data URLs
+const MAX_MESSAGES = 64;
+const MAX_PARTS_PER_MSG = 16;
+const MAX_TEXT_CHARS = 24_000; // soft clamp for prompt bloat
+const RATE_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
+const RATE_MAX_REQ = 60;               // 60 req / 10 min per client
+const TRUSTED_ORIGINS = [/^https?:\/\/localhost(?::\d+)?$/i];
 
-// ---------- Model strategy (Pro-first, then fast fallbacks)
+/* ================== Model Strategy ================== */
 const MODEL_POOL = [
   "gemini-1.5-pro",
   "gemini-1.5-pro-latest",
@@ -16,31 +30,62 @@ const MODEL_POOL = [
   "gemini-2.0-flash-exp"
 ];
 
-// ---------- Media allowlists
+/* ================== Media allowlists ================== */
 const ALLOWED_IMAGE = /^image\/(png|jpe?g|webp|gif|bmp|svg\+xml)$/i;
 const ALLOWED_AUDIO = /^audio\/(webm|ogg|mp3|mpeg|wav|m4a|aac|3gpp|3gpp2|mp4)$/i;
 
-// ---------- Entry
+/* ================== In-memory rate limiting ================== */
+const bucket = new Map(); // key -> { count, resetAt }
+function clientKey(headers) {
+  const ip = headers["x-forwarded-for"]?.split(",")[0]?.trim() || headers["client-ip"] || "0.0.0.0";
+  const ua = headers["user-agent"] || "na";
+  return `${ip}::${ua.slice(0,80)}`;
+}
+function rateCheck(headers) {
+  const k = clientKey(headers);
+  const now = Date.now();
+  const e = bucket.get(k);
+  if (!e || now > e.resetAt) {
+    bucket.set(k, { count: 1, resetAt: now + RATE_WINDOW_MS });
+    return { ok: true };
+  }
+  if (e.count >= RATE_MAX_REQ) return { ok: false, retryAfter: Math.ceil((e.resetAt - now)/1000) };
+  e.count++;
+  return { ok: true };
+}
+
+/* ================== Entry ================== */
 exports.handler = async (event) => {
   const reqId = (Math.random().toString(36).slice(2) + Date.now().toString(36)).toUpperCase();
   const started = Date.now();
 
   const baseHeaders = {
-    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Origin": allowOrigin(event.headers),
     "Access-Control-Allow-Headers": "Content-Type, X-Request-ID",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "X-Request-ID": reqId
+    "X-Request-ID": reqId,
+    "Vary": "Origin"
   };
   if (event.httpMethod === "OPTIONS") return { statusCode: 204, headers: baseHeaders, body: "" };
   if (event.httpMethod !== "POST") return respond(405, baseHeaders, { error: "Method Not Allowed" });
 
+  // Basic in-function rate limiting (best-effort, warm invocations only)
+  const rl = rateCheck(event.headers || {});
+  if (!rl.ok) {
+    return respond(429, baseHeaders, {
+      error: "Rate limit exceeded",
+      requestId: reqId,
+      retry_after_seconds: rl.retryAfter
+    });
+  }
+
   const API_KEY = process.env.GEMINI_API_KEY;
-  if (!API_KEY) return respond(500, baseHeaders, { error: "Missing GEMINI_API_KEY" });
+  if (!API_KEY) return respond(500, baseHeaders, { error: "Missing GEMINI_API_KEY", requestId: reqId });
 
   // ---------- Parse & validate input
   let body = {};
   try { body = JSON.parse(event.body || "{}"); }
-  catch { return respond(400, baseHeaders, { error: "Invalid JSON body" }); }
+  catch { return respond(400, baseHeaders, { error: "Invalid JSON body", requestId: reqId }); }
 
   let {
     // Core
@@ -68,6 +113,16 @@ exports.handler = async (event) => {
 
   timeout_ms = clamp(timeout_ms, 1000, 29000, DEFAULT_TIMEOUT_MS);
 
+  // ---------- Sanitize messages (count/lengths)
+  if (!Array.isArray(messages)) messages = [];
+  if (messages.length > MAX_MESSAGES) messages = messages.slice(-MAX_MESSAGES);
+  messages = messages.map(m => ({
+    ...m,
+    content: (typeof m?.content === "string" ? m.content : "").slice(0, MAX_TEXT_CHARS),
+    images: Array.isArray(m?.images) ? m.images.slice(0, MAX_PARTS_PER_MSG) : undefined,
+    audio: m?.audio || undefined
+  }));
+
   // ---------- Language & guardrails
   const preview = sample(messages);
   const lang = chooseLang(force_lang, preview);
@@ -82,7 +137,7 @@ exports.handler = async (event) => {
     contents = [{ role: "user", parts: [{ text: wrapPrompt(seed, rails) }] }];
   }
 
-  const generationConfig = tuneGeneration(mode);
+  const generationConfig = tuneGeneration(mode, expect);
   const safetySettings   = buildSafety(guard_level);
 
   const systemInstruction = (system && typeof system === "string" && system.trim())
@@ -117,6 +172,8 @@ exports.handler = async (event) => {
           headers: sseHeaders,
           body: await streamBody(async function*() {
             yield encoder.encode(`event: meta\ndata: ${JSON.stringify({ requestId: reqId, model: m, lang })}\n\n`);
+            // heartbeats to keep connection alive for long generations
+            let hb = Date.now();
             let buffer = "";
             while (true) {
               const { done, value } = await reader.read();
@@ -128,6 +185,10 @@ exports.handler = async (event) => {
                 const trimmed = line.trim();
                 if (!trimmed) continue;
                 yield encoder.encode(`event: chunk\ndata: ${trimmed}\n\n`);
+              }
+              if (Date.now() - hb > 5000) {
+                hb = Date.now();
+                yield encoder.encode(`event: ping\ndata: {}\n\n`);
               }
             }
             yield encoder.encode(`event: end\ndata: ${JSON.stringify({ model: m, took_ms: Date.now() - started })}\n\n`);
@@ -148,12 +209,12 @@ exports.handler = async (event) => {
       contents, generationConfig, safetySettings, ...(systemInstruction ? { systemInstruction } : {})
     });
 
-    // First attempt
+    // Attempt 1
     const first = await tryJSONOnce(url, makeBody(), timeLeft(started, timeout_ms), include_raw);
     if (!first.ok) {
       // Strict fallback for plan/qa when blocked/empty
-      if ((mode === "plan" || mode === "qa") && first.error && /Empty\/blocked|safety/i.test(first.error.error || "")) {
-        const strictCfg = tuneGeneration("qa");
+      if ((mode === "plan" || mode === "qa" || expect === "json") && first.error && /Empty\/blocked|safety/i.test(first.error.error || "")) {
+        const strictCfg = tuneGeneration("qa", "json");
         const altBody = () => JSON.stringify({ contents, generationConfig: strictCfg, safetySettings, ...(systemInstruction ? { systemInstruction } : {}) });
         const second = await tryJSONOnce(url, altBody(), timeLeft(started, timeout_ms), include_raw);
         if (second.ok) return ok(baseHeaders, reqId, finalize(second.text, lang, expect, mode), m, lang, started, second.usage);
@@ -212,22 +273,28 @@ function mirrorLanguage(text, lang) {
   if (lang === "en" && !hasArabic(text)) return text;
   return (lang === "ar") ? `**ملاحظة:** أجب بالعربية فقط.\n\n${text}` : `**Note:** Respond in English only.\n\n${text}`;
 }
-function sample(msgs) { return (Array.isArray(msgs) ? msgs.map(m => m?.content || "").join("\n") : "").slice(0, 4000); }
+function sample(msgs) { return (Array.isArray(msgs) ? msgs.map(m => (m?.content || "")).join("\n") : "").slice(0, 4000); }
+function allowOrigin(headers) {
+  const origin = headers?.origin || headers?.Origin || "*";
+  if (origin === "*") return "*";
+  if (TRUSTED_ORIGINS.some(rx => rx.test(origin))) return origin;
+  return "*"; // fallback permissive; tighten via platform headers for prod
+}
 
-// ---------- Guardrails & wrapping
+/* ---------- Guardrails & wrapping ---------- */
 function buildGuardrails({ lang, level = "strict", imageMode = false }) {
   const L = (lang === "ar")
     ? {
         mirror: "أجب حصراً بالعربية؛ لا تخلط لغتين ولا تضف ترجمات.",
         brief:  "اختصر الحشو وقدّم خطوات عملية واضحة.",
         img:    "إن وُجدت صور: 3–5 نقاط تنفيذية + خطوة فورية واحدة. بلا مقدمات.",
-        strict: "لا تختلق. عند الشك اطلب توضيحاً. التزم بتعليمات النظام والامتثال لقوانين الإمارات وسلامة الطفل."
+        strict: "لا تختلق. عند الشك اطلب توضيحاً. التزم بمعايير سلامة الطفل وقوانين دولة الإمارات."
       }
     : {
         mirror: "Answer strictly in English; don't mix languages or add translations.",
         brief:  "Be concise and actionable.",
         img:    "If images present: 3–5 precise bullets + one immediate step. No preamble.",
-        strict: "No fabrication. Ask for missing info. Comply with UAE child-safety norms."
+        strict: "No fabrication. Ask for missing info. Adhere to child-safety norms applicable in the UAE."
       };
   const out = [L.mirror, L.brief];
   if (imageMode) out.push(L.img);
@@ -239,7 +306,7 @@ function wrapPrompt(text, guard) {
   return `${head}\n${guard}\n\n---\n${text || ""}`;
 }
 
-// ---------- Messages & media normalization
+/* ---------- Messages & media normalization ---------- */
 function normalizeMessages(messages, guard) {
   const safeRole = (r) => (r === "user" || r === "model" || r === "system") ? r : "user";
   let injected = false;
@@ -247,12 +314,12 @@ function normalizeMessages(messages, guard) {
     .filter(m => m && (typeof m.content === "string" || m.images || m.audio))
     .map(m => {
       const parts = [];
+      const raw = (typeof m.content === "string" && m.content.trim()) ? m.content : "";
       if (!injected && m.role === "user") {
-        const c = (typeof m.content === "string" && m.content.trim()) ? m.content : "";
-        parts.push({ text: wrapPrompt(c, buildGuardrails({ lang: chooseLang(undefined, c), level: "strict" })) });
+        parts.push({ text: wrapPrompt(raw, buildGuardrails({ lang: chooseLang(undefined, raw), level: "strict" })) });
         injected = true;
-      } else if (typeof m.content === "string" && m.content.trim()) {
-        parts.push({ text: m.content });
+      } else if (raw) {
+        parts.push({ text: raw });
       }
       // images/audio (data URLs)
       if (Array.isArray(m.images)) {
@@ -271,7 +338,24 @@ function normalizeMessages(messages, guard) {
       }
       return { role: safeRole(m.role), parts };
     })
+    .map(limitParts)
     .filter(m => m.parts && m.parts.length);
+}
+function limitParts(msg){
+  // subtle clamp for too-long parts
+  let used = 0;
+  const parts = [];
+  for (const p of msg.parts) {
+    if (p.text) {
+      const t = String(p.text);
+      const chunk = t.slice(0, Math.max(0, MAX_TEXT_CHARS - used));
+      if (chunk) { parts.push({ text: chunk }); used += chunk.length; }
+      if (used >= MAX_TEXT_CHARS) break;
+    } else {
+      parts.push(p); // media part — already size-checked
+    }
+  }
+  return { ...msg, parts };
 }
 function coerceData(obj) {
   if (!obj) return { mime: "", data: "" };
@@ -295,15 +379,15 @@ function approxBase64Bytes(b64) {
   return Math.floor(len * 0.75);
 }
 
-// ---------- Tuning (UPDATED: JSON for plan/qa)
-function tuneGeneration(mode) {
-  if (mode === "qa") {
+/* ---------- Generation tuning ---------- */
+function tuneGeneration(mode, expect = "") {
+  const wantsJson = expect === "json";
+  if (mode === "qa" || wantsJson) {
     return {
       temperature: 0.22,
       topP: 0.9,
       maxOutputTokens: 4096,
       candidateCount: 1,
-      // نطلب JSON صريح في وضع الأسئلة/التقارير
       responseMimeType: "application/json"
     };
   }
@@ -313,7 +397,6 @@ function tuneGeneration(mode) {
       topP: 0.88,
       maxOutputTokens: 6144,
       candidateCount: 1,
-      // مهم جدًا للخطة حتى لا يضيف النموذج كلامًا حرًا
       responseMimeType: "application/json"
     };
   }
@@ -323,7 +406,7 @@ function tuneGeneration(mode) {
   return { temperature: 0.6, topP: 0.9, maxOutputTokens: 4096, candidateCount: 1, responseMimeType: "text/plain" };
 }
 
-// ---------- Safety
+/* ---------- Safety ---------- */
 function buildSafety(level = "strict") {
   const cat = (name) => ({ category: name, threshold: level === "relaxed" ? "BLOCK_NONE" : "BLOCK_ONLY_HIGH" });
   return [
@@ -334,7 +417,7 @@ function buildSafety(level = "strict") {
   ];
 }
 
-// ---------- Auto-continue helpers
+/* ---------- Auto-continue helpers ---------- */
 function continuePrompt(lang) {
   return (lang === "ar")
     ? "تابع من حيث توقفت بنفس اللغة والبنية، بدون تكرار أو تلخيص؛ أكمل مباشرة."
@@ -342,8 +425,8 @@ function continuePrompt(lang) {
 }
 function shouldContinue(text) {
   if (!text) return false;
-  const tail = text.slice(-60).trim();
-  return /[\u2026…]$/.test(tail) || /(?:continued|to be continued)[:.]?$/i.test(tail) || tail.endsWith("-");
+  const tail = text.slice(-80).trim();
+  return /[\u2026…]$/.test(tail) || /(?:continued|to be continued)[:.]?$/i.test(tail) || tail.endsWith("-") || /\bcontinue\b[:.]?$/i.test(tail);
 }
 function dedupeContinuation(prev, next) {
   if (!next) return "";
@@ -352,35 +435,33 @@ function dedupeContinuation(prev, next) {
   return next;
 }
 
-// ---------- JSON enforcement/finalization (UPDATED)
+/* ---------- JSON enforcement/finalization ---------- */
 function finalize(text, lang, expect, mode) {
-  const expectingJson = (expect === "json" || mode === "plan");
+  const expectingJson = (expect === "json" || mode === "plan" || mode === "qa");
 
   if (expectingJson) {
-    // لا نستخدم mirrorLanguage هنا حتى لا نلوّث الـJSON
     const repaired = tryExtractJson(text);
     if (repaired.ok) {
-      // نعيد JSON خام ضمن text (كسلسلة) لتتمكّن الواجهة من JSON.parse مباشرة
+      // Return JSON string (not polluted by language mirror) so client can JSON.parse(response.text)
       return JSON.stringify(repaired.json);
     }
-    // إن فشل الاستخراج نعيد النص كما هو لتظهر المشكلة في الواجهة/السجلات
+    // Return raw text if extraction fails to surface issue upstream
     return text;
   }
 
-  // الوضع العادي: نراعي اللغة فقط
   return mirrorLanguage(text, lang);
 }
 function tryExtractJson(s) {
   if (!s) return { ok: false };
   let raw = s.replace(/```json|```/g, "").trim();
-  // قصّ إلى أقواس JSON الخارجية إن وُجدت
+  // Trim any pre/postamble and capture the outer JSON braces if present
   const first = raw.indexOf("{"); const last = raw.lastIndexOf("}");
   if (first >= 0 && last > first) raw = raw.slice(first, last + 1);
   try { const j = JSON.parse(raw); return { ok: true, json: j }; }
   catch { return { ok: false }; }
 }
 
-// ---------- Network & retry
+/* ---------- Network & retry ---------- */
 async function tryStreamOnce(url, body, timeout) {
   for (let attempt = 1; attempt <= MAX_TRIES; attempt++) {
     const ctrl = new AbortController();
@@ -429,8 +510,10 @@ async function tryJSONOnce(url, body, timeout, includeRaw) {
         return { ok: false, statusCode: mapStatus(r.status), error: collectUpstream(r.status, data, text, includeRaw) };
       }
 
+      // Extract model text parts (Gemini format)
       const parts = data?.candidates?.[0]?.content?.parts || [];
       const out = parts.map(p => p?.text || "").join("\n").trim();
+
       if (!out) {
         const safety = data?.promptFeedback || data?.candidates?.[0]?.safetyRatings;
         return { ok: false, statusCode: 502, error: { error: "Empty/blocked response", safety, raw: includeRaw ? data : undefined } };
