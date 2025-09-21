@@ -12,20 +12,44 @@
   <script src="https://unpkg.com/lucide@latest" defer></script>
 
   <style>
-    :root{ --vh:1vh; --card:rgba(248,250,252,.92) }
-    html,body{height:100%;margin:0;padding:0;overscroll-behavior-y:contain}
+    :root{ --vh:1vh; --card:rgba(248,250,252,.92); --safe: env(safe-area-inset-bottom, 0px); }
+    html,body{height:100%;margin:0;padding:0;overscroll-behavior-y:contain;scroll-behavior:smooth}
     body{font-family:'Cairo',system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial,'Noto Sans',sans-serif;line-height:1.9;-webkit-tap-highlight-color:transparent}
     #app-wrapper{
       background-image:
         linear-gradient( rgba(245,248,252,.85), rgba(245,248,252,.88) ),
         url('https://www.albayan.ae/assets/archives/images/2024/05/16/4873295.jpg');
       background-size:cover;background-position:center;background-attachment:fixed;
-      /* ✅ احترام الحواف الآمنة (iPhone Notch) */
-      padding-bottom: env(safe-area-inset-bottom);
+      min-height:100dvh;
     }
-    #app-container{height:calc(var(--vh) * 100)}
+
+    /* ==== ارتفاع حقيقي متوافق مع كل الأجهزة (مع fallback) ==== */
+    #app-container{height:100dvh}
+    @supports not (height: 100dvh){
+      #app-container{height:calc(var(--vh)*100)}
+    }
+
     .screen,.modal{display:none}.screen.active,.modal.active{display:flex}
+
+    /* ==== اجعل كل شاشة قابلة للتمرير بسهولة وسلاسة ==== */
+    .screen{
+      overflow-y:auto;            /* Scroll مريح لكل الشاشات */
+      -webkit-overflow-scrolling:touch; /* سلاسة على iOS */
+    }
     .bg-screen{background:var(--card);backdrop-filter:blur(3px)}
+
+    /* ==== مساحة سفلية آمنة تظهر الأزرار والنصوص الطويلة فوق شريط المتصفح ==== */
+    .screen.active{
+      padding-bottom:calc(var(--safe) + 140px);
+    }
+    /* شاشة مراجعة الخطة: هامش أكبر لضمان ظهور (موافقة/طلب تعديل) */
+    #plan-review-screen #plan-content{
+      padding-bottom:calc(var(--safe) + 160px);
+    }
+
+    /* تمنع قصّ محتوى الكروت البيضاء الطويلة */
+    #plan-review-screen .bg-white{overflow:visible}
+
     #chat-messages{display:flex;flex-direction:column;gap:.5rem;scroll-padding-bottom:160px}
     #chat-messages .msg-row{display:flex;width:100%}
     #chat-messages .msg-row.user{justify-content:flex-end !important}
@@ -33,9 +57,6 @@
     #chat-messages .bubble{
       max-width:78% !important;border-radius:16px !important;padding:.6rem .8rem !important;
       position:relative !important;word-wrap:break-word !important;box-shadow:0 1px 0 rgba(0,0,0,.05) !important;line-height:1.9 !important;
-      /* ✅ لفّ أي نص طويل/روابط دون كسر التخطيط */
-      overflow-wrap:anywhere; word-break:break-word;
-      white-space:pre-wrap;
     }
     #chat-messages .bubble-user{background:#dcf8c6 !important;color:#0b141a !important;border:1px solid rgba(0,0,0,.06) !important;border-top-right-radius:6px !important;}
     #chat-messages .bubble-user::after{content:"";position:absolute;bottom:.25rem;right:-6px;width:0;height:0;border:7px solid transparent;border-left-color:#dcf8c6;border-right:0;border-top:0}
@@ -57,43 +78,6 @@
     #chat-screen footer{position:sticky;bottom:0;z-index:10}
     @media (orientation:landscape){ #app-container{max-width:960px} #chat-messages{padding-bottom:.25rem} }
     @media (min-width:1024px){ #app-container{max-width:1024px} }
-
-    /* =========================
-       ✅ تحسينات الاستجابة والتمرير
-       دون تعديل أي منطق آخر
-       ========================= */
-    /* اجعل كل شاشة قابلة للتمرير دائماً */
-    .screen.active{
-      min-height:calc(var(--vh) * 100);
-      overflow-y:auto;
-      -webkit-overflow-scrolling:touch;
-    }
-    /* تذييل ثابت + مساحة للحافة الآمنة */
-    footer[role="contentinfo"]{
-      padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 6px);
-    }
-    /* الحوارات: لا تتجاوز الشاشة وتدعم التمرير */
-    .modal.active{
-      align-items:center;justify-content:center;
-    }
-    .modal.active > div{
-      max-height:calc(var(--vh) * 90);
-      overflow:auto;
-      -webkit-overflow-scrolling:touch;
-    }
-    /* صندوق الرسائل: تأكيد التمرير في كل الأجهزة */
-    #chat-messages{
-      overflow-y:auto;
-      -webkit-overflow-scrolling:touch;
-    }
-    /* مربعات الإدخال الطويلة: حد أقصى وتمريري */
-    textarea{
-      max-height:40vh;
-      overflow:auto;
-      -webkit-overflow-scrolling:touch;
-    }
-    /* أزرار الخيارات قد تمتد كامل الصف على الشاشات الضيقة */
-    #chat-options-container > button{ width:100%; }
   </style>
 </head>
 <body class="bg-slate-200 text-slate-800 antialiased">
@@ -191,10 +175,10 @@
         <h2 class="text-2xl font-bold text-center mb-2">كيف نعمل؟ والتزاماتنا</h2>
         <p class="text-slate-600 text-center mb-6">نبني علاقة ودّية أولًا، ثم نجمع بيانات تدريجيًا لكشف الاحتياجات الخفية، وبعدها ندرّب بخطوات متدرجة وآمنة.</p>
         <ul class="space-y-3 text-sm text-slate-700">
-          <li class="flex items-start gap-3"><i data-lucide="scale" class="w-5 ه-5 text-sky-500 mt-0.5" aria-hidden="true"></i><span><b>امتثال:</b> الالتزام بقوانين الإمارات والمعايير الدولية لسلامة الطفل.</span></li>
-          <li class="flex items-start gap-3"><i data-lucide="database" class="w-5 ه-5 text-sky-500 mt-0.5" aria-hidden="true"></i><span><b>خصوصية:</b> لا نطلب بيانات تعريفية؛ التخزين محلي؛ لا تُشارك المحادثات.</span></li>
-          <li class="flex items-start gap-3"><i data-lucide="stethoscope" class="w-5 ه-5 text-sky-500 mt-0.5" aria-hidden="true"></i><span><b>حدود:</b> إرشاد تربوي — ليس تشخيصاً طبياً/نفسياً. عند مؤشرات الخطر نوصي بالتصعيد لمختص مرخّص.</span></li>
-          <li class="flex items-start gap-3"><i data-lucide="child" class="w-5 ه-5 text-sky-500 mt-0.5" aria-hidden="true"></i><span><b>الهدف:</b> تمكين الطفل تدريجيًا عبر تمارين قابلة للقياس.</span></li>
+          <li class="flex items-start gap-3"><i data-lucide="scale" class="w-5 h-5 text-sky-500 mt-0.5" aria-hidden="true"></i><span><b>امتثال:</b> الالتزام بقوانين الإمارات والمعايير الدولية لسلامة الطفل.</span></li>
+          <li class="flex items-start gap-3"><i data-lucide="database" class="w-5 h-5 text-sky-500 mt-0.5" aria-hidden="true"></i><span><b>خصوصية:</b> لا نطلب بيانات تعريفية؛ التخزين محلي؛ لا تُشارك المحادثات.</span></li>
+          <li class="flex items-start gap-3"><i data-lucide="stethoscope" class="w-5 h-5 text-sky-500 mt-0.5" aria-hidden="true"></i><span><b>حدود:</b> إرشاد تربوي — ليس تشخيصاً طبياً/نفسياً. عند مؤشرات الخطر نوصي بالتصعيد لمختص مرخّص.</span></li>
+          <li class="flex items-start gap-3"><i data-lucide="child" class="w-5 h-5 text-sky-500 mt-0.5" aria-hidden="true"></i><span><b>الهدف:</b> تمكين الطفل تدريجيًا عبر تمارين قابلة للقياس.</span></li>
         </ul>
         <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
           <button id="intro-back" class="bg-slate-200 text-slate-800 font-bold py-3 px-6 rounded-full hover:bg-slate-300 hit" aria-label="رجوع">رجوع</button>
@@ -276,7 +260,7 @@
       </section>
 
       <!-- الصفحة الرئيسية -->
-      <section id="home-screen" class="screen bg-transparent flex-col p-6" aria-label="الصفحة الرئيسية">
+      <section id="home-screen" class="screen bg-transparent flex-col p-6 overflow-y-auto" aria-label="الصفحة الرئيسية">
         <header class="flex justify-between items-center mb-6">
           <div><p id="home-greeting" class="text-slate-500"></p><h2 id="home-mission-status" class="text-2xl font-bold">جاهز لمغامرة اليوم؟</h2></div>
           <div class="flex items-center gap-2">
@@ -285,7 +269,7 @@
           </div>
         </header>
         <main class="flex-grow flex flex-col justify-center items-center text-center">
-          <div class="w-44 h-44 md:w-48 md:h-48 bg-white/60 backdrop-blur-sm rounded-full flex items-center justify-center mb-6"><i data-lucide="bot" class="w-24 ه-24 md:w-28 md:h-28 text-sky-600" aria-hidden="true"></i></div>
+          <div class="w-44 h-44 md:w-48 md:h-48 bg-white/60 backdrop-blur-sm rounded-full flex items-center justify-center mb-6"><i data-lucide="bot" class="w-24 h-24 md:w-28 md:h-28 text-sky-600" aria-hidden="true"></i></div>
           <h3 id="home-ai-name-intro" class="text-2xl font-bold mb-2"></h3>
           <p id="home-intro-text" class="text-slate-500 max-w-xs mb-6"></p>
           <button id="initiate-chat-btn" class="w-full bg-sky-600 text-white font-bold py-4 px-6 rounded-full text-lg shadow flex items-center justify-center gap-2 hit" aria-label="ابدأ الدردشة"><i data-lucide="message-circle"></i><span id="start-chat-btn-text"></span></button>
@@ -382,12 +366,6 @@
     /* ===== أدوات عرض ===== */
     function setVh(){ document.documentElement.style.setProperty('--vh', (window.innerHeight*0.01)+'px'); }
     setVh(); window.addEventListener('resize', setVh);
-
-    // ✅ حساسية أعلى لتغيّر لوحة المفاتيح/الاتجاه/الظهور
-    ['orientationchange','visibilitychange'].forEach(ev=>{
-      window.addEventListener(ev, ()=>{ setTimeout(()=>{ setVh(); adjustChatPadding(); }, 50); });
-    });
-
     function adjustChatPadding(){
       const pad = (dom.chatFooter?.getBoundingClientRect().height || 96) + 24;
       dom.chatMessages.style.paddingBottom = pad+'px';
@@ -408,7 +386,7 @@
 - الخصوصية أولًا: لا نطلب ولا نخزن أي بيانات تعريفية (الاسم الكامل، العنوان، المدرسة، أرقام الاتصال، الصور/الفيديو).
 - لغة مناسبة للعمر والثقافة الإماراتية، خالية من اللوم والأوامر والتهديد.
 - عند مؤشرات خطر (إساءة/تنمّر/إهمال/إيذاء ذاتي أو للغير): إيقاف التقدّم الفوري وإخطار وليّ الأمر/المدرسة والتوجيه لجهة مختصّة.
-- أي تنفيذ عملي لخطة يتم تحت إشراف مختص بشري مرخّص عند الحاجة (طبيب/أخصائي نفسي/اختصاصي اجتماعي).
+- أي تنفيذ عملي للخطة يتم تحت إشراف مختص بشري مرخّص عند الحاجة (طبيب/أخصائي نفسي/اختصاصي اجتماعي).
 `;
 
     const getAiName=(age,gender)=>{
@@ -787,7 +765,7 @@ ${UAE_COMPLIANCE}
         }
       }
       if(out.length===0){
-        const bullets = lines.filter(s=>/^-\s+/.test(s)).map(s=>s.replace(/^-\s+/,'').trim());
+        const bullets = lines.filter(s=>/^-\s+/.test(s)).map(s=>s.replace(/^-+\s*/,'').trim());
         bullets.forEach(b=>{ if(b.length<=40 && !/(جرّب|قل|افعل|اذهب|يجب|عليك)/.test(b)) out.push(b); });
       }
       if(!/[\؟?]/.test(currentQuestion||'')) return [];
@@ -1034,6 +1012,15 @@ ${UAE_COMPLIANCE}
       if(!ok) resetState();
       if(ok && state.name){ updateHome(); show('home-screen'); }
       if(window.lucide) lucide.createIcons();
+    }
+    function updateHome(){
+      const t={ ar:{g:`مرحباً يا ${state.name||''}`,m:`هدفنا:`,ready:`جاهز لمغامرة اليوم؟`,ai:`أنا ${state.aiName||'صديقك'}`,desc:{'ذكر':'رفيجك الرقمي اللي بيساعدك خطوة بخطوة.','أنثى':'رفيجتج الرقمية اللي بتساعدج خطوة بخطوة.'},chat:`ابدأ الدردشة مع ${state.aiName||'صديقي الذكي'}`,ph:'اكتب ردك هنا...'},
+               en:{g:`Welcome, ${state.name||''}`,m:`Our goal:`,ready:`Ready for today’s adventure?`,ai:`I'm ${state.aiName||'your buddy'}`,desc:{'ذكر':'Your digital buddy to help you step by step.','أنثى':'Your digital buddy to help you step by step.'},chat:`Start chat with ${state.aiName||'Sadiki'}`,ph:'Type your reply here...'} };
+      const L=t[state.language||'ar'];
+      $('home-greeting').textContent=L.g; $('home-ai-name-intro').textContent=L.ai; $('home-intro-text').textContent=L.desc[state.gender||'ذكر'];
+      $('start-chat-btn-text').textContent=L.chat; dom.chatInput.placeholder=L.ph;
+      $('home-mission-status').textContent = (state.plan?.planSteps?.[state.step]) ? `${L.m} ${state.plan.planSteps[state.step]}` : L.ready;
+      $('chat-header-name').textContent = state.aiName || 'صديقي الذكي';
     }
     init();
   });
