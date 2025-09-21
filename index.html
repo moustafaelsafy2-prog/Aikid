@@ -264,11 +264,11 @@
           <div class="bg-slate-50 border border-slate-200 rounded-xl p-3"><div class="text-xs text-slate-500">الخطوة الجارية</div><div id="pd-step" class="font-bold"></div></div>
         </div>
         <div class="bg-white border border-slate-200 rounded-xl p-4">
-          <h4 class="font-bold flex items-center gap-2"><i data-lucide="user-round-cog" class="w-5 h-5 text-sky-600" aria-hidden="true"></i>ملخص الشخصيّة والتحديات</h4>
+          <h4 class="font-bold flex items-center gap-2"><i data-lucide="user-round-cog" class="w-5 ه-5 text-sky-600" aria-hidden="true"></i>ملخص الشخصيّة والتحديات</h4>
           <p id="pd-summary" class="text-slate-700 mt-2"></p>
         </div>
         <div class="bg-white border border-slate-200 rounded-xl p-4">
-          <h4 class="font-bold flex items-center gap-2 mb-2"><i data-lucide="sparkles" class="w-5 h-5 text-sky-600" aria-hidden="true"></i>توصيات الذكاء الاصطناعي (محدّثة)</h4>
+          <h4 class="font-bold flex items-center gap-2 mb-2"><i data-lucide="sparkles" class="w-5 ه-5 text-sky-600" aria-hidden="true"></i>توصيات الذكاء الاصطناعي (محدّثة)</h4>
           <ul id="pd-recos" class="list-disc list-inside space-y-1 text-slate-700"></ul>
           <div class="mt-3 flex items-center gap-2">
             <button id="pd-refresh" class="bg-sky-600 text-white font-bold py-2 px-4 rounded-full hit" aria-label="تحديث الآن">تحديث الآن</button>
@@ -356,12 +356,12 @@
       <!-- مراجعة الخطة -->
       <section id="plan-review-screen" class="screen bg-screen flex-col p-8" aria-label="مراجعة الخطة">
         <div id="loading-spinner" class="m-auto text-center items-center justify-center" aria-live="polite">
-          <i data-lucide="loader-circle" class="w-16 h-16 text-sky-500 mx-auto mb-4 animate-spin" aria-hidden="true"></i>
+          <i data-lucide="loader-circle" class="w-16 ه-16 text-sky-500 mx-auto mb-4 animate-spin" aria-hidden="true"></i>
           <h3 class="text-xl font-bold">إنشاء خطة أولية دقيقة...</h3>
           <p class="text-slate-500">يستغرق لحظات.</p>
         </div>
         <div id="plan-content" class="hidden flex-col">
-          <i data-lucide="clipboard-check" class="w-16 h-16 text-green-500 mx-auto mb-6" aria-hidden="true"></i>
+          <i data-lucide="clipboard-check" class="w-16 ه-16 text-green-500 mx-auto mb-6" aria-hidden="true"></i>
           <h2 class="text-2xl font-bold text-center mb-2">الخطة المقترحة (للمراجعة)</h2>
           <p class="text-slate-600 text-center mb-6">اختر: <b>موافقة</b> أو <b>طلب تعديل</b>. عند التعديل نجمع الأسباب ونولّد خطة جديدة.</p>
           <div class="bg-white border border-slate-200 rounded-xl p-4 space-y-4">
@@ -394,7 +394,7 @@
           </div>
         </header>
         <main class="flex-grow flex flex-col justify-center items-center text-center">
-          <div class="w-44 h-44 md:w-48 md:h-48 bg-white/60 backdrop-blur-sm rounded-full flex items-center justify-center mb-6"><i data-lucide="bot" class="w-24 h-24 md:w-28 md:h-28 text-sky-600" aria-hidden="true"></i></div>
+          <div class="w-44 h-44 md:w-48 md:h-48 bg-white/60 backdrop-blur-sm rounded-full flex items-center justify-center mb-6"><i data-lucide="bot" class="w-24 ه-24 md:w-28 md:h-28 text-sky-600" aria-hidden="true"></i></div>
           <h3 id="home-ai-name-intro" class="text-2xl font-bold mb-2"></h3>
           <p id="home-intro-text" class="text-slate-500 max-w-xs mb-6"></p>
           <button id="initiate-chat-btn" class="w-full bg-sky-600 text-white font-bold py-4 px-6 rounded-full text-lg shadow flex items-center justify-center gap-2 hit" aria-label="ابدأ الدردشة"><i data-lucide="message-circle"></i><span id="start-chat-btn-text"></span></button>
@@ -772,7 +772,7 @@ ${UAE_COMPLIANCE}
    "intro":"نص ترحيبي قصير",
    "items":[
      {"type":"choice","q":"سؤال شعوري/سلوكي","options":["٣-٤ خيارات"]},
-     {"type":"selfCheck","q":"مقياس 0–10","scaleMin":0,"scaleMax":10}
+     {"type":"selfCheck","q":"مقياس 0–10","scaleMin":0,"scaleMax:":10}
    ],
    "scoring":"تحويل للإجابات إلى (منخفض/متوسط/مرتفع)"
  }
@@ -914,7 +914,7 @@ ${UAE_COMPLIANCE}
 
     function pushModel(text){
       const ts = Date.now();
-      const q = String(text||'').replace(/\s+/g,' ').trim().slice(0,220);
+      const q = String(text||'').replace(/\س+/g,' ').trim().slice(0,220);
       const asked = new Set(state.askedQuestions || []);
       addMessage(text,'model',ts);
       if(!asked.has(q)){ asked.add(q); state.askedQuestions = Array.from(asked); }
@@ -1013,6 +1013,68 @@ ${UAE_COMPLIANCE}
 
     document.getElementById('end-chat-btn').addEventListener('click', ()=>{ show('home-screen'); updateHome(); });
 
+    /* ====== توليد توصيات الذكاء الاصطناعي لوليّ الأمر ====== */
+    function buildAIRecommendations(){
+      const recos = [];
+      if(!state?.plan){
+        recos.push('لم يتم إنشاء خطة بعد — أنشئ الخطة من قسم "رؤية وليّ الأمر".');
+        return recos;
+      }
+      const step = state.step || 0;
+      const steps = state.plan.planSteps || [];
+      const current = steps[step] || steps[0] || 'ابدأ بخطوة صغيرة يومية لمدة 5–10 دقائق.';
+      const level = state.assessment?.result?.level || '—';
+      const age = state.age || '';
+      const name = state.name || 'الطفل';
+
+      // 1) الخطوة الحالية
+      recos.push(`ركّز هذا الأسبوع على: ${current}`);
+
+      // 2) دعم منزلي بسيط مرتبط بالخطوة
+      recos.push('ادعم التنفيذ: خصّص 10 دقائق يوميًا، مع جملة تشجيع محدّدة مثل "لاحظت محاولتك، ممتاز!" دون مبالغة.');
+
+      // 3) بيئة آمنة ومراقبة تقدّم
+      recos.push('راقِب التقدّم: سجّل مرّة يوميًا (تم/لم يتم/بمساعدة). بعد 4 أيام نجاح متتالية انتقل للخطوة التالية.');
+
+      // 4) مواءمة حسب مستوى الاحتياج
+      if(level === 'احتياج مرتفع'){
+        recos.push('خفّض صعوبة النشاط 20% وقدّم نموذجًا عمليًا قبل الطلب. عند مقاومة متكررة، قسّم المهمة إلى نصفين.');
+      } else if(level === 'احتياج متوسط'){
+        recos.push('ثبّت الروتين أولًا (وقت/مكان ثابتان) ثم زد التحدي تدريجيًا كل 3 أيام.');
+      } else if(level === 'احتياج منخفض'){
+        recos.push('امنح مساحة للاستقلال: اسأل "كيف تحب تبدأ؟" ودع الطفل يقترح تعديلًا صغيرًا.');
+      } else {
+        recos.push('أتمّم التقييم الأولي داخل الحوار لتحصل على توصيات أكثر دقة.');
+      }
+
+      // 5) ربط بفرضية الاحتياجات
+      const needs = (state.plan.needsHypothesis || []).slice(0,2);
+      if(needs.length){
+        recos.push(`نقاط تركيز: ${needs.join('، ')}.`);
+      }
+
+      // 6) إشارات التصعيد الآمن
+      recos.push('تصعيد آمن: إذا ظهر تجنّب شديد مستمر لأكثر من أسبوعين أو بكاء/ألم بطني يومي قبل المدرسة، يُفضّل استشارة مختص مرخّص.');
+
+      // 7) اقتراح متابعة أسبوعية
+      recos.push('مراجعة أسبوعية: يوم الجمعة دوّن ما نجح وما تعثّر وعدّل خطوة الأسبوع القادم وفق الملاحظات.');
+
+      return recos;
+    }
+
+    function renderParentRecommendations(){
+      const list = dom.pdRecos;
+      list.innerHTML = '';
+      const recos = buildAIRecommendations();
+      recos.forEach(txt=>{
+        const li = document.createElement('li');
+        li.textContent = txt;
+        list.appendChild(li);
+      });
+      const d = new Date();
+      dom.pdUpdated.textContent = `آخر تحديث: ${d.toLocaleDateString('ar-AE')} ${d.toLocaleTimeString('ar-AE', {hour:'2-digit', minute:'2-digit'})}`;
+    }
+
     /* الصفحة الرئيسية */
     function updateHome(){
       const t={
@@ -1083,7 +1145,7 @@ ${UAE_COMPLIANCE}
       if(isLocked()){ lockMsg($('parent-lockmsg'), st); return; }
       if($('parent-pin').value===PIN_CODE){
         setPinState({fail:0,until:0});
-        $('parent-auth').classList.add('hidden'); $('parent-dashboard').classList.remove('hidden'); fillParentBasics();
+        $('parent-auth').classList.add('hidden'); $('parent-dashboard').classList.remove('hidden'); fillParentBasics(); renderParentRecommendations();
       }else{
         st.fail=(st.fail||0)+1; if(st.fail>=MAX_PIN_ATTEMPTS){ st.until=Date.now()+LOCKOUT_MS; lockMsg($('parent-lockmsg'), st); }
         setPinState(st);
@@ -1099,7 +1161,11 @@ ${UAE_COMPLIANCE}
       $('pd-updated').textContent = '';
       $('pd-recos').innerHTML = '';
     }
-    document.getElementById('pd-refresh').addEventListener('click', ()=>{ $('pd-updated').textContent='حاليًا يتم التحديث من الخطة المحلية.'; });
+
+    // زر التحديث يعيد توليد التوصيات ويظهر وقت آخر تحديث
+    document.getElementById('pd-refresh').addEventListener('click', ()=>{
+      renderParentRecommendations();
+    });
 
     /* تهيئة الحالة */
     function init(){
