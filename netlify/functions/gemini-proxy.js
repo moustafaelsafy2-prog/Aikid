@@ -22,12 +22,17 @@ const RATE_MAX_REQ = 60;               // 60 req / 10 min per client
 const TRUSTED_ORIGINS = [/^https?:\/\/localhost(?::\d+)?$/i];
 
 /* ================== Model Strategy ================== */
+// gemini-1.5-*/gemini-2.0-*/gemini-2.5-flash were retired and are no
+// longer served as of Sep 2026 (Google's API now returns 404 telling
+// callers to move to gemini-3.x). "-latest" aliases track Google's
+// current stable release automatically so they shouldn't need updating
+// again, but are kept after the pinned 3.x names since pinned names
+// responded fastest in testing.
 const MODEL_POOL = [
-  "gemini-1.5-pro",
-  "gemini-1.5-pro-latest",
-  "gemini-2.0-flash",
-  "gemini-1.5-flash",
-  "gemini-2.0-flash-exp"
+  "gemini-3.6-flash",
+  "gemini-flash-latest",
+  "gemini-3.5-flash",
+  "gemini-pro-latest"
 ];
 
 /* ================== Media allowlists ================== */
