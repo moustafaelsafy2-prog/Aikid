@@ -669,7 +669,7 @@
         stream: false,
         timeout_ms: 28000
       };
-      const doFetch = ()=> fetch('/.netlify/functions/gemini-proxy', {
+      const doFetch = ()=> fetch('/api/gemini-proxy', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
       });
 
