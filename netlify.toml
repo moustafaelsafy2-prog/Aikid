@@ -1,6 +1,6 @@
 [build]
   publish = "."
-  functions = "functions"
+  functions = "netlify/functions"
 
 [functions]
   node_bundler = "esbuild"
@@ -9,8 +9,23 @@
   NODE_VERSION = "20.18.0"
   NPM_FLAGS = "--no-audit --no-fund"
 
+# Let the frontend call one platform-neutral path (/api/gemini-proxy) on
+# both Netlify and Cloudflare Pages; Netlify rewrites it to its function.
+[[redirects]]
+  from = "/api/gemini-proxy"
+  to = "/.netlify/functions/gemini-proxy"
+  status = 200
+  force = true
+
 [[headers]]
   for = "/.netlify/functions/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Headers = "Content-Type"
+    Access-Control-Allow-Methods = "POST, OPTIONS"
+
+[[headers]]
+  for = "/api/*"
   [headers.values]
     Access-Control-Allow-Origin = "*"
     Access-Control-Allow-Headers = "Content-Type"
