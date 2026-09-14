@@ -1138,11 +1138,22 @@ ${isFirstTurn ? '1) تحية بسيطة بالاسم.\n2) انعكاس محاي�
       $('start-chat-btn-text').textContent=L.chat; dom.chatInput.placeholder=L.ph;
       $('home-mission-status').textContent = (state.plan?.planSteps?.[state.step]) ? `${L.m} ${state.plan.planSteps[state.step]}` : L.ready;
       $('chat-header-name').textContent = state.aiName || 'صديقي الذكي';
+      // مزامنة اتجاه/لغة الصفحة مع لغة المحادثة الفعلية — كانت تبقى rtl/ar
+      // دائمًا حتى بعد التبديل للإنجليزية، فتُعرض نصوص إنجليزية داخل تخطيط RTL.
+      const isAr = (state.language||'ar') === 'ar';
+      document.documentElement.setAttribute('dir', isAr ? 'rtl' : 'ltr');
+      document.documentElement.setAttribute('lang', isAr ? 'ar' : 'en');
     }
 
     document.getElementById('language-toggle-btn').addEventListener('click', ()=>{
       state.language = state.language==='ar' ? 'en' : 'ar'; save(); updateHome();
-      state.chat.push({role:'user',parts:[{text:`(System instruction: switch language to ${state.language}.)`}], ts: Date.now()}); respond();
+      // محليًا فقط: لا نرسل "تعليمة نظام" مقنّعة كرسالة من الطفل إلى النموذج —
+      // كانت تظهر حرفيًا في فقاعة الدردشة وتُنتج ردًا يكشف نص التعليمات الداخلي.
+      // اللغة الجديدة تُطبَّق تلقائيًا على رسالة الطفل التالية عبر forceLang في respond().
+      const notice = state.language === 'ar'
+        ? 'تم تبديل اللغة إلى العربية. تابع الكتابة بالعربية.'
+        : 'Language switched to English. Continue typing in English.';
+      addMessage(notice, 'model');
     });
 
     document.getElementById('initiate-chat-btn').addEventListener('click', ()=>{
