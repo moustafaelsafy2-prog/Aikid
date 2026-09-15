@@ -17,19 +17,10 @@
   status = 200
   force = true
 
-[[headers]]
-  for = "/.netlify/functions/*"
-  [headers.values]
-    Access-Control-Allow-Origin = "*"
-    Access-Control-Allow-Headers = "Content-Type"
-    Access-Control-Allow-Methods = "POST, OPTIONS"
-
-[[headers]]
-  for = "/api/*"
-  [headers.values]
-    Access-Control-Allow-Origin = "*"
-    Access-Control-Allow-Headers = "Content-Type"
-    Access-Control-Allow-Methods = "POST, OPTIONS"
+# CORS for the proxy is set dynamically inside the function itself
+# (origin-checked against TRUSTED_ORIGINS), so it is NOT duplicated here
+# as a static "*" header — a static wildcard here would override the
+# function's own origin check and re-open the proxy to any site.
 
 [[headers]]
   for = "/*"

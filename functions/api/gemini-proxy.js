@@ -23,7 +23,13 @@ const MAX_PARTS_PER_MSG = 16;
 const MAX_TEXT_CHARS = 24_000; // soft clamp for prompt bloat
 const RATE_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
 const RATE_MAX_REQ = 60;               // 60 req / 10 min per client
-const TRUSTED_ORIGINS = [/^https?:\/\/localhost(?::\d+)?$/i];
+const TRUSTED_ORIGINS = [
+  /^https?:\/\/localhost(?::\d+)?$/i,
+  /^https:\/\/aikid\.netlify\.app$/i,
+  /^https:\/\/[a-z0-9-]+\.aikid-uq0\.pages\.dev$/i,
+  /^https:\/\/sadiki-ai-uq0\.pages\.dev$/i,
+  /^https:\/\/[a-z0-9-]+\.sadiki-ai-uq0\.pages\.dev$/i
+];
 
 /* ================== Model Strategy ================== */
 // gemini-1.5-*/gemini-2.0-*/gemini-2.5-flash were retired and are no
@@ -283,10 +289,16 @@ function mirrorLanguage(text, lang) {
 }
 function sample(msgs) { return (Array.isArray(msgs) ? msgs.map(m => (m?.content || "")).join("\n") : "").slice(0, 4000); }
 function allowOrigin(headers) {
-  const origin = headers.get("origin") || "*";
-  if (origin === "*") return "*";
+  const origin = headers.get("origin");
+  // No Origin header at all (e.g. a same-origin navigation, or a
+  // server-to-server call) — nothing to reflect, nothing to leak either.
+  if (!origin) return "null";
   if (TRUSTED_ORIGINS.some(rx => rx.test(origin))) return origin;
-  return "*"; // fallback permissive; tighten via platform headers for prod
+  // Any other origin: return something that will never match the
+  // caller's own page, so the browser's CORS check blocks the response
+  // from being read — this is what actually stops cross-site abuse of
+  // the (secret-holding) proxy, not just an informational header.
+  return "null";
 }
 
 /* ---------- Guardrails & wrapping ---------- */
